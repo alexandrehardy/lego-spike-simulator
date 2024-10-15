@@ -1,5 +1,5 @@
 <script>
-  import BlocklyComponent from "../components/BlocklyComponent.svelte";
+  import BlocklyComponent from "$components/BlocklyComponent.svelte";
 </script>
 
 <style>
