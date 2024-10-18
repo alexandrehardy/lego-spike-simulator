@@ -8,5 +8,5 @@
 </svelte:head>
 
 <section>
-    <BlocklyPage/>
+	<BlocklyPage />
 </section>
