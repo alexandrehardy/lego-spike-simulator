@@ -16,7 +16,8 @@ const config = {
             $stores: 'src/stores',
             $components: 'src/components',
             $pages: 'src/pages',
-            $routes: 'src/routes'
+            $routes: 'src/routes',
+            $lib: 'src/lib'
         }
     }
 };
