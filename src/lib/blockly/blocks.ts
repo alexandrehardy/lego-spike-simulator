@@ -15,7 +15,7 @@ export const blocks = [
         "args2": [
             {
                 "type": "field_image",
-                "src": "repeat.svg",
+                "src": "icons/repeat.svg",
                 "width": 24,
                 "height": 24,
                 "alt": "*",
@@ -98,7 +98,7 @@ export const blocks = [
         "args2": [
             {
                 "type": "field_image",
-                "src": "repeat.svg",
+                "src": "icons/repeat.svg",
                 "width": 24,
                 "height": 24,
                 "alt": "*",
@@ -131,7 +131,7 @@ export const blocks = [
         "args2": [
             {
                 "type": "field_image",
-                "src": "repeat.svg",
+                "src": "icons/repeat.svg",
                 "width": 24,
                 "height": 24,
                 "alt": "*",
@@ -183,7 +183,8 @@ export const blocks = [
                 "name": "LIST",
                 "variableTypes": [
                     "list"
-                ]
+                ],
+                "defaultType": "list"
             }
         ],
         "previousStatement": null,
@@ -216,7 +217,8 @@ export const blocks = [
                 "name": "LIST",
                 "variableTypes": [
                     "list"
-                ]
+                ],
+                "defaultType": "list"
             }
         ],
         "previousStatement": null,
@@ -236,7 +238,8 @@ export const blocks = [
                 "name": "LIST",
                 "variableTypes": [
                     "list"
-                ]
+                ],
+                "defaultType": "list"
             }
         ],
         "previousStatement": null,
@@ -260,7 +263,8 @@ export const blocks = [
                 "name": "LIST",
                 "variableTypes": [
                     "list"
-                ]
+                ],
+                "defaultType": "list"
             }
         ],
         "previousStatement": null,
@@ -280,7 +284,8 @@ export const blocks = [
                 "name": "LIST",
                 "variableTypes": [
                     "list"
-                ]
+                ],
+                "defaultType": "list"
             }
         ],
         "output": null,
@@ -300,7 +305,8 @@ export const blocks = [
                 "name": "LIST",
                 "variableTypes": [
                     "list"
-                ]
+                ],
+                "defaultType": "list"
             }
         ],
         "output": null,
@@ -316,7 +322,8 @@ export const blocks = [
                 "name": "LIST",
                 "variableTypes": [
                     "list"
-                ]
+                ],
+                "defaultType": "list"
             }
         ],
         "output": "Number",
@@ -331,7 +338,8 @@ export const blocks = [
                 "name": "LIST",
                 "variableTypes": [
                     "list"
-                ]
+                ],
+                "defaultType": "list"
             },
             {
                 "type": "input_value",
@@ -349,7 +357,8 @@ export const blocks = [
                 "type": "field_variable_getter",
                 "text": "",
                 "name": "LIST",
-                "variableType": "list"
+                "variableType": "list",
+                "defaultType": "list"
             }
         ],
         "checkboxInFlyout": true,
@@ -369,7 +378,8 @@ export const blocks = [
                 "name": "LIST",
                 "variableTypes": [
                     "list"
-                ]
+                ],
+                "defaultType": "list"
             },
             {
                 "type": "input_value",
@@ -1859,6 +1869,71 @@ export const blocks = [
         "nextStatement": null
     },
     {
+        "type": "flippermove_move",
+        "message0": "%4 move %1 for %2  %3",
+        "args0": [
+            {
+                "type": "field_dropdown",
+                "name": "DIRECTION",
+                "options": [
+                    [
+                        "shortest path",
+                        "shortest path"
+                    ],
+                    [
+                        "clockwise",
+                        "clockwise"
+                    ],
+                    [
+                        "counterclockwise",
+                        "counterclockwise"
+                    ]
+                ]
+            },
+            {
+                "type": "field_number",
+                "name": "VALUE",
+                "value": 36
+            },
+            {
+                "type": "field_dropdown",
+                "name": "UNIT",
+                "options": [
+                    [
+                        "rotations",
+                        "rotations"
+                    ],
+                    [
+                        "degrees",
+                        "degrees"
+                    ],
+                    [
+                        "seconds",
+                        "seconds"
+                    ],
+                    [
+                        "cm",
+                        "cm"
+                    ],
+                    [
+                        "in",
+                        "in"
+                    ]
+                ]
+            },
+            {
+                "type": "field_image",
+                "src": "icons/Movement.svg",
+                "width": 24,
+                "height": 24
+            }
+        ],
+        "colour": "#ff4ccd",
+        "tooltip": "flippermove_move",
+        "previousStatement": null,
+        "nextStatement": null
+    },
+    {
         "type": "flippermove_movementSpeed",
         "message0": "%2 set movement speed to %1 %%",
         "args0": [
@@ -2107,14 +2182,10 @@ export const blocks = [
         "message0": "%2 start moving %1",
         "args0": [
             {
-                "type": "field_dropdown",
+                "type": "field_angle",
                 "name": "STEERING",
-                "options": [
-                    [
-                        "angle100",
-                        "angle100"
-                    ]
-                ]
+                "value": "0",
+                "mode": "compass"
             },
             {
                 "type": "field_image",
@@ -2133,14 +2204,10 @@ export const blocks = [
         "message0": "%4 move %1 for %2  %3",
         "args0": [
             {
-                "type": "field_dropdown",
+                "type": "field_angle",
                 "name": "STEERING",
-                "options": [
-                    [
-                        "angle100",
-                        "angle100"
-                    ]
-                ]
+                "value": "0",
+                "mode": "compass"
             },
             {
                 "type": "field_number",
@@ -2691,6 +2758,20 @@ export const blocks = [
         "colour": "#3fccf1",
         "tooltip": "flippersensors_isorientation",
         "output": "Boolean"
+    },
+    {
+        "type": "flippersensors_orientationAxis",
+        "message0": "%1 angle",
+        "args0": [
+            {
+                "type": "field_number",
+                "name": "AXIS",
+                "value": 1
+            }
+        ],
+        "colour": "#3fccf1",
+        "tooltip": "flippersensors_orientationAxis",
+        "output": "Number"
     },
     {
         "type": "flippersensors_reflectivity",

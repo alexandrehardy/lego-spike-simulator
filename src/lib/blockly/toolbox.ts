@@ -33,12 +33,17 @@ export const toolbox = {
                     "kind": "block",
                     "type": "flippermotor_speed"
                 }
-            ]
+            ],
+            "colour": "#0090f5"
         },
         {
             "kind": "category",
             "name": "MOVEMENT",
             "contents": [
+                {
+                    "kind": "block",
+                    "type": "flippermove_move"
+                },
                 {
                     "kind": "block",
                     "type": "flippermove_startMove"
@@ -67,7 +72,8 @@ export const toolbox = {
                     "kind": "block",
                     "type": "flippermove_setDistance"
                 }
-            ]
+            ],
+            "colour": "#ff4ccd"
         },
         {
             "kind": "category",
@@ -113,11 +119,12 @@ export const toolbox = {
                     "kind": "block",
                     "type": "flipperlight_ultrasonicLightUp"
                 }
-            ]
+            ],
+            "colour": "#9b6af6"
         },
         {
             "kind": "category",
-            "name": "HUB-SOUND",
+            "name": "SOUND",
             "contents": [
                 {
                     "kind": "block",
@@ -163,7 +170,8 @@ export const toolbox = {
                     "kind": "block",
                     "type": "sound_volume"
                 }
-            ]
+            ],
+            "colour": "#c061f1"
         },
         {
             "kind": "category",
@@ -221,7 +229,8 @@ export const toolbox = {
                     "kind": "block",
                     "type": "event_broadcastandwait"
                 }
-            ]
+            ],
+            "colour": "#f5c402"
         },
         {
             "kind": "category",
@@ -263,7 +272,8 @@ export const toolbox = {
                     "kind": "block",
                     "type": "flippercontrol_stop"
                 }
-            ]
+            ],
+            "colour": "#ffb515"
         },
         {
             "kind": "category",
@@ -315,6 +325,10 @@ export const toolbox = {
                 },
                 {
                     "kind": "block",
+                    "type": "flippersensors_orientationAxis"
+                },
+                {
+                    "kind": "block",
                     "type": "flippersensors_resetYaw"
                 },
                 {
@@ -329,7 +343,8 @@ export const toolbox = {
                     "kind": "block",
                     "type": "flippersensors_resetTimer"
                 }
-            ]
+            ],
+            "colour": "#3fccf1"
         },
         {
             "kind": "category",
@@ -411,7 +426,8 @@ export const toolbox = {
                     "kind": "block",
                     "type": "operator_mathop"
                 }
-            ]
+            ],
+            "colour": "#00b94d"
         },
         {
             "kind": "category",
@@ -421,7 +437,8 @@ export const toolbox = {
                     "kind": "block",
                     "type": "data_variable"
                 }
-            ]
+            ],
+            "colour": "#ff9835"
         },
         {
             "kind": "category",
@@ -471,7 +488,8 @@ export const toolbox = {
                     "kind": "block",
                     "type": "data_listcontainsitem"
                 }
-            ]
+            ],
+            "colour": "#ff9835"
         },
         {
             "kind": "category",
@@ -481,7 +499,8 @@ export const toolbox = {
                     "kind": "block",
                     "type": "data_listcontents"
                 }
-            ]
+            ],
+            "colour": "#ff9835"
         },
         {
             "kind": "category",
@@ -491,7 +510,8 @@ export const toolbox = {
                     "kind": "block",
                     "type": "procedures_definition"
                 }
-            ]
+            ],
+            "colour": "#ff5d64"
         },
         {
             "kind": "category",
@@ -501,7 +521,8 @@ export const toolbox = {
                     "kind": "block",
                     "type": "procedures_call"
                 }
-            ]
+            ],
+            "colour": "#ff5d64"
         },
         {
             "kind": "category",
@@ -523,7 +544,8 @@ export const toolbox = {
                     "kind": "block",
                     "type": "flippermoremotor_motorSetAcceleration"
                 }
-            ]
+            ],
+            "colour": "#0090f5"
         },
         {
             "kind": "category",
@@ -545,7 +567,20 @@ export const toolbox = {
                     "kind": "block",
                     "type": "flippermoresensors_orientation"
                 }
-            ]
+            ],
+            "colour": "#3fccf1"
+        },
+        {
+            "kind": "category",
+            "name": "VARIABLES",
+            "custom": "VARIABLE",
+            "colour": "#ff9835"
+        },
+        {
+            "kind": "category",
+            "name": "MY BLOCKS",
+            "custom": "PROCEDURE",
+            "colour": "#ff5d64"
         }
     ]
 };
