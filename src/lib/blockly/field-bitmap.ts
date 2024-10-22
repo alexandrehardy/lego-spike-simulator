@@ -4,8 +4,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import * as Blockly from 'blockly/core';
+import { browser, building } from '$app/environment';
+import * as BlocklyLib from 'blockly/core';
 
+const Blockly = (browser) ? BlocklyLib : BlocklyLib.default;
 Blockly.Msg['BUTTON_LABEL_RANDOMIZE'] = 'Randomize';
 Blockly.Msg['BUTTON_LABEL_CLEAR'] = 'Clear';
 
@@ -13,8 +15,8 @@ export const DEFAULT_HEIGHT = 5;
 export const DEFAULT_WIDTH = 5;
 const DEFAULT_PIXEL_SIZE = 15;
 const DEFAULT_PIXEL_COLOURS: PixelColours = {
-  empty: '#fff',
-  filled: '#363d80',
+  filled: '#fff',
+  empty: '#363d80',
 };
 const DEFAULT_BUTTONS: Buttons = {
   randomize: true,
@@ -377,6 +379,7 @@ export class FieldBitmap extends Blockly.Field<number[][]> {
             width: this.pixelSize,
             height: this.pixelSize,
             fill: this.pixelColours.empty,
+            stroke: '#000',
             fill_opacity: 1, // eslint-disable-line
           },
           this.getSvgRoot(),
@@ -630,6 +633,7 @@ export interface FieldBitmapFromJsonConfig extends Blockly.FieldConfig {
   colours?: PixelColours;
 }
 
+if (browser) {
 Blockly.fieldRegistry.register('field_bitmap', FieldBitmap);
 
 /**
@@ -670,3 +674,4 @@ Blockly.Css.register(`
   max-height: none;
 }
 `);
+}

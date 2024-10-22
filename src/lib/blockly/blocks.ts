@@ -499,8 +499,9 @@ export const blocks = [
         "message0": "%1 when colour is %2",
         "args0": [
             {
-                "type": "field_dropdown",
+                "type": "field_grid_dropdown",
                 "name": "PORT",
+                "columns": 2,
                 "options": [
                     [
                         "A",
@@ -557,8 +558,9 @@ export const blocks = [
         "message0": "%1 when %2  %3  %4",
         "args0": [
             {
-                "type": "field_dropdown",
+                "type": "field_grid_dropdown",
                 "name": "PORT",
+                "columns": 2,
                 "options": [
                     [
                         "A",
@@ -660,8 +662,9 @@ export const blocks = [
         "message0": "%1 when %2",
         "args0": [
             {
-                "type": "field_dropdown",
+                "type": "field_grid_dropdown",
                 "name": "PORT",
+                "columns": 2,
                 "options": [
                     [
                         "A",
@@ -785,7 +788,7 @@ export const blocks = [
                         0,
                         0,
                         0,
-                        1
+                        0
                     ],
                     [
                         1,
@@ -805,7 +808,8 @@ export const blocks = [
                 "buttons": {
                     "randomize": false,
                     "clear": true
-                }
+                },
+                "fieldHeight": 30
             },
             {
                 "type": "field_image",
@@ -848,7 +852,7 @@ export const blocks = [
                         0,
                         0,
                         0,
-                        1
+                        0
                     ],
                     [
                         1,
@@ -868,7 +872,8 @@ export const blocks = [
                 "buttons": {
                     "randomize": false,
                     "clear": true
-                }
+                },
+                "fieldHeight": 30
             },
             {
                 "type": "field_number",
@@ -1095,8 +1100,9 @@ export const blocks = [
         "message0": "%1 light up %2",
         "args0": [
             {
-                "type": "field_dropdown",
+                "type": "field_grid_dropdown",
                 "name": "PORT",
+                "columns": 2,
                 "options": [
                     [
                         "A",
@@ -1139,8 +1145,9 @@ export const blocks = [
         "message0": "%4 %1 go to relative position %2 at %3 %% speed",
         "args0": [
             {
-                "type": "field_dropdown",
+                "type": "field_grid_dropdown",
                 "name": "PORT",
+                "columns": 2,
                 "options": [
                     [
                         "A",
@@ -1195,8 +1202,9 @@ export const blocks = [
         "message0": "%3 %1 set acceleration to %2 seconds",
         "args0": [
             {
-                "type": "field_dropdown",
+                "type": "field_grid_dropdown",
                 "name": "PORT",
+                "columns": 2,
                 "options": [
                     [
                         "A",
@@ -1246,8 +1254,9 @@ export const blocks = [
         "message0": "%3 %1 set motors to %2 at stop",
         "args0": [
             {
-                "type": "field_dropdown",
+                "type": "field_grid_dropdown",
                 "name": "PORT",
+                "columns": 2,
                 "options": [
                     [
                         "A",
@@ -1297,8 +1306,9 @@ export const blocks = [
         "message0": "%3 %1 start motor at %2 %% power",
         "args0": [
             {
-                "type": "field_dropdown",
+                "type": "field_grid_dropdown",
                 "name": "PORT",
+                "columns": 2,
                 "options": [
                     [
                         "A",
@@ -1384,8 +1394,9 @@ export const blocks = [
         "message0": "%1 raw %2",
         "args0": [
             {
-                "type": "field_dropdown",
+                "type": "field_grid_dropdown",
                 "name": "PORT",
+                "columns": 2,
                 "options": [
                     [
                         "A",
@@ -1428,8 +1439,9 @@ export const blocks = [
         "message0": "%2 %1 position",
         "args0": [
             {
-                "type": "field_dropdown",
+                "type": "field_grid_dropdown",
                 "name": "PORT",
+                "columns": 2,
                 "options": [
                     [
                         "A",
@@ -1474,8 +1486,9 @@ export const blocks = [
         "message0": "%4 %1 go %2 to position %3",
         "args0": [
             {
-                "type": "field_dropdown",
+                "type": "field_grid_dropdown",
                 "name": "PORT",
+                "columns": 2,
                 "options": [
                     [
                         "A",
@@ -1543,8 +1556,9 @@ export const blocks = [
         "message0": "%3 %1 set speed to %2 %%",
         "args0": [
             {
-                "type": "field_dropdown",
+                "type": "field_grid_dropdown",
                 "name": "PORT",
+                "columns": 2,
                 "options": [
                     [
                         "A",
@@ -1594,8 +1608,9 @@ export const blocks = [
         "message0": "%3 %1 start motor %2",
         "args0": [
             {
-                "type": "field_dropdown",
+                "type": "field_grid_dropdown",
                 "name": "PORT",
+                "columns": 2,
                 "options": [
                     [
                         "A",
@@ -1658,8 +1673,9 @@ export const blocks = [
         "message0": "%2 %1 stop motor",
         "args0": [
             {
-                "type": "field_dropdown",
+                "type": "field_grid_dropdown",
                 "name": "PORT",
+                "columns": 2,
                 "options": [
                     [
                         "A",
@@ -1704,8 +1720,9 @@ export const blocks = [
         "message0": "%5 %1 run %2 for %3  %4",
         "args0": [
             {
-                "type": "field_dropdown",
+                "type": "field_grid_dropdown",
                 "name": "PORT",
+                "columns": 2,
                 "options": [
                     [
                         "A",
@@ -1799,8 +1816,9 @@ export const blocks = [
         "message0": "%2 %1 speed",
         "args0": [
             {
-                "type": "field_dropdown",
+                "type": "field_grid_dropdown",
                 "name": "PORT",
+                "columns": 2,
                 "options": [
                     [
                         "A",
@@ -2232,8 +2250,9 @@ export const blocks = [
         "message0": "%1 colour",
         "args0": [
             {
-                "type": "field_dropdown",
+                "type": "field_grid_dropdown",
                 "name": "PORT",
+                "columns": 2,
                 "options": [
                     [
                         "A",
@@ -2271,8 +2290,9 @@ export const blocks = [
         "message0": "%1 distance in %2",
         "args0": [
             {
-                "type": "field_dropdown",
+                "type": "field_grid_dropdown",
                 "name": "PORT",
+                "columns": 2,
                 "options": [
                     [
                         "A",
@@ -2336,8 +2356,9 @@ export const blocks = [
         "message0": "%1 pressure in %2",
         "args0": [
             {
-                "type": "field_dropdown",
+                "type": "field_grid_dropdown",
                 "name": "PORT",
+                "columns": 2,
                 "options": [
                     [
                         "A",
@@ -2401,8 +2422,9 @@ export const blocks = [
         "message0": "%1 is colour %2 ?",
         "args0": [
             {
-                "type": "field_dropdown",
+                "type": "field_grid_dropdown",
                 "name": "PORT",
+                "columns": 2,
                 "options": [
                     [
                         "A",
@@ -2445,8 +2467,9 @@ export const blocks = [
         "message0": "%1 is %2  %3  %4 ?",
         "args0": [
             {
-                "type": "field_dropdown",
+                "type": "field_grid_dropdown",
                 "name": "PORT",
+                "columns": 2,
                 "options": [
                     [
                         "A",
@@ -2520,8 +2543,9 @@ export const blocks = [
         "message0": "%1 is %2 ?",
         "args0": [
             {
-                "type": "field_dropdown",
+                "type": "field_grid_dropdown",
                 "name": "PORT",
+                "columns": 2,
                 "options": [
                     [
                         "A",
@@ -2564,8 +2588,9 @@ export const blocks = [
         "message0": "%1 reflection %2  %3 %% ?",
         "args0": [
             {
-                "type": "field_dropdown",
+                "type": "field_grid_dropdown",
                 "name": "PORT",
+                "columns": 2,
                 "options": [
                     [
                         "A",
@@ -2672,8 +2697,9 @@ export const blocks = [
         "message0": "%1 reflected light",
         "args0": [
             {
-                "type": "field_dropdown",
+                "type": "field_grid_dropdown",
                 "name": "PORT",
+                "columns": 2,
                 "options": [
                     [
                         "A",

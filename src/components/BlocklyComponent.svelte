@@ -2,7 +2,7 @@
     import { onMount } from 'svelte';
     import * as Blockly from 'blockly/core';
     import * as En from 'blockly/msg/en';
-    import '@blockly/field-bitmap';
+    import '$lib/blockly/field-bitmap';
     import '@blockly/field-grid-dropdown';
     import { blocks } from '$lib/blockly/blocks';
     import { toolbox } from '$lib/blockly/toolbox';
