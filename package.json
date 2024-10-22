@@ -31,6 +31,8 @@
     },
     "type": "module",
     "dependencies": {
+        "@blockly/field-bitmap": "^5.0.9",
+        "@blockly/field-grid-dropdown": "^5.0.9",
         "blockly": "^11.1.1"
     }
 }

@@ -1,8 +1,9 @@
-<script>
+<script lang="ts">
     import { onMount } from 'svelte';
     import * as Blockly from 'blockly/core';
     import * as En from 'blockly/msg/en';
-    import 'blockly/blocks';
+    import '@blockly/field-bitmap';
+    import '@blockly/field-grid-dropdown';
     import { blocks } from '$lib/blockly/blocks';
     import { toolbox } from '$lib/blockly/toolbox';
 
@@ -13,11 +14,8 @@
             renderer: 'zelos',
             theme: 'zelos',
             grid: { spacing: 20, length: 3, colour: '#ccc', snap: true },
-            //toolbox: document.getElementById("toolbox")
             toolbox: toolbox
         });
-
-        //Blockly.inject('blocklyDiv', {toolbox: toolbox});
     });
 </script>
 

@@ -761,9 +761,51 @@ export const blocks = [
         "message0": "%2 turn on %1",
         "args0": [
             {
-                "type": "field_number",
+                "type": "field_bitmap",
                 "name": "MATRIX",
-                "value": 50
+                "width": 5,
+                "height": 5,
+                "value": [
+                    [
+                        1,
+                        1,
+                        0,
+                        1,
+                        1
+                    ],
+                    [
+                        1,
+                        1,
+                        0,
+                        1,
+                        1
+                    ],
+                    [
+                        0,
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    [
+                        1,
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    [
+                        0,
+                        1,
+                        1,
+                        1,
+                        0
+                    ]
+                ],
+                "buttons": {
+                    "randomize": false,
+                    "clear": true
+                }
             },
             {
                 "type": "field_image",
@@ -782,9 +824,51 @@ export const blocks = [
         "message0": "%3 turn on %1 for %2 seconds",
         "args0": [
             {
-                "type": "field_number",
+                "type": "field_bitmap",
                 "name": "MATRIX",
-                "value": 50
+                "width": 5,
+                "height": 5,
+                "value": [
+                    [
+                        1,
+                        1,
+                        0,
+                        1,
+                        1
+                    ],
+                    [
+                        1,
+                        1,
+                        0,
+                        1,
+                        1
+                    ],
+                    [
+                        0,
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    [
+                        1,
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    [
+                        0,
+                        1,
+                        1,
+                        1,
+                        0
+                    ]
+                ],
+                "buttons": {
+                    "randomize": false,
+                    "clear": true
+                }
             },
             {
                 "type": "field_number",
