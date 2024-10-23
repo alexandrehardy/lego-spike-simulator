@@ -7,6 +7,7 @@
     import '@blockly/field-grid-dropdown';
     import * as fieldAngle from '$lib/blockly/field_angle';
     import * as shareableProcedures from '@blockly/block-shareable-procedures';
+    import { registerInputShadowExtension } from '$lib/blockly/shadow_input';
     import { blocks } from '$lib/blockly/blocks';
     import { toolbox } from '$lib/blockly/toolbox';
 
@@ -15,6 +16,7 @@
         shareableProcedures.unregisterProcedureBlocks();
         Blockly.common.defineBlocks(shareableProcedures.blocks);
         Blockly.setLocale(En);
+        registerInputShadowExtension(Blockly);
         Blockly.defineBlocksWithJsonArray(blocks);
         Blockly.inject(document.getElementById('blocklyDiv'), {
             renderer: 'zelos',

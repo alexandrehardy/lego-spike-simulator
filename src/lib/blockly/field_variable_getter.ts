@@ -65,7 +65,7 @@ export class FieldVariableGetter extends Blockly.FieldVariable {
             }
             return state;
         } else {
-            const state = { };
+            const state = {};
             if (doFullSerialization) {
                 (state as AnyDuringMigration)['name'] = 'none';
                 (state as AnyDuringMigration)['type'] = 'Number';
