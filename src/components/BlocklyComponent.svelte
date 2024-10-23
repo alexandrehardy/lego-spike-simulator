@@ -2,9 +2,10 @@
     import { onMount } from 'svelte';
     import * as Blockly from 'blockly/core';
     import * as En from 'blockly/msg/en';
+    import '$lib/blockly/field_variable_getter';
     import '$lib/blockly/field-bitmap';
     import '@blockly/field-grid-dropdown';
-    import * as fieldAngle from '@blockly/field-angle';
+    import * as fieldAngle from '$lib/blockly/field_angle';
     import * as shareableProcedures from '@blockly/block-shareable-procedures';
     import { blocks } from '$lib/blockly/blocks';
     import { toolbox } from '$lib/blockly/toolbox';
@@ -13,7 +14,6 @@
         fieldAngle.registerFieldAngle();
         shareableProcedures.unregisterProcedureBlocks();
         Blockly.common.defineBlocks(shareableProcedures.blocks);
-        Blockly.fieldRegistry.register('field_variable_getter', Blockly.FieldVariable);
         Blockly.setLocale(En);
         Blockly.defineBlocksWithJsonArray(blocks);
         Blockly.inject(document.getElementById('blocklyDiv'), {

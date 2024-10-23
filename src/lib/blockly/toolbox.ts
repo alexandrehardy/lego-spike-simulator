@@ -431,19 +431,12 @@ export const toolbox = {
         },
         {
             "kind": "category",
-            "name": "VARIABLE-VARIABLE",
+            "name": "VARIABLE",
             "contents": [
                 {
                     "kind": "block",
                     "type": "data_variable"
-                }
-            ],
-            "colour": "#ff9835"
-        },
-        {
-            "kind": "category",
-            "name": "VARIABLE",
-            "contents": [
+                },
                 {
                     "kind": "block",
                     "type": "data_setvariableto"
@@ -487,14 +480,7 @@ export const toolbox = {
                 {
                     "kind": "block",
                     "type": "data_listcontainsitem"
-                }
-            ],
-            "colour": "#ff9835"
-        },
-        {
-            "kind": "category",
-            "name": "VARIABLE-LIST",
-            "contents": [
+                },
                 {
                     "kind": "block",
                     "type": "data_listcontents"
