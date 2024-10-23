@@ -179,7 +179,7 @@ export const blocks = [
                 "name": "ITEM"
             },
             {
-                "type": "field_variable",
+                "type": "field_variable_getter",
                 "name": "LIST",
                 "variableTypes": [
                     "list"
@@ -196,7 +196,7 @@ export const blocks = [
         "message0": "change %1 by %2",
         "args0": [
             {
-                "type": "field_variable",
+                "type": "field_variable_getter",
                 "name": "VARIABLE"
             },
             {
@@ -213,7 +213,7 @@ export const blocks = [
         "message0": "delete all of %1",
         "args0": [
             {
-                "type": "field_variable",
+                "type": "field_variable_getter",
                 "name": "LIST",
                 "variableTypes": [
                     "list"
@@ -234,7 +234,7 @@ export const blocks = [
                 "name": "INDEX"
             },
             {
-                "type": "field_variable",
+                "type": "field_variable_getter",
                 "name": "LIST",
                 "variableTypes": [
                     "list"
@@ -259,7 +259,7 @@ export const blocks = [
                 "name": "INDEX"
             },
             {
-                "type": "field_variable",
+                "type": "field_variable_getter",
                 "name": "LIST",
                 "variableTypes": [
                     "list"
@@ -280,7 +280,7 @@ export const blocks = [
                 "name": "ITEM"
             },
             {
-                "type": "field_variable",
+                "type": "field_variable_getter",
                 "name": "LIST",
                 "variableTypes": [
                     "list"
@@ -301,7 +301,7 @@ export const blocks = [
                 "name": "INDEX"
             },
             {
-                "type": "field_variable",
+                "type": "field_variable_getter",
                 "name": "LIST",
                 "variableTypes": [
                     "list"
@@ -318,7 +318,7 @@ export const blocks = [
         "message0": "length of %1",
         "args0": [
             {
-                "type": "field_variable",
+                "type": "field_variable_getter",
                 "name": "LIST",
                 "variableTypes": [
                     "list"
@@ -334,7 +334,7 @@ export const blocks = [
         "message0": "%1 contains %2?",
         "args0": [
             {
-                "type": "field_variable",
+                "type": "field_variable_getter",
                 "name": "LIST",
                 "variableTypes": [
                     "list"
@@ -374,7 +374,7 @@ export const blocks = [
                 "name": "INDEX"
             },
             {
-                "type": "field_variable",
+                "type": "field_variable_getter",
                 "name": "LIST",
                 "variableTypes": [
                     "list"
@@ -395,7 +395,7 @@ export const blocks = [
         "message0": "set %1 to %2",
         "args0": [
             {
-                "type": "field_variable",
+                "type": "field_variable_getter",
                 "name": "VARIABLE"
             },
             {
@@ -455,7 +455,7 @@ export const blocks = [
         "message0": "when I receive %1",
         "args0": [
             {
-                "type": "field_variable",
+                "type": "field_variable_getter",
                 "name": "BROADCAST_OPTION",
                 "variable": "message1"
             }
@@ -2185,7 +2185,8 @@ export const blocks = [
                 "type": "field_angle",
                 "name": "STEERING",
                 "value": "0",
-                "mode": "compass"
+                "mode": "steering",
+                "precision": 1
             },
             {
                 "type": "field_image",
@@ -2207,7 +2208,8 @@ export const blocks = [
                 "type": "field_angle",
                 "name": "STEERING",
                 "value": "0",
-                "mode": "compass"
+                "mode": "steering",
+                "precision": 1
             },
             {
                 "type": "field_number",
@@ -2913,6 +2915,23 @@ export const blocks = [
         "nextStatement": null
     },
     {
+        "type": "math_change",
+        "message0": "change %1 by %2",
+        "args0": [
+            {
+                "type": "field_variable_getter",
+                "name": "VAR"
+            },
+            {
+                "type": "input_value",
+                "name": "VALUE"
+            }
+        ],
+        "previousStatement": null,
+        "nextStatement": null,
+        "colour": "#ff9835"
+    },
+    {
         "type": "operator_add",
         "message0": "%1 + %2",
         "args0": [
@@ -3379,5 +3398,37 @@ export const blocks = [
         "checkboxInFlyout": true,
         "output": "Number",
         "colour": "#c061f1"
+    },
+    {
+        "type": "variables_get",
+        "message0": "%1",
+        "lastDummyAlign0": "CENTRE",
+        "args0": [
+            {
+                "type": "field_variable_getter",
+                "text": "",
+                "name": "VAR"
+            }
+        ],
+        "checkboxInFlyout": true,
+        "output": "String",
+        "colour": "#ff9835"
+    },
+    {
+        "type": "variables_set",
+        "message0": "set %1 to %2",
+        "args0": [
+            {
+                "type": "field_variable_getter",
+                "name": "VAR"
+            },
+            {
+                "type": "input_value",
+                "name": "VALUE"
+            }
+        ],
+        "previousStatement": null,
+        "nextStatement": null,
+        "colour": "#ff9835"
     }
 ];
