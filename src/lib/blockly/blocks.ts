@@ -2125,7 +2125,8 @@ export const blocks = [
         args0: [],
         colour: '#3fccf1',
         tooltip: 'flippersensors_resetYaw',
-        output: 'Number',
+        previousStatement: null,
+        nextStatement: null,
         extensions: ['shadow_input']
     },
     {
