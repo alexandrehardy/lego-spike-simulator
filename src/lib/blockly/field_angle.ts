@@ -147,16 +147,19 @@ export class FieldAngle extends Blockly.FieldNumber {
             case Mode.STEERING:
                 this.clockwise = true;
                 this.offset = 90;
+                this.mode = Mode.STEERING;
                 break;
             case Mode.COMPASS:
                 this.clockwise = true;
                 this.offset = 90;
+                this.mode = Mode.COMPASS;
                 break;
             case Mode.PROTRACTOR:
                 // This is the default mode, so we could do nothing.  But just to
                 // future-proof, we'll set it anyway.
                 this.clockwise = false;
                 this.offset = 0;
+                this.mode = Mode.PROTRACTOR;
                 break;
         }
 
