@@ -21,6 +21,9 @@ export interface FieldGridDropdownConfig extends Blockly.FieldDropdownConfig {
     columns?: string | number;
     primaryColour?: string;
     borderColour?: string;
+    maxItems?: number;
+    minItems?: number;
+    sorted?: boolean;
 }
 
 /**
@@ -45,6 +48,14 @@ export class FieldGridDropdown extends Blockly.FieldDropdown {
     private primaryColour?: string;
 
     private borderColour?: string;
+
+    private maxItems = 1;
+
+    private minItems = 1;
+
+    private selected: Array<string> = [];
+
+    private sorted = true;
 
     /**
      * Class for an grid dropdown field.
@@ -81,6 +92,22 @@ export class FieldGridDropdown extends Blockly.FieldDropdown {
         if (config && config.borderColour) {
             this.borderColour = config.borderColour;
         }
+
+        if (config && config.minItems) {
+            this.minItems = config.minItems;
+        }
+
+        if (config && config.maxItems) {
+            this.maxItems = config.maxItems;
+        }
+
+        if (config && config.sorted !== undefined) {
+            this.sorted = config.sorted;
+        }
+
+        this.selected = this.getOptions(false)
+            .slice(0, this.minItems)
+            .map((v) => v[0]);
     }
 
     /**
@@ -187,6 +214,120 @@ export class FieldGridDropdown extends Blockly.FieldDropdown {
             primary: this.primaryColour ?? colourSource.getColour(),
             border: this.borderColour ?? colourSource.getColourTertiary()
         };
+    }
+
+    private override handleMenuActionEvent(menuItem: Blockly.MenuItem) {
+        if (this.maxItems == 1) {
+            Blockly.DropDownDiv.hideIfOwner(this, true);
+        }
+        this.onItemSelected_(this.menu_ as Blockly.Menu, menuItem);
+    }
+
+    setChecked(menuItem: Blockly.MenuItem, checked: boolean) {
+        menuItem.setChecked(checked);
+        const el = menuItem.getElement();
+        if (el && menuItem.isEnabled()) {
+            const name = 'blocklyMenuItemSelected';
+            const nameDep = 'goog-option-selected';
+            if (checked) {
+                Blockly.utils.dom.addClass(el, name);
+                Blockly.utils.dom.addClass(el, nameDep);
+            } else {
+                Blockly.utils.dom.removeClass(el, name);
+                Blockly.utils.dom.removeClass(el, nameDep);
+            }
+        }
+    }
+
+    protected override onItemSelected_(menu: Blockly.Menu, menuItem: Blockly.MenuItem) {
+        if (this.maxItems == 1) {
+            this.setValue(menuItem.getValue());
+        } else {
+            if (menuItem.checked) {
+                if (this.selected.length > this.minItems) {
+                    const value = menuItem.getValue();
+                    this.selected = this.selected.filter((v) => v !== value);
+                    this.setChecked(menuItem, false);
+                }
+            } else {
+                const value = menuItem.getValue();
+                if (this.selected.length >= this.maxItems) {
+                    this.selected = this.selected.slice(this.maxItems - 1);
+                    menu.menuItems.forEach((item) =>
+                        this.setChecked(
+                            item,
+                            this.selected.some((v) => v === item.getValue())
+                        )
+                    );
+                }
+                this.selected.push(value);
+                if (this.sorted) {
+                    this.selected.sort();
+                }
+                this.setChecked(menuItem, true);
+            }
+            this.setValue(this.selected.join(','));
+        }
+    }
+
+    protected override doClassValidation_(newValue?: string): string | null | undefined {
+        const options = this.getOptions(true);
+        let isValueValid = false;
+
+        if (this.maxItems == 1) {
+            isValueValid = options.some((option) => option[1] === newValue);
+        } else {
+            const selected = newValue?.split(',') ?? [];
+            const itemsValid = selected.map((v) => options.some((option) => option[1] === v));
+            isValueValid = itemsValid.every((v) => v);
+            if (selected.length > this.maxItems) {
+                console.warn(
+                    'Too many items selected.' +
+                        ' Block type: ' +
+                        this.sourceBlock_.type +
+                        ', Field name: ' +
+                        this.name +
+                        ', Value: ' +
+                        newValue
+                );
+            }
+        }
+
+        if (!isValueValid) {
+            if (this.sourceBlock_) {
+                console.warn(
+                    "Cannot set the dropdown's value to an unavailable option." +
+                        ' Block type: ' +
+                        this.sourceBlock_.type +
+                        ', Field name: ' +
+                        this.name +
+                        ', Value: ' +
+                        newValue
+                );
+            }
+            return null;
+        }
+        return newValue;
+    }
+
+    override getText(): string {
+        if (this.maxItems == 1) {
+            return super.getText();
+        }
+        return this.selected.join(',');
+    }
+
+    override applyColour() {
+        // We override this to setup the dropdown menu
+        super.applyColour();
+        if (this.maxItems !== 1 && this.menu_) {
+            this.menu_.menuItems.forEach((item) =>
+                this.setChecked(
+                    item,
+                    this.selected.some((v) => v === item.getValue())
+                )
+            );
+        }
     }
 }
 

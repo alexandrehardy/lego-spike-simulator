@@ -465,6 +465,7 @@ export const blocks = [
             }
         ],
         colour: '#f5c402',
+        nextStatement: null,
         extensions: ['shadow_input']
     },
     {
@@ -520,6 +521,8 @@ export const blocks = [
                 type: 'field_grid_dropdown',
                 name: 'PORT',
                 columns: 2,
+                maxItems: 6,
+                minItems: 1,
                 options: [
                     ['A', 'A'],
                     ['B', 'B'],
@@ -563,6 +566,8 @@ export const blocks = [
                 type: 'field_grid_dropdown',
                 name: 'PORT',
                 columns: 2,
+                maxItems: 6,
+                minItems: 1,
                 options: [
                     ['A', 'A'],
                     ['B', 'B'],
@@ -637,6 +642,8 @@ export const blocks = [
                 type: 'field_grid_dropdown',
                 name: 'PORT',
                 columns: 2,
+                maxItems: 6,
+                minItems: 1,
                 options: [
                     ['A', 'A'],
                     ['B', 'B'],
@@ -953,12 +960,14 @@ export const blocks = [
     },
     {
         type: 'flipperlight_ultrasonicLightUp',
-        message0: '%1 light up %2',
+        message0: '%3 %1 light up %2',
         args0: [
             {
                 type: 'field_grid_dropdown',
                 name: 'PORT',
                 columns: 2,
+                maxItems: 6,
+                minItems: 1,
                 options: [
                     ['A', 'A'],
                     ['B', 'B'],
@@ -972,11 +981,18 @@ export const blocks = [
                 type: 'input_value',
                 name: 'VALUE',
                 value: 36
+            },
+            {
+                type: 'field_image',
+                src: 'icons/Light.svg',
+                width: 24,
+                height: 24
             }
         ],
-        colour: '#3fccf1',
+        colour: '#9b6af6',
         tooltip: 'flipperlight_ultrasonicLightUp',
-        output: 'Number',
+        previousStatement: null,
+        nextStatement: null,
         extensions: ['shadow_input']
     },
     {
@@ -987,6 +1003,8 @@ export const blocks = [
                 type: 'field_grid_dropdown',
                 name: 'PORT',
                 columns: 2,
+                maxItems: 6,
+                minItems: 1,
                 options: [
                     ['A', 'A'],
                     ['B', 'B'],
@@ -997,9 +1015,11 @@ export const blocks = [
                 ]
             },
             {
-                type: 'input_value',
+                type: 'field_angle',
                 name: 'POSITION',
-                value: 26
+                value: '0',
+                mode: 'compass',
+                precision: 1
             },
             {
                 type: 'input_value',
@@ -1027,6 +1047,8 @@ export const blocks = [
                 type: 'field_grid_dropdown',
                 name: 'PORT',
                 columns: 2,
+                maxItems: 6,
+                minItems: 1,
                 options: [
                     ['A', 'A'],
                     ['B', 'B'],
@@ -1062,6 +1084,8 @@ export const blocks = [
                 type: 'field_grid_dropdown',
                 name: 'PORT',
                 columns: 2,
+                maxItems: 6,
+                minItems: 1,
                 options: [
                     ['A', 'A'],
                     ['B', 'B'],
@@ -1097,6 +1121,8 @@ export const blocks = [
                 type: 'field_grid_dropdown',
                 name: 'PORT',
                 columns: 2,
+                maxItems: 6,
+                minItems: 1,
                 options: [
                     ['A', 'A'],
                     ['B', 'B'],
@@ -1171,6 +1197,8 @@ export const blocks = [
                 type: 'field_grid_dropdown',
                 name: 'PORT',
                 columns: 2,
+                maxItems: 6,
+                minItems: 1,
                 options: [
                     ['A', 'A'],
                     ['B', 'B'],
@@ -1199,6 +1227,8 @@ export const blocks = [
                 type: 'field_grid_dropdown',
                 name: 'PORT',
                 columns: 2,
+                maxItems: 6,
+                minItems: 1,
                 options: [
                     ['A', 'A'],
                     ['B', 'B'],
@@ -1229,6 +1259,8 @@ export const blocks = [
                 type: 'field_grid_dropdown',
                 name: 'PORT',
                 columns: 2,
+                maxItems: 6,
+                minItems: 1,
                 options: [
                     ['A', 'A'],
                     ['B', 'B'],
@@ -1248,9 +1280,11 @@ export const blocks = [
                 ]
             },
             {
-                type: 'input_value',
+                type: 'field_angle',
                 name: 'POSITION',
-                value: 26
+                value: '0',
+                mode: 'compass',
+                precision: 1
             },
             {
                 type: 'field_image',
@@ -1273,6 +1307,8 @@ export const blocks = [
                 type: 'field_grid_dropdown',
                 name: 'PORT',
                 columns: 2,
+                maxItems: 6,
+                minItems: 1,
                 options: [
                     ['A', 'A'],
                     ['B', 'B'],
@@ -1308,6 +1344,8 @@ export const blocks = [
                 type: 'field_grid_dropdown',
                 name: 'PORT',
                 columns: 2,
+                maxItems: 6,
+                minItems: 1,
                 options: [
                     ['A', 'A'],
                     ['B', 'B'],
@@ -1347,6 +1385,8 @@ export const blocks = [
                 type: 'field_grid_dropdown',
                 name: 'PORT',
                 columns: 2,
+                maxItems: 6,
+                minItems: 1,
                 options: [
                     ['A', 'A'],
                     ['B', 'B'],
@@ -1377,6 +1417,8 @@ export const blocks = [
                 type: 'field_grid_dropdown',
                 name: 'PORT',
                 columns: 2,
+                maxItems: 6,
+                minItems: 1,
                 options: [
                     ['A', 'A'],
                     ['B', 'B'],
@@ -1432,6 +1474,8 @@ export const blocks = [
                 type: 'field_grid_dropdown',
                 name: 'PORT',
                 columns: 2,
+                maxItems: 6,
+                minItems: 1,
                 options: [
                     ['A', 'A'],
                     ['B', 'B'],
@@ -1556,39 +1600,19 @@ export const blocks = [
         message0: '%2 set movement motors to %1',
         args0: [
             {
-                type: 'field_dropdown',
+                type: 'field_grid_dropdown',
                 name: 'PAIR',
+                columns: 2,
+                maxItems: 2,
+                minItems: 2,
+                sorted: false,
                 options: [
-                    ['A+B', 'A+B'],
-                    ['A+C', 'A+C'],
-                    ['A+D', 'A+D'],
-                    ['A+E', 'A+E'],
-                    ['A+F', 'A+F'],
-                    ['B+A', 'B+A'],
-                    ['B+C', 'B+C'],
-                    ['B+D', 'B+D'],
-                    ['B+E', 'B+E'],
-                    ['B+F', 'B+F'],
-                    ['C+A', 'C+A'],
-                    ['C+B', 'C+B'],
-                    ['C+D', 'C+D'],
-                    ['C+E', 'C+E'],
-                    ['C+F', 'C+F'],
-                    ['D+A', 'D+A'],
-                    ['D+B', 'D+B'],
-                    ['D+C', 'D+C'],
-                    ['D+E', 'D+E'],
-                    ['D+F', 'D+F'],
-                    ['E+A', 'E+A'],
-                    ['E+B', 'E+B'],
-                    ['E+C', 'E+C'],
-                    ['E+D', 'E+D'],
-                    ['E+F', 'E+F'],
-                    ['F+A', 'F+A'],
-                    ['F+B', 'F+B'],
-                    ['F+C', 'F+C'],
-                    ['F+D', 'F+D'],
-                    ['F+E', 'F+E']
+                    ['A', 'A'],
+                    ['B', 'B'],
+                    ['C', 'C'],
+                    ['D', 'D'],
+                    ['E', 'E'],
+                    ['F', 'F']
                 ]
             },
             {
@@ -1765,6 +1789,8 @@ export const blocks = [
                 type: 'field_grid_dropdown',
                 name: 'PORT',
                 columns: 2,
+                maxItems: 6,
+                minItems: 1,
                 options: [
                     ['A', 'A'],
                     ['B', 'B'],
@@ -1788,6 +1814,8 @@ export const blocks = [
                 type: 'field_grid_dropdown',
                 name: 'PORT',
                 columns: 2,
+                maxItems: 6,
+                minItems: 1,
                 options: [
                     ['A', 'A'],
                     ['B', 'B'],
@@ -1822,6 +1850,8 @@ export const blocks = [
                 type: 'field_grid_dropdown',
                 name: 'PORT',
                 columns: 2,
+                maxItems: 6,
+                minItems: 1,
                 options: [
                     ['A', 'A'],
                     ['B', 'B'],
@@ -1856,6 +1886,8 @@ export const blocks = [
                 type: 'field_grid_dropdown',
                 name: 'PORT',
                 columns: 2,
+                maxItems: 6,
+                minItems: 1,
                 options: [
                     ['A', 'A'],
                     ['B', 'B'],
@@ -1884,6 +1916,8 @@ export const blocks = [
                 type: 'field_grid_dropdown',
                 name: 'PORT',
                 columns: 2,
+                maxItems: 6,
+                minItems: 1,
                 options: [
                     ['A', 'A'],
                     ['B', 'B'],
@@ -1928,6 +1962,8 @@ export const blocks = [
                 type: 'field_grid_dropdown',
                 name: 'PORT',
                 columns: 2,
+                maxItems: 6,
+                minItems: 1,
                 options: [
                     ['A', 'A'],
                     ['B', 'B'],
@@ -1956,6 +1992,8 @@ export const blocks = [
                 type: 'field_grid_dropdown',
                 name: 'PORT',
                 columns: 2,
+                maxItems: 6,
+                minItems: 1,
                 options: [
                     ['A', 'A'],
                     ['B', 'B'],
@@ -2054,6 +2092,8 @@ export const blocks = [
                 type: 'field_grid_dropdown',
                 name: 'PORT',
                 columns: 2,
+                maxItems: 6,
+                minItems: 1,
                 options: [
                     ['A', 'A'],
                     ['B', 'B'],

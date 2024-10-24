@@ -4,7 +4,7 @@
     import * as En from 'blockly/msg/en';
     import '$lib/blockly/field_variable_getter';
     import '$lib/blockly/field-bitmap';
-    import '@blockly/field-grid-dropdown';
+    import '$lib/blockly/field-grid-dropdown';
     import * as fieldAngle from '$lib/blockly/field_angle';
     import * as shareableProcedures from '@blockly/block-shareable-procedures';
     import { registerInputShadowExtension } from '$lib/blockly/shadow_input';
