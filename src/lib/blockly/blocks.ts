@@ -470,12 +470,23 @@ export const blocks = [
     },
     {
         type: 'flippercontrol_stop',
-        message0: 'stop %1',
+        message0: '%2 stop %1',
         args0: [
             {
-                type: 'input_value',
+                type: 'field_dropdown',
                 name: 'STOP_OPTION',
-                value: 32
+                options: [
+                    ['all', 'all'],
+                    ['other', 'other stacks'],
+                    ['program', 'and exit program'],
+                    ['this', 'this stack']
+                ]
+            },
+            {
+                type: 'field_image',
+                src: 'icons/no_icon.svg',
+                width: 24,
+                height: 24
             }
         ],
         colour: '#ffb515',
@@ -485,8 +496,15 @@ export const blocks = [
     },
     {
         type: 'flippercontrol_stopOtherStacks',
-        message0: 'stop other stacks',
-        args0: [],
+        message0: '%1 stop other stacks',
+        args0: [
+            {
+                type: 'field_image',
+                src: 'icons/no_icon.svg',
+                width: 24,
+                height: 24
+            }
+        ],
         colour: '#ffb515',
         tooltip: 'flippercontrol_stopOtherStacks',
         previousStatement: null,
@@ -495,17 +513,29 @@ export const blocks = [
     },
     {
         type: 'flipperevents_whenButton',
-        message0: 'when %1 button %2',
+        message0: '%3 when %1 button %2',
         args0: [
             {
-                type: 'input_value',
+                type: 'field_dropdown',
                 name: 'BUTTON',
-                value: 4
+                options: [
+                    ['left', 'left'],
+                    ['right', 'right']
+                ]
             },
             {
-                type: 'input_value',
+                type: 'field_dropdown',
                 name: 'EVENT',
-                value: 12
+                options: [
+                    ['pressed', 'pressed'],
+                    ['released', 'released']
+                ]
+            },
+            {
+                type: 'field_image',
+                src: 'icons/no_icon.svg',
+                width: 24,
+                height: 24
             }
         ],
         colour: '#f5c402',
@@ -515,7 +545,7 @@ export const blocks = [
     },
     {
         type: 'flipperevents_whenColor',
-        message0: '%1 when colour is %2',
+        message0: '%3 %1 when colour is %2',
         args0: [
             {
                 type: 'field_grid_dropdown',
@@ -536,6 +566,12 @@ export const blocks = [
                 type: 'input_value',
                 name: 'OPTION',
                 value: 23
+            },
+            {
+                type: 'field_image',
+                src: 'icons/no_icon.svg',
+                width: 24,
+                height: 24
             }
         ],
         colour: '#f5c402',
@@ -545,12 +581,18 @@ export const blocks = [
     },
     {
         type: 'flipperevents_whenCondition',
-        message0: 'when %1',
+        message0: '%2 when %1',
         args0: [
             {
                 type: 'input_value',
                 name: 'CONDITION',
                 value: 7
+            },
+            {
+                type: 'field_image',
+                src: 'icons/no_icon.svg',
+                width: 24,
+                height: 24
             }
         ],
         colour: '#f5c402',
@@ -560,7 +602,7 @@ export const blocks = [
     },
     {
         type: 'flipperevents_whenDistance',
-        message0: '%1 when %2  %3  %4',
+        message0: '%5 %1 when %2  %3  %4',
         args0: [
             {
                 type: 'field_grid_dropdown',
@@ -578,9 +620,13 @@ export const blocks = [
                 ]
             },
             {
-                type: 'input_value',
+                type: 'field_dropdown',
                 name: 'COMPARATOR',
-                value: 6
+                options: [
+                    ['closer than', 'closer than'],
+                    ['exactly at', 'exactly at'],
+                    ['further than', 'further than']
+                ]
             },
             {
                 type: 'input_value',
@@ -597,6 +643,12 @@ export const blocks = [
                     ['cm', 'cm'],
                     ['in', 'in']
                 ]
+            },
+            {
+                type: 'field_image',
+                src: 'icons/no_icon.svg',
+                width: 24,
+                height: 24
             }
         ],
         colour: '#f5c402',
@@ -606,12 +658,21 @@ export const blocks = [
     },
     {
         type: 'flipperevents_whenGesture',
-        message0: 'when %1',
+        message0: '%2 when %1',
         args0: [
             {
-                type: 'input_value',
+                type: 'field_dropdown',
                 name: 'EVENT',
-                value: 12
+                options: [
+                    ['pressed', 'pressed'],
+                    ['released', 'released']
+                ]
+            },
+            {
+                type: 'field_image',
+                src: 'icons/no_icon.svg',
+                width: 24,
+                height: 24
             }
         ],
         colour: '#f5c402',
@@ -621,12 +682,18 @@ export const blocks = [
     },
     {
         type: 'flipperevents_whenOrientation',
-        message0: 'when %1 is up',
+        message0: '%2 when %1 is up',
         args0: [
             {
                 type: 'input_value',
                 name: 'VALUE',
                 value: 36
+            },
+            {
+                type: 'field_image',
+                src: 'icons/no_icon.svg',
+                width: 24,
+                height: 24
             }
         ],
         colour: '#f5c402',
@@ -636,7 +703,7 @@ export const blocks = [
     },
     {
         type: 'flipperevents_whenPressed',
-        message0: '%1 when %2',
+        message0: '%3 %1 when %2',
         args0: [
             {
                 type: 'field_grid_dropdown',
@@ -657,6 +724,12 @@ export const blocks = [
                 type: 'input_value',
                 name: 'OPTION',
                 value: 23
+            },
+            {
+                type: 'field_image',
+                src: 'icons/no_icon.svg',
+                width: 24,
+                height: 24
             }
         ],
         colour: '#f5c402',
@@ -666,8 +739,15 @@ export const blocks = [
     },
     {
         type: 'flipperevents_whenProgramStarts',
-        message0: 'when program starts',
-        args0: [],
+        message0: '%1 when program starts',
+        args0: [
+            {
+                type: 'field_image',
+                src: 'icons/no_icon.svg',
+                width: 24,
+                height: 24
+            }
+        ],
         colour: '#f5c402',
         tooltip: 'flipperevents_whenProgramStarts',
         nextStatement: null,
@@ -675,12 +755,18 @@ export const blocks = [
     },
     {
         type: 'flipperevents_whenTilted',
-        message0: 'when tilted %1',
+        message0: '%2 when tilted %1',
         args0: [
             {
                 type: 'input_value',
                 name: 'VALUE',
                 value: 36
+            },
+            {
+                type: 'field_image',
+                src: 'icons/no_icon.svg',
+                width: 24,
+                height: 24
             }
         ],
         colour: '#f5c402',
@@ -690,12 +776,18 @@ export const blocks = [
     },
     {
         type: 'flipperevents_whenTimer',
-        message0: 'when timer > %1',
+        message0: '%2 when timer > %1',
         args0: [
             {
                 type: 'input_value',
                 name: 'VALUE',
                 value: 36
+            },
+            {
+                type: 'field_image',
+                src: 'icons/no_icon.svg',
+                width: 24,
+                height: 24
             }
         ],
         colour: '#f5c402',
@@ -708,9 +800,32 @@ export const blocks = [
         message0: '%2 set Centre Button Light to %1',
         args0: [
             {
-                type: 'input_value',
+                type: 'field_colour',
                 name: 'COLOR',
-                value: 5
+                colour: '#e700a7',
+                colourOptions: [
+                    '#e700a7',
+                    '#0090f5',
+                    '#77e8ff',
+                    '#00a845',
+                    '#ffe360',
+                    '#ff000c',
+                    '#ffffff',
+                    '#000000',
+                    '#000000ff'
+                ],
+                colourTitles: [
+                    'magenta',
+                    'blue',
+                    'turquoise',
+                    'green',
+                    'yellow',
+                    'red',
+                    'white',
+                    'black',
+                    'none'
+                ],
+                columns: 3
             },
             {
                 type: 'field_image',
@@ -1152,12 +1267,22 @@ export const blocks = [
     },
     {
         type: 'flippermoresensors_acceleration',
-        message0: 'acceleration %1',
+        message0: '%2 acceleration %1',
         args0: [
             {
-                type: 'input_value',
+                type: 'field_dropdown',
                 name: 'AXIS',
-                value: 1
+                options: [
+                    ['pitch', 'pitch'],
+                    ['roll', 'roll'],
+                    ['yaw', 'yaw']
+                ]
+            },
+            {
+                type: 'field_image',
+                src: 'icons/no_icon.svg',
+                width: 24,
+                height: 24
             }
         ],
         colour: '#34ccf1',
@@ -1167,12 +1292,22 @@ export const blocks = [
     },
     {
         type: 'flippermoresensors_angularVelocity',
-        message0: 'angular velocity %1',
+        message0: '%2 angular velocity %1',
         args0: [
             {
-                type: 'input_value',
+                type: 'field_dropdown',
                 name: 'AXIS',
-                value: 1
+                options: [
+                    ['pitch', 'pitch'],
+                    ['roll', 'roll'],
+                    ['yaw', 'yaw']
+                ]
+            },
+            {
+                type: 'field_image',
+                src: 'icons/no_icon.svg',
+                width: 24,
+                height: 24
             }
         ],
         colour: '#34ccf1',
@@ -1182,8 +1317,15 @@ export const blocks = [
     },
     {
         type: 'flippermoresensors_orientation',
-        message0: 'orientation',
-        args0: [],
+        message0: '%1 orientation',
+        args0: [
+            {
+                type: 'field_image',
+                src: 'icons/no_icon.svg',
+                width: 24,
+                height: 24
+            }
+        ],
         colour: '#34ccf1',
         tooltip: 'flippermoresensors_orientation',
         output: 'Number',
@@ -1191,7 +1333,7 @@ export const blocks = [
     },
     {
         type: 'flippermoresensors_rawColor',
-        message0: '%1 raw %2',
+        message0: '%3 %1 raw %2',
         args0: [
             {
                 type: 'field_grid_dropdown',
@@ -1209,9 +1351,38 @@ export const blocks = [
                 ]
             },
             {
-                type: 'input_value',
+                type: 'field_colour',
                 name: 'COLOR',
-                value: 5
+                colour: '#e700a7',
+                colourOptions: [
+                    '#e700a7',
+                    '#0090f5',
+                    '#77e8ff',
+                    '#00a845',
+                    '#ffe360',
+                    '#ff000c',
+                    '#ffffff',
+                    '#000000',
+                    '#000000ff'
+                ],
+                colourTitles: [
+                    'magenta',
+                    'blue',
+                    'turquoise',
+                    'green',
+                    'yellow',
+                    'red',
+                    'white',
+                    'black',
+                    'none'
+                ],
+                columns: 3
+            },
+            {
+                type: 'field_image',
+                src: 'icons/no_icon.svg',
+                width: 24,
+                height: 24
             }
         ],
         colour: '#34ccf1',
@@ -1737,7 +1908,7 @@ export const blocks = [
     },
     {
         type: 'flipperoperator_isInBetween',
-        message0: 'is %1 in between %2 and %3 ?',
+        message0: '%4 is %1 in between %2 and %3 ?',
         args0: [
             {
                 type: 'input_value',
@@ -1753,6 +1924,12 @@ export const blocks = [
                 type: 'input_value',
                 name: 'HIGH',
                 value: 13
+            },
+            {
+                type: 'field_image',
+                src: 'icons/no_icon.svg',
+                width: 24,
+                height: 24
             }
         ],
         colour: '#00b94d',
@@ -1763,17 +1940,29 @@ export const blocks = [
     },
     {
         type: 'flippersensors_buttonIsPressed',
-        message0: 'is %1 button %2 ?',
+        message0: '%3 is %1 button %2 ?',
         args0: [
             {
-                type: 'input_value',
+                type: 'field_dropdown',
                 name: 'BUTTON',
-                value: 4
+                options: [
+                    ['left', 'left'],
+                    ['right', 'right']
+                ]
             },
             {
-                type: 'input_value',
+                type: 'field_dropdown',
                 name: 'EVENT',
-                value: 12
+                options: [
+                    ['pressed', 'pressed'],
+                    ['released', 'released']
+                ]
+            },
+            {
+                type: 'field_image',
+                src: 'icons/no_icon.svg',
+                width: 24,
+                height: 24
             }
         ],
         colour: '#3fccf1',
@@ -1783,7 +1972,7 @@ export const blocks = [
     },
     {
         type: 'flippersensors_color',
-        message0: '%1 colour',
+        message0: '%2 %1 colour',
         args0: [
             {
                 type: 'field_grid_dropdown',
@@ -1799,6 +1988,12 @@ export const blocks = [
                     ['E', 'E'],
                     ['F', 'F']
                 ]
+            },
+            {
+                type: 'field_image',
+                src: 'icons/no_icon.svg',
+                width: 24,
+                height: 24
             }
         ],
         colour: '#3fccf1',
@@ -1808,7 +2003,7 @@ export const blocks = [
     },
     {
         type: 'flippersensors_distance',
-        message0: '%1 distance in %2',
+        message0: '%3 %1 distance in %2',
         args0: [
             {
                 type: 'field_grid_dropdown',
@@ -1835,6 +2030,12 @@ export const blocks = [
                     ['cm', 'cm'],
                     ['in', 'in']
                 ]
+            },
+            {
+                type: 'field_image',
+                src: 'icons/no_icon.svg',
+                width: 24,
+                height: 24
             }
         ],
         colour: '#3fccf1',
@@ -1844,7 +2045,7 @@ export const blocks = [
     },
     {
         type: 'flippersensors_force',
-        message0: '%1 pressure in %2',
+        message0: '%3 %1 pressure in %2',
         args0: [
             {
                 type: 'field_grid_dropdown',
@@ -1871,6 +2072,12 @@ export const blocks = [
                     ['cm', 'cm'],
                     ['in', 'in']
                 ]
+            },
+            {
+                type: 'field_image',
+                src: 'icons/no_icon.svg',
+                width: 24,
+                height: 24
             }
         ],
         colour: '#3fccf1',
@@ -1880,7 +2087,7 @@ export const blocks = [
     },
     {
         type: 'flippersensors_isColor',
-        message0: '%1 is colour %2 ?',
+        message0: '%3 %1 is colour %2 ?',
         args0: [
             {
                 type: 'field_grid_dropdown',
@@ -1901,6 +2108,12 @@ export const blocks = [
                 type: 'input_value',
                 name: 'VALUE',
                 value: 36
+            },
+            {
+                type: 'field_image',
+                src: 'icons/no_icon.svg',
+                width: 24,
+                height: 24
             }
         ],
         colour: '#3fccf1',
@@ -1910,7 +2123,7 @@ export const blocks = [
     },
     {
         type: 'flippersensors_isDistance',
-        message0: '%1 is %2  %3  %4 ?',
+        message0: '%5 %1 is %2  %3  %4 ?',
         args0: [
             {
                 type: 'field_grid_dropdown',
@@ -1928,9 +2141,13 @@ export const blocks = [
                 ]
             },
             {
-                type: 'input_value',
+                type: 'field_dropdown',
                 name: 'COMPARATOR',
-                value: 6
+                options: [
+                    ['closer than', 'closer than'],
+                    ['exactly at', 'exactly at'],
+                    ['further than', 'further than']
+                ]
             },
             {
                 type: 'input_value',
@@ -1947,6 +2164,12 @@ export const blocks = [
                     ['cm', 'cm'],
                     ['in', 'in']
                 ]
+            },
+            {
+                type: 'field_image',
+                src: 'icons/no_icon.svg',
+                width: 24,
+                height: 24
             }
         ],
         colour: '#3fccf1',
@@ -1956,7 +2179,7 @@ export const blocks = [
     },
     {
         type: 'flippersensors_isPressed',
-        message0: '%1 is %2 ?',
+        message0: '%3 %1 is %2 ?',
         args0: [
             {
                 type: 'field_grid_dropdown',
@@ -1977,6 +2200,12 @@ export const blocks = [
                 type: 'input_value',
                 name: 'OPTION',
                 value: 23
+            },
+            {
+                type: 'field_image',
+                src: 'icons/no_icon.svg',
+                width: 24,
+                height: 24
             }
         ],
         colour: '#3fccf1',
@@ -1986,7 +2215,7 @@ export const blocks = [
     },
     {
         type: 'flippersensors_isReflectivity',
-        message0: '%1 reflection %2  %3 %% ?',
+        message0: '%4 %1 reflection %2  %3 %% ?',
         args0: [
             {
                 type: 'field_grid_dropdown',
@@ -2004,14 +2233,24 @@ export const blocks = [
                 ]
             },
             {
-                type: 'input_value',
+                type: 'field_dropdown',
                 name: 'COMPARATOR',
-                value: 6
+                options: [
+                    ['closer than', 'closer than'],
+                    ['exactly at', 'exactly at'],
+                    ['further than', 'further than']
+                ]
             },
             {
                 type: 'input_value',
                 name: 'VALUE',
                 value: 36
+            },
+            {
+                type: 'field_image',
+                src: 'icons/no_icon.svg',
+                width: 24,
+                height: 24
             }
         ],
         colour: '#3fccf1',
@@ -2021,12 +2260,18 @@ export const blocks = [
     },
     {
         type: 'flippersensors_isTilted',
-        message0: 'Is tilted %1 ?',
+        message0: '%2 Is tilted %1 ?',
         args0: [
             {
                 type: 'input_value',
                 name: 'VALUE',
                 value: 36
+            },
+            {
+                type: 'field_image',
+                src: 'icons/no_icon.svg',
+                width: 24,
+                height: 24
             }
         ],
         colour: '#3fccf1',
@@ -2036,12 +2281,18 @@ export const blocks = [
     },
     {
         type: 'flippersensors_ismotion',
-        message0: 'is %1 ?',
+        message0: '%2 is %1 ?',
         args0: [
             {
                 type: 'input_value',
                 name: 'MOTION',
                 value: 21
+            },
+            {
+                type: 'field_image',
+                src: 'icons/no_icon.svg',
+                width: 24,
+                height: 24
             }
         ],
         colour: '#3fccf1',
@@ -2051,7 +2302,7 @@ export const blocks = [
     },
     {
         type: 'flippersensors_isorientation',
-        message0: 'is %1 up?',
+        message0: '%2 is %1 up?',
         args0: [
             {
                 type: 'field_dropdown',
@@ -2062,6 +2313,12 @@ export const blocks = [
                     ['right', 'right'],
                     ['upside down', 'upside down']
                 ]
+            },
+            {
+                type: 'field_image',
+                src: 'icons/no_icon.svg',
+                width: 24,
+                height: 24
             }
         ],
         colour: '#3fccf1',
@@ -2071,12 +2328,22 @@ export const blocks = [
     },
     {
         type: 'flippersensors_orientationAxis',
-        message0: '%1 angle',
+        message0: '%2 %1 angle',
         args0: [
             {
-                type: 'input_value',
+                type: 'field_dropdown',
                 name: 'AXIS',
-                value: 1
+                options: [
+                    ['pitch', 'pitch'],
+                    ['roll', 'roll'],
+                    ['yaw', 'yaw']
+                ]
+            },
+            {
+                type: 'field_image',
+                src: 'icons/no_icon.svg',
+                width: 24,
+                height: 24
             }
         ],
         colour: '#3fccf1',
@@ -2086,7 +2353,7 @@ export const blocks = [
     },
     {
         type: 'flippersensors_reflectivity',
-        message0: '%1 reflected light',
+        message0: '%2 %1 reflected light',
         args0: [
             {
                 type: 'field_grid_dropdown',
@@ -2102,6 +2369,12 @@ export const blocks = [
                     ['E', 'E'],
                     ['F', 'F']
                 ]
+            },
+            {
+                type: 'field_image',
+                src: 'icons/no_icon.svg',
+                width: 24,
+                height: 24
             }
         ],
         colour: '#3fccf1',
@@ -2111,8 +2384,15 @@ export const blocks = [
     },
     {
         type: 'flippersensors_resetTimer',
-        message0: 'reset timer',
-        args0: [],
+        message0: '%1 reset timer',
+        args0: [
+            {
+                type: 'field_image',
+                src: 'icons/no_icon.svg',
+                width: 24,
+                height: 24
+            }
+        ],
         colour: '#3fccf1',
         tooltip: 'flippersensors_resetTimer',
         previousStatement: null,
@@ -2121,8 +2401,15 @@ export const blocks = [
     },
     {
         type: 'flippersensors_resetYaw',
-        message0: 'set yaw angle to 0',
-        args0: [],
+        message0: '%1 set yaw angle to 0',
+        args0: [
+            {
+                type: 'field_image',
+                src: 'icons/no_icon.svg',
+                width: 24,
+                height: 24
+            }
+        ],
         colour: '#3fccf1',
         tooltip: 'flippersensors_resetYaw',
         previousStatement: null,
@@ -2131,8 +2418,15 @@ export const blocks = [
     },
     {
         type: 'flippersensors_timer',
-        message0: 'timer',
-        args0: [],
+        message0: '%1 timer',
+        args0: [
+            {
+                type: 'field_image',
+                src: 'icons/no_icon.svg',
+                width: 24,
+                height: 24
+            }
+        ],
         colour: '#3fccf1',
         tooltip: 'flippersensors_timer',
         output: 'Number',
@@ -2140,12 +2434,18 @@ export const blocks = [
     },
     {
         type: 'flippersound_beep',
-        message0: 'start playing beep %1',
+        message0: '%2 start playing beep %1',
         args0: [
             {
                 type: 'input_value',
                 name: 'NOTE',
                 value: 22
+            },
+            {
+                type: 'field_image',
+                src: 'icons/no_icon.svg',
+                width: 24,
+                height: 24
             }
         ],
         colour: '#c061f1',
@@ -2156,7 +2456,7 @@ export const blocks = [
     },
     {
         type: 'flippersound_beepForTime',
-        message0: 'play beep %1 for %2 seconds',
+        message0: '%3 play beep %1 for %2 seconds',
         args0: [
             {
                 type: 'input_value',
@@ -2167,6 +2467,12 @@ export const blocks = [
                 type: 'input_value',
                 name: 'DURATION',
                 value: 10
+            },
+            {
+                type: 'field_image',
+                src: 'icons/no_icon.svg',
+                width: 24,
+                height: 24
             }
         ],
         colour: '#c061f1',
@@ -2177,12 +2483,18 @@ export const blocks = [
     },
     {
         type: 'flippersound_playSound',
-        message0: 'start sound %1',
+        message0: '%2 start sound %1',
         args0: [
             {
-                type: 'input_value',
+                type: 'field_dropdown',
                 name: 'SOUND',
-                value: 28
+                options: [['Cat Meow 1', 'Cat Meow 1']]
+            },
+            {
+                type: 'field_image',
+                src: 'icons/no_icon.svg',
+                width: 24,
+                height: 24
             }
         ],
         colour: '#c061f1',
@@ -2193,12 +2505,18 @@ export const blocks = [
     },
     {
         type: 'flippersound_playSoundUntilDone',
-        message0: 'play sound %1 until done',
+        message0: '%2 play sound %1 until done',
         args0: [
             {
-                type: 'input_value',
+                type: 'field_dropdown',
                 name: 'SOUND',
-                value: 28
+                options: [['Cat Meow 1', 'Cat Meow 1']]
+            },
+            {
+                type: 'field_image',
+                src: 'icons/no_icon.svg',
+                width: 24,
+                height: 24
             }
         ],
         colour: '#c061f1',
@@ -2209,8 +2527,15 @@ export const blocks = [
     },
     {
         type: 'flippersound_stopSound',
-        message0: 'stop all sounds',
-        args0: [],
+        message0: '%1 stop all sounds',
+        args0: [
+            {
+                type: 'field_image',
+                src: 'icons/no_icon.svg',
+                width: 24,
+                height: 24
+            }
+        ],
         colour: '#c061f1',
         tooltip: 'flippersound_stopSound',
         previousStatement: null,
@@ -2586,6 +2911,13 @@ export const blocks = [
     },
     {
         type: 'procedures_call',
+        previousStatement: null,
+        nextStatement: null,
+        colour: '#ff5d64',
+        extensions: ['shadow_input']
+    },
+    {
+        type: 'procedures_declaration',
         previousStatement: null,
         nextStatement: null,
         colour: '#ff5d64',

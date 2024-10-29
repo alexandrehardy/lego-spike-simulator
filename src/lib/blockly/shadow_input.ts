@@ -1,3 +1,5 @@
+import { blocks } from '$lib/blockly/blocks';
+
 export function registerInputShadowExtension(Blockly) {
     // This extension sets the block's tooltip to be a function which displays
     // the parent block's tooltip (if it exists).
@@ -21,8 +23,6 @@ export function registerInputShadowExtension(Blockly) {
                     } else {
                         createShadow = true;
                     }
-                    console.log(thisBlock.type);
-                    console.log(input.connection.getCheck());
                     if (createShadow) {
                         input.setShadowDom(
                             Blockly.utils.xml.textToDom(

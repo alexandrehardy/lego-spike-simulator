@@ -8,11 +8,13 @@
     import * as fieldAngle from '$lib/blockly/field_angle';
     import * as shareableProcedures from '@blockly/block-shareable-procedures';
     import { registerInputShadowExtension } from '$lib/blockly/shadow_input';
+    import * as colourPkg from '@blockly/field-colour';
     import { blocks } from '$lib/blockly/blocks';
     import { toolbox } from '$lib/blockly/toolbox';
 
     onMount(() => {
         fieldAngle.registerFieldAngle();
+        colourPkg.registerFieldColour();
         shareableProcedures.unregisterProcedureBlocks();
         Blockly.common.defineBlocks(shareableProcedures.blocks);
         Blockly.setLocale(En);
