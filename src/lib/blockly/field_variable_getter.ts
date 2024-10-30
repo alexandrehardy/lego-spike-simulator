@@ -15,6 +15,7 @@ export class FieldVariableGetter extends Blockly.FieldVariable {
         config?: FieldVariableConfig
     ) {
         super(varName, validator, variableTypes, defaultType, config);
+        this.menuGenerator_ = FieldVariableGetter.dropdownCreate as Blockly.MenuGenerator;
     }
 
     override initModel() {
@@ -79,6 +80,21 @@ export class FieldVariableGetter extends Blockly.FieldVariable {
         // `this` might be a subclass of FieldVariable if that class doesn't
         // override the static fromJson method.
         return new this(varName, undefined, undefined, undefined, options);
+    }
+
+    static dropdownCreate(this: FieldVariable): Blockly.MenuOption[] {
+        const copy = Object.create(this);
+        for (let attribut in this) {
+            copy[attribut] = this[attribut];
+        }
+        // Set variable to something so that the drop down list can
+        // be created. Otherwise it errors out
+        if (!copy.variable) {
+            copy.variable = new Blockly.VariableModel(this.sourceBlock_.workspace, 'x');
+        }
+        copy.variableMenuGenerator = Blockly.FieldVariable.dropdownCreate;
+        return copy.variableMenuGenerator(copy);
+        return Blockly.FieldVariable.dropdownCreate(copy);
     }
 }
 
