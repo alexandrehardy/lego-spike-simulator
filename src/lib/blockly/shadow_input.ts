@@ -9,6 +9,9 @@ export function registerInputShadowExtension(Blockly) {
     Blockly.Extensions.register('shadow_input', function () {
         // this refers to the block that the extension is being run on
         const thisBlock = this;
+        if (!thisBlock.inputList) {
+            return;
+        }
         thisBlock.inputList.forEach((input) => {
             if (input.type === Blockly.ConnectionType.INPUT_VALUE) {
                 if (input.connection) {
@@ -36,4 +39,10 @@ export function registerInputShadowExtension(Blockly) {
             }
         });
     });
+}
+
+export function applyInputShadowExtension(Blockly) {
+    for (const key in Blockly.Blocks) {
+        Blockly.Extensions.apply('shadow_input', Blockly.Blocks[key], false);
+    }
 }

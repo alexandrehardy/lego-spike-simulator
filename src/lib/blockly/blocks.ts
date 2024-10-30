@@ -477,9 +477,9 @@ export const blocks = [
                 name: 'STOP_OPTION',
                 options: [
                     ['all', 'all'],
-                    ['other', 'other stacks'],
-                    ['program', 'and exit program'],
-                    ['this', 'this stack']
+                    ['other stacks', 'other'],
+                    ['and exit program', 'program'],
+                    ['this stack', 'this']
                 ]
             },
             {
@@ -2543,40 +2543,6 @@ export const blocks = [
         extensions: ['shadow_input']
     },
     {
-        type: 'math_change',
-        message0: 'change %1 by %2',
-        args0: [
-            {
-                type: 'field_variable_getter',
-                name: 'VAR'
-            },
-            {
-                type: 'input_value',
-                name: 'VALUE'
-            }
-        ],
-        previousStatement: null,
-        nextStatement: null,
-        colour: '#ff9835',
-        extensions: ['shadow_input']
-    },
-    {
-        type: 'math_number',
-        message0: '%1',
-        args0: [
-            {
-                type: 'field_number',
-                name: 'NUM',
-                value: 0
-            }
-        ],
-        output: 'Number',
-        helpUrl: '%{BKY_MATH_NUMBER_HELPURL}',
-        tooltip: '%{BKY_MATH_NUMBER_TOOLTIP}',
-        colour: '#ff9835',
-        extensions: ['shadow_input']
-    },
-    {
         type: 'operator_add',
         message0: '%1 + %2',
         args0: [
@@ -2917,13 +2883,6 @@ export const blocks = [
         extensions: ['shadow_input']
     },
     {
-        type: 'procedures_declaration',
-        previousStatement: null,
-        nextStatement: null,
-        colour: '#ff5d64',
-        extensions: ['shadow_input']
-    },
-    {
         type: 'procedures_definition',
         message0: 'define %1',
         args0: [
@@ -3021,40 +2980,6 @@ export const blocks = [
         checkboxInFlyout: true,
         output: 'Number',
         colour: '#c061f1',
-        extensions: ['shadow_input']
-    },
-    {
-        type: 'variables_get',
-        message0: '%1',
-        lastDummyAlign0: 'CENTRE',
-        args0: [
-            {
-                type: 'field_variable_getter',
-                text: '',
-                name: 'VAR'
-            }
-        ],
-        checkboxInFlyout: true,
-        output: 'String',
-        colour: '#ff9835',
-        extensions: ['shadow_input']
-    },
-    {
-        type: 'variables_set',
-        message0: 'set %1 to %2',
-        args0: [
-            {
-                type: 'field_variable_getter',
-                name: 'VAR'
-            },
-            {
-                type: 'input_value',
-                name: 'VALUE'
-            }
-        ],
-        previousStatement: null,
-        nextStatement: null,
-        colour: '#ff9835',
         extensions: ['shadow_input']
     }
 ];

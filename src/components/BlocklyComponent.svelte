@@ -1,13 +1,17 @@
 <script lang="ts">
     import { onMount } from 'svelte';
     import * as Blockly from 'blockly/core';
+    import * as BlocklyBlocks from 'blockly/blocks';
     import * as En from 'blockly/msg/en';
     import '$lib/blockly/field_variable_getter';
     import '$lib/blockly/field-bitmap';
     import '$lib/blockly/field-grid-dropdown';
     import * as fieldAngle from '$lib/blockly/field_angle';
     import * as shareableProcedures from '@blockly/block-shareable-procedures';
-    import { registerInputShadowExtension } from '$lib/blockly/shadow_input';
+    import {
+        registerInputShadowExtension,
+        applyInputShadowExtension
+    } from '$lib/blockly/shadow_input';
     import * as colourPkg from '@blockly/field-colour';
     import { blocks } from '$lib/blockly/blocks';
     import { toolbox } from '$lib/blockly/toolbox';
@@ -20,6 +24,9 @@
         Blockly.setLocale(En);
         registerInputShadowExtension(Blockly);
         Blockly.defineBlocksWithJsonArray(blocks);
+        // Also apply the shadow extension to any blocks that
+        // don't declare they use it.
+        applyInputShadowExtension(Blockly);
         Blockly.inject(document.getElementById('blocklyDiv'), {
             renderer: 'zelos',
             grid: { spacing: 20, length: 3, colour: '#ccc', snap: true },
