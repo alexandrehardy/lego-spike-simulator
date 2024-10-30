@@ -6,6 +6,9 @@ const Blockly = browser ? BlocklyLib : BlocklyLib.default;
 /**
  * Class for a variable's dropdown field.
  */
+
+const NONE_AVAILABLE = 'NONE_AVAILABLE';
+
 export class FieldVariableGetter extends Blockly.FieldVariable {
     constructor(
         varName: string | null | typeof Field.SKIP_SETUP,
@@ -93,8 +96,20 @@ export class FieldVariableGetter extends Blockly.FieldVariable {
             copy.variable = new Blockly.VariableModel(this.sourceBlock_.workspace, 'x');
         }
         copy.variableMenuGenerator = Blockly.FieldVariable.dropdownCreate;
-        return copy.variableMenuGenerator(copy);
-        return Blockly.FieldVariable.dropdownCreate(copy);
+        const options = copy.variableMenuGenerator(copy);
+        if (options.length == 2) {
+            return [['No variables available', NONE_AVAILABLE]];
+        }
+        return options;
+    }
+
+    protected override onItemSelected_(menu: Menu, menuItem: MenuItem) {
+        const id = menuItem.getValue();
+        // Handle special cases.
+        if (id === NONE_AVAILABLE) {
+            return;
+        }
+        return super.onItemSelected_(menu, menuItem);
     }
 }
 
