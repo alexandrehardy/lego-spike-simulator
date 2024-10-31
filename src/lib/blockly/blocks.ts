@@ -2316,9 +2316,13 @@ export const blocks = [
         message0: '%2 is %1 ?',
         args0: [
             {
-                type: 'input_value',
+                type: 'field_dropdown',
                 name: 'MOTION',
-                value: 21
+                options: [
+                    ['shaken', 'shaken'],
+                    ['tapped', 'tapped'],
+                    ['falling', 'falling']
+                ]
             },
             {
                 type: 'field_image',
