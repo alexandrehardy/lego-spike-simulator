@@ -6,6 +6,7 @@
     import '$lib/blockly/field_variable_getter';
     import '$lib/blockly/field-bitmap';
     import '$lib/blockly/field-grid-dropdown';
+    import * as variableFlyout from '$lib/blockly/variable_flyout';
     import * as fieldAngle from '$lib/blockly/field_angle';
     import * as shareableProcedures from '@blockly/block-shareable-procedures';
     import {
@@ -27,12 +28,13 @@
         // Also apply the shadow extension to any blocks that
         // don't declare they use it.
         applyInputShadowExtension(Blockly);
-        Blockly.inject(document.getElementById('blocklyDiv'), {
+        const workspace = Blockly.inject(document.getElementById('blocklyDiv'), {
             renderer: 'zelos',
             grid: { spacing: 20, length: 3, colour: '#ccc', snap: true },
             theme: 'zelos',
             toolbox: toolbox
         });
+        variableFlyout.registerVariableFlyout(workspace);
     });
 </script>
 

@@ -431,87 +431,6 @@ export const toolbox = {
         },
         {
             kind: 'category',
-            name: 'VARIABLE',
-            contents: [
-                {
-                    kind: 'block',
-                    type: 'data_variable'
-                },
-                {
-                    kind: 'block',
-                    type: 'data_setvariableto'
-                },
-                {
-                    kind: 'block',
-                    type: 'data_changevariableby'
-                },
-                {
-                    kind: 'block',
-                    type: 'data_addtolist'
-                },
-                {
-                    kind: 'block',
-                    type: 'data_deleteoflist'
-                },
-                {
-                    kind: 'block',
-                    type: 'data_deletealloflist'
-                },
-                {
-                    kind: 'block',
-                    type: 'data_insertatlist'
-                },
-                {
-                    kind: 'block',
-                    type: 'data_replaceitemoflist'
-                },
-                {
-                    kind: 'block',
-                    type: 'data_itemoflist'
-                },
-                {
-                    kind: 'block',
-                    type: 'data_itemnumoflist'
-                },
-                {
-                    kind: 'block',
-                    type: 'data_lengthoflist'
-                },
-                {
-                    kind: 'block',
-                    type: 'data_listcontainsitem'
-                },
-                {
-                    kind: 'block',
-                    type: 'data_listcontents'
-                }
-            ],
-            colour: '#ff9835'
-        },
-        {
-            kind: 'category',
-            name: 'VARIABLE-DEFINE-BLOCK',
-            contents: [
-                {
-                    kind: 'block',
-                    type: 'procedures_definition'
-                }
-            ],
-            colour: '#ff5d64'
-        },
-        {
-            kind: 'category',
-            name: 'VARIABLE-MY-BLOCK',
-            contents: [
-                {
-                    kind: 'block',
-                    type: 'procedures_call'
-                }
-            ],
-            colour: '#ff5d64'
-        },
-        {
-            kind: 'category',
             name: 'MORE-MOTOR',
             contents: [
                 {
@@ -559,7 +478,7 @@ export const toolbox = {
         {
             kind: 'category',
             name: 'VARIABLES',
-            custom: 'VARIABLE',
+            custom: 'SPIKE_VARIABLES',
             colour: '#ff9835'
         },
         {

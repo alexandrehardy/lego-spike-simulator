@@ -111,6 +111,14 @@ export class FieldVariableGetter extends Blockly.FieldVariable {
         }
         return super.onItemSelected_(menu, menuItem);
     }
+
+    override fromXml(fieldElement: Element) {
+        return super.fromXml(element);
+    }
+
+    override loadState(state: AnyDuringMigration) {
+        return super.loadState(state);
+    }
 }
 
 if (browser) {
