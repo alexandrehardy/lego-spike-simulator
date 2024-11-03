@@ -29,6 +29,10 @@
         // Also apply the shadow extension to any blocks that
         // don't declare they use it.
         applyInputShadowExtension(Blockly);
+        // Only include procedure defintion, like spike does
+        delete Blockly.Blocks['procedures_callreturn'];
+        delete Blockly.Blocks['procedures_ifreturn'];
+        delete Blockly.Blocks['procedures_defreturn'];
         const workspace = Blockly.inject(document.getElementById('blocklyDiv'), {
             renderer: 'zelos',
             grid: { spacing: 20, length: 3, colour: '#ccc', snap: true },
