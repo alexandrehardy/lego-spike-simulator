@@ -9,9 +9,7 @@
  * @author kozbial@google.com (Monica Kozbial)
  */
 
-import * as BlocklyLib from 'blockly/core';
-
-const Blockly = BlocklyLib.default ? BlocklyLib.default : BlocklyLib;
+import * as Blockly from 'blockly/core';
 
 /**
  * A config object for defining a field grid dropdown.

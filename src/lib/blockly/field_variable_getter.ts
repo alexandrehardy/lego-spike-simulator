@@ -1,6 +1,4 @@
-import * as BlocklyLib from 'blockly/core';
-
-const Blockly = BlocklyLib.default ? BlocklyLib.default : BlocklyLib;
+import * as Blockly from 'blockly/core';
 
 /**
  * Class for a variable's dropdown field.

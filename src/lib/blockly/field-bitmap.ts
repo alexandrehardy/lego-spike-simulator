@@ -4,9 +4,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import * as BlocklyLib from 'blockly/core';
+import * as Blockly from 'blockly/core';
 
-const Blockly = BlocklyLib.default ? BlocklyLib.default : BlocklyLib;
 Blockly.Msg['BUTTON_LABEL_RANDOMIZE'] = 'Randomize';
 Blockly.Msg['BUTTON_LABEL_CLEAR'] = 'Clear';
 
