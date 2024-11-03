@@ -9,10 +9,9 @@
  * @author kozbial@google.com (Monica Kozbial)
  */
 
-import { browser, building } from '$app/environment';
 import * as BlocklyLib from 'blockly/core';
 
-const Blockly = browser ? BlocklyLib : BlocklyLib.default;
+const Blockly = BlocklyLib.default ? BlocklyLib.default : BlocklyLib;
 
 /**
  * A config object for defining a field grid dropdown.
@@ -331,7 +330,7 @@ export class FieldGridDropdown extends Blockly.FieldDropdown {
     }
 }
 
-if (browser) {
+if (window) {
     Blockly.fieldRegistry.register('field_grid_dropdown', FieldGridDropdown);
 
     /**

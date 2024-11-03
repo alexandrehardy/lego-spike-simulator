@@ -3,8 +3,8 @@
 </script>
 
 <svelte:head>
-    <title>Home</title>
-    <meta name="description" content="Svelte demo app" />
+    <title>Lego Spike Simulator</title>
+    <meta name="description" content="Lego Spike Simulator" />
 </svelte:head>
 
 <section>

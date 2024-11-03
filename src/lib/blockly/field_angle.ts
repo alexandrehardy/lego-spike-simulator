@@ -8,10 +8,9 @@
  * @fileoverview Angle input field.
  */
 
-import { browser, building } from '$app/environment';
 import * as BlocklyLib from 'blockly/core';
 
-const Blockly = browser ? BlocklyLib : BlocklyLib.default;
+const Blockly = BlocklyLib.default ? BlocklyLib.default : BlocklyLib;
 
 /**
  * Class for an editable angle field.

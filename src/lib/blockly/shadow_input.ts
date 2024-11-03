@@ -1,5 +1,3 @@
-import { blocks } from '$lib/blockly/blocks';
-
 export function registerInputShadowExtension(Blockly) {
     // This extension sets the block's tooltip to be a function which displays
     // the parent block's tooltip (if it exists).

@@ -4,10 +4,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { browser, building } from '$app/environment';
 import * as BlocklyLib from 'blockly/core';
 
-const Blockly = browser ? BlocklyLib : BlocklyLib.default;
+const Blockly = BlocklyLib.default ? BlocklyLib.default : BlocklyLib;
 Blockly.Msg['BUTTON_LABEL_RANDOMIZE'] = 'Randomize';
 Blockly.Msg['BUTTON_LABEL_CLEAR'] = 'Clear';
 
@@ -600,7 +599,7 @@ export interface FieldBitmapFromJsonConfig extends Blockly.FieldConfig {
     colours?: PixelColours;
 }
 
-if (browser) {
+if (window) {
     Blockly.fieldRegistry.register('field_bitmap', FieldBitmap);
 
     /**

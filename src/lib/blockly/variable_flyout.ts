@@ -1,8 +1,7 @@
 import { variable_blocks, list_variable_blocks } from '$lib/blockly/variable_blocks';
-import { browser, building } from '$app/environment';
 import * as BlocklyLib from 'blockly/core';
 
-const Blockly = browser ? BlocklyLib : BlocklyLib.default;
+const Blockly = BlocklyLib.default ? BlocklyLib.default : BlocklyLib;
 
 function numberButtonClickHandler(button: FlyoutButton) {
     Blockly.Variables.createVariableButtonHandler(button.getTargetWorkspace(), undefined, 'Number');

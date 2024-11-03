@@ -1,7 +1,6 @@
-import { browser, building } from '$app/environment';
 import * as BlocklyLib from 'blockly/core';
 
-const Blockly = browser ? BlocklyLib : BlocklyLib.default;
+const Blockly = BlocklyLib.default ? BlocklyLib.default : BlocklyLib;
 
 /**
  * Class for a variable's dropdown field.
@@ -121,6 +120,6 @@ export class FieldVariableGetter extends Blockly.FieldVariable {
     }
 }
 
-if (browser) {
+if (window) {
     Blockly.fieldRegistry.register('field_variable_getter', FieldVariableGetter);
 }
