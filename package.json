@@ -35,6 +35,9 @@
         "@blockly/block-shareable-procedures": "^5.0.9",
         "@blockly/field-colour": "^5.0.9",
         "@blockly/field-grid-dropdown": "^5.0.9",
-        "blockly": "^11.1.1"
+        "blockly": "^11.1.1",
+        "file-saver": "^2.0.5",
+        "flowbite-svelte": "^0.47.3",
+        "jszip": "^3.10.1"
     }
 }
