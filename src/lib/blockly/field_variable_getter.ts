@@ -86,8 +86,8 @@ export class FieldVariableGetter extends Blockly.FieldVariable {
 
     static dropdownCreate(this: FieldVariable): Blockly.MenuOption[] {
         const copy = Object.create(this);
-        for (let attribut in this) {
-            copy[attribut] = this[attribut];
+        for (const attribute in this) {
+            copy[attribute] = this[attribute];
         }
         // Set variable to something so that the drop down list can
         // be created. Otherwise it errors out
@@ -112,7 +112,7 @@ export class FieldVariableGetter extends Blockly.FieldVariable {
     }
 
     override fromXml(fieldElement: Element) {
-        return super.fromXml(element);
+        return super.fromXml(fieldElement);
     }
 
     override loadState(state: AnyDuringMigration) {

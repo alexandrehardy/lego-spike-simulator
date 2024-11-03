@@ -155,7 +155,6 @@ export class FieldGridDropdown extends Blockly.FieldDropdown {
         }
     }
 
-    /* eslint-disable @typescript-eslint/naming-convention */
     /**
      * Create a dropdown menu under the text.
      *

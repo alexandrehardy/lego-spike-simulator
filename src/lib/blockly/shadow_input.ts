@@ -6,6 +6,7 @@ export function registerInputShadowExtension(Blockly) {
     }
     Blockly.Extensions.register('shadow_input', function () {
         // this refers to the block that the extension is being run on
+        // eslint-disable-next-line @typescript-eslint/no-this-alias
         const thisBlock = this;
         if (!thisBlock.inputList) {
             return;

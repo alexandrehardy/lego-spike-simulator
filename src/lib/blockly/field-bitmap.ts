@@ -118,11 +118,8 @@ export class FieldBitmap extends Blockly.Field<number[][]> {
      * @param newValue The new value to be tested.
      * @returns The new value if it's valid, or null.
      */
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     protected override doClassValidation_(newValue: number[][]): number[][] | null | undefined;
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     protected override doClassValidation_(newValue?: number[][]): number[][] | null;
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     protected override doClassValidation_(newValue?: number[][]): number[][] | null | undefined {
         if (!newValue) {
             return null;
@@ -165,7 +162,6 @@ export class FieldBitmap extends Blockly.Field<number[][]> {
      *
      * @param newValue The value that's about to be set.
      */
-    // eslint-disable-next-line
     protected override doValueUpdate_(newValue: number[][]) {
         super.doValueUpdate_(newValue);
         if (newValue) {
@@ -186,7 +182,7 @@ export class FieldBitmap extends Blockly.Field<number[][]> {
      * @param e Optional mouse event that triggered the field to open, or
      *    undefined if triggered programmatically.
      */
-    // eslint-disable-next-line
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     protected override showEditor_(e?: Event) {
         const editor = this.dropdownCreate();
         Blockly.DropDownDiv.getContentDiv().appendChild(editor);
@@ -196,7 +192,6 @@ export class FieldBitmap extends Blockly.Field<number[][]> {
     /**
      * Updates the block display and editor dropdown when the field re-renders.
      */
-    // eslint-disable-next-line
     protected override render_() {
         super.render_();
 
@@ -358,7 +353,7 @@ export class FieldBitmap extends Blockly.Field<number[][]> {
                         height: this.pixelSize,
                         fill: this.pixelColours.empty,
                         stroke: '#000',
-                        fill_opacity: 1 // eslint-disable-line
+                        fill_opacity: 1
                     },
                     this.getSvgRoot()
                 );
@@ -371,7 +366,6 @@ export class FieldBitmap extends Blockly.Field<number[][]> {
     /**
      * Updates the size of the block based on the size of the underlying image.
      */
-    // eslint-disable-next-line
     protected override updateSize_() {
         {
             const newWidth = this.pixelSize * this.imgWidth;

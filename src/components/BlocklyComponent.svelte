@@ -1,7 +1,8 @@
 <script lang="ts">
     import { onMount } from 'svelte';
     import * as Blockly from 'blockly/core';
-    import * as BlocklyBlocks from 'blockly/blocks';
+    // Import the list of blocks so it gets loaded into blockly
+    import 'blockly/blocks';
     import * as En from 'blockly/msg/en';
     import '$lib/blockly/field_variable_getter';
     import '$lib/blockly/field-bitmap';

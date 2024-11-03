@@ -25,11 +25,9 @@ export class FieldAngle extends Blockly.FieldNumber {
      */
     static readonly RADIUS: number = FieldAngle.HALF - 1;
 
-    /* eslint-disable @typescript-eslint/naming-convention */
     static readonly DEFAULT_PRECISION = 15;
     static readonly DEFAULT_MIN = 0;
     static readonly DEFAULT_MAX = 360;
-    /* eslint-enable @typescript-eslint/naming-convention */
 
     private mode = Mode.STEERING;
     /**
@@ -139,7 +137,6 @@ export class FieldAngle extends Blockly.FieldNumber {
      *
      * @param config A map of options to configure the field based on.
      */
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     protected override configure_(config: FieldAngleConfig) {
         super.configure_(config);
         switch (config.mode) {
@@ -206,7 +203,6 @@ export class FieldAngle extends Blockly.FieldNumber {
     }
 
     createPrefix(value: number) {
-        const symbolElement = Blockly.utils.dom.createSvgElement(Blockly.utils.Svg.TSPAN, {});
         return document.createTextNode(value < 0 ? 'left:' : 'right:');
     }
 
@@ -222,7 +218,6 @@ export class FieldAngle extends Blockly.FieldNumber {
     /**
      * Updates the angle when the field rerenders.
      */
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     protected override render_() {
         super.render_();
         this.updateGraph();
@@ -234,7 +229,6 @@ export class FieldAngle extends Blockly.FieldNumber {
      * @param e Optional mouse event that triggered the field to open,
      *     or undefined if triggered programmatically.
      */
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     protected override showEditor_(e?: Event) {
         // Mobile browsers have issues with in-line textareas (focus & keyboards).
         const noFocus =
@@ -267,9 +261,7 @@ export class FieldAngle extends Blockly.FieldNumber {
     private dropdownCreate(): SVGSVGElement {
         const svg = Blockly.utils.dom.createSvgElement(Blockly.utils.Svg.SVG, {
             xmlns: Blockly.utils.dom.SVG_NS,
-            // eslint-disable-next-line @typescript-eslint/naming-convention
             'xmlns:html': Blockly.utils.dom.HTML_NS,
-            // eslint-disable-next-line @typescript-eslint/naming-convention
             'xmlns:xlink': Blockly.utils.dom.XLINK_NS,
             version: '1.1',
             height: FieldAngle.HALF * 2 + 'px',
@@ -412,7 +404,6 @@ export class FieldAngle extends Blockly.FieldNumber {
      *
      * @param e Mouse move event.
      */
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     protected onMouseMove_(e: PointerEvent) {
         // Calculate angle.
         const bBox = this.gauge?.ownerSVGElement?.getBoundingClientRect();
@@ -562,7 +553,6 @@ export class FieldAngle extends Blockly.FieldNumber {
      *
      * @param e Keyboard event.
      */
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     protected override onHtmlInputKeyDown_(e: KeyboardEvent) {
         super.onHtmlInputKeyDown_(e);
         const block = this.getSourceBlock();
@@ -606,11 +596,8 @@ export class FieldAngle extends Blockly.FieldNumber {
      * @param newValue The input value.
      * @returns A valid angle, or null if invalid.
      */
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     protected override doClassValidation_(newValue: number): number | null | undefined;
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     protected override doClassValidation_(newValue?: number): number | null;
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     protected override doClassValidation_(newValue?: number): number | null | undefined {
         // The obvious approach would be to call super.doClassValidation_ to handle
         // min/max limitations.  However angle pickers out of range need to clamp
