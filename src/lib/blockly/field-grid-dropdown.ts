@@ -11,6 +11,13 @@
 
 import * as Blockly from 'blockly/core';
 
+export interface ImageProperties {
+  src: string;
+  alt: string;
+  width: number;
+  height: number;
+}
+
 /**
  * A config object for defining a field grid dropdown.
  */
@@ -50,7 +57,7 @@ export class FieldGridDropdown extends Blockly.FieldDropdown {
 
     private minItems = 1;
 
-    private selected: Array<string> = [];
+    private selected: Array<string | ImageProperties> = [];
 
     private sorted = true;
 
@@ -247,25 +254,29 @@ export class FieldGridDropdown extends Blockly.FieldDropdown {
                 }
             } else {
                 const value = menuItem.getValue();
-                if (this.selected.length >= this.maxItems) {
-                    this.selected = this.selected.slice(this.maxItems - 1);
-                    menu.menuItems.forEach((item) =>
-                        this.setChecked(
-                            item,
-                            this.selected.some((v) => v === item.getValue())
-                        )
-                    );
+                if (value !== null) {
+                    if (this.selected.length >= this.maxItems) {
+                        this.selected = this.selected.slice(this.maxItems - 1);
+                        menu.menuItems.forEach((item: Blockly.MenuItem) =>
+                            this.setChecked(
+                                item,
+                                this.selected.some((v) => v === item.getValue())
+                            )
+                        );
+                    }
+                    this.selected.push(value);
+                    if (this.sorted) {
+                        this.selected.sort();
+                    }
+                    this.setChecked(menuItem, true);
                 }
-                this.selected.push(value);
-                if (this.sorted) {
-                    this.selected.sort();
-                }
-                this.setChecked(menuItem, true);
             }
             this.setValue(this.selected.join(','));
         }
     }
 
+    protected override doClassValidation_(newValue: string,): string | null | undefined;
+    protected override doClassValidation_(newValue?: string): string | null;
     protected override doClassValidation_(newValue?: string): string | null | undefined {
         const options = this.getOptions(true);
         let isValueValid = false;
@@ -280,7 +291,7 @@ export class FieldGridDropdown extends Blockly.FieldDropdown {
                 console.warn(
                     'Too many items selected.' +
                         ' Block type: ' +
-                        this.sourceBlock_.type +
+                        this.sourceBlock_?.type?.toString() +
                         ', Field name: ' +
                         this.name +
                         ', Value: ' +
@@ -294,7 +305,7 @@ export class FieldGridDropdown extends Blockly.FieldDropdown {
                 console.warn(
                     "Cannot set the dropdown's value to an unavailable option." +
                         ' Block type: ' +
-                        this.sourceBlock_.type +
+                        this.sourceBlock_?.type?.toString() +
                         ', Field name: ' +
                         this.name +
                         ', Value: ' +
@@ -317,7 +328,7 @@ export class FieldGridDropdown extends Blockly.FieldDropdown {
         // We override this to setup the dropdown menu
         super.applyColour();
         if (this.maxItems !== 1 && this.menu_) {
-            this.menu_.menuItems.forEach((item) =>
+            this.menu_.menuItems.forEach((item: Blockly.MenuItem) =>
                 this.setChecked(
                     item,
                     this.selected.some((v) => v === item.getValue())

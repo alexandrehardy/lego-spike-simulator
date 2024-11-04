@@ -6,13 +6,15 @@ import * as Blockly from 'blockly/core';
 
 const NONE_AVAILABLE = 'NONE_AVAILABLE';
 
+type AnyDuringMigration = any;
+
 export class FieldVariableGetter extends Blockly.FieldVariable {
     constructor(
-        varName: string | null | typeof Field.SKIP_SETUP,
-        validator?: FieldVariableValidator,
+        varName: string | null | typeof Blockly.Field.SKIP_SETUP,
+        validator?: Blockly.FieldVariableValidator,
         variableTypes?: string[],
         defaultType?: string,
-        config?: FieldVariableConfig
+        config?: Blockly.FieldVariableConfig
     ) {
         super(varName, validator, variableTypes, defaultType, config);
         this.menuGenerator_ = FieldVariableGetter.dropdownCreate as Blockly.MenuGenerator;
@@ -75,22 +77,31 @@ export class FieldVariableGetter extends Blockly.FieldVariable {
         }
     }
 
-    static override fromJson(options: FieldVariableFromJsonConfig): FieldVariable {
+    static override fromJson(options: Blockly.FieldVariableFromJsonConfig): Blockly.FieldVariable {
         const varName = options.variable;
         // `this` might be a subclass of FieldVariable if that class doesn't
         // override the static fromJson method.
-        return new this(varName, undefined, undefined, undefined, options);
+        if (varName === undefined) {
+            return new this(null, undefined, undefined, undefined, options);
+        } else {
+            return new this(varName, undefined, undefined, undefined, options);
+        }
     }
 
-    static dropdownCreate(this: FieldVariable): Blockly.MenuOption[] {
+    static dropdownCreate(this: FieldVariableGetter): Blockly.MenuOption[] {
         const copy = Object.create(this);
+
+        if (!this.sourceBlock_) {
+            return [];
+        }
+
         for (const attribute in this) {
             copy[attribute] = this[attribute];
         }
         // Set variable to something so that the drop down list can
         // be created. Otherwise it errors out
         if (!copy.variable) {
-            copy.variable = new Blockly.VariableModel(this.sourceBlock_.workspace, 'x');
+            copy.variable = new Blockly.VariableModel(this.sourceBlock_!.workspace, 'x');
         }
         copy.variableMenuGenerator = Blockly.FieldVariable.dropdownCreate;
         const options = copy.variableMenuGenerator(copy);
@@ -100,7 +111,7 @@ export class FieldVariableGetter extends Blockly.FieldVariable {
         return options;
     }
 
-    protected override onItemSelected_(menu: Menu, menuItem: MenuItem) {
+    protected override onItemSelected_(menu: Blockly.Menu, menuItem: Blockly.MenuItem) {
         const id = menuItem.getValue();
         // Handle special cases.
         if (id === NONE_AVAILABLE) {

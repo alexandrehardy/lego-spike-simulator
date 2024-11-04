@@ -83,8 +83,11 @@ export class FieldAngle extends Blockly.FieldNumber {
     /** Dynamic pink area extending from 0 to the value's angle. */
     private gauge: SVGPathElement | null = null;
 
-    /** The degree symbol for this field, or right / left */
+    /** The degree symbol for this field */
     protected symbolElement: SVGTSpanElement | null = null;
+
+    /** The right / left text*/
+    protected labelElement: Text | null = null;
 
     /**
      * @param value The initial value of the field.  Should cast to a number.
@@ -183,9 +186,9 @@ export class FieldAngle extends Blockly.FieldNumber {
     override initView() {
         super.initView();
         if (this.mode == Mode.STEERING) {
-            this.symbolElement = this.createPrefix(this.value_);
+            this.labelElement = this.createPrefix(this.value_);
             const textElement = this.getTextElement();
-            textElement.insertBefore(this.symbolElement, textElement.lastChild);
+            textElement.insertBefore(this.labelElement, textElement.lastChild);
         } else {
             if (this.symbol) {
                 // Add the degree symbol to the left of the number,
@@ -200,16 +203,22 @@ export class FieldAngle extends Blockly.FieldNumber {
         }
     }
 
-    createPrefix(value: number) {
+    createPrefix(value: number | string | null | undefined) {
+        if (!value) {
+            value = 0;
+        }
+        if (typeof value === 'string') {
+            value = 0;
+        }
         return document.createTextNode(value < 0 ? 'left:' : 'right:');
     }
 
-    updatePrefix(value: number) {
+    updatePrefix(value: number | string | null | undefined) {
         if (this.mode == Mode.STEERING) {
-            if (this.symbolElement) {
+            if (this.labelElement) {
                 const newElement = this.createPrefix(value);
-                this.symbolElement.replaceWith(newElement);
-                this.symbolElement = newElement;
+                this.labelElement.replaceWith(newElement);
+                this.labelElement = newElement;
             }
         }
     }

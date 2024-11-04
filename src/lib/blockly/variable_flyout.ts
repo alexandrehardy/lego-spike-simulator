@@ -1,11 +1,11 @@
 import { variable_blocks, list_variable_blocks } from '$lib/blockly/variable_blocks';
 import * as Blockly from 'blockly/core';
 
-function numberButtonClickHandler(button: FlyoutButton) {
+function numberButtonClickHandler(button: Blockly.FlyoutButton) {
     Blockly.Variables.createVariableButtonHandler(button.getTargetWorkspace(), undefined, 'Number');
 }
 
-function listButtonClickHandler(button: FlyoutButton) {
+function listButtonClickHandler(button: Blockly.FlyoutButton) {
     Blockly.Variables.createVariableButtonHandler(button.getTargetWorkspace(), undefined, 'list');
 }
 
@@ -69,7 +69,7 @@ function variablesFlyoutCallback(workspace: Blockly.Workspace) {
     return blockList;
 }
 
-export function registerVariableFlyout(workspace: Blockly.Workspace) {
+export function registerVariableFlyout(workspace: Blockly.WorkspaceSvg) {
     workspace.registerButtonCallback('CREATE_SPIKE_NUMBER_VARIABLE', numberButtonClickHandler);
     workspace.registerButtonCallback('CREATE_SPIKE_LIST_VARIABLE', listButtonClickHandler);
     workspace.registerToolboxCategoryCallback('SPIKE_VARIABLES', variablesFlyoutCallback);
