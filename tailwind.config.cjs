@@ -4,6 +4,7 @@ const config = {
         './node_modules/flowbite-svelte/**/*.{html,js,svelte,ts}'
     ],
 
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     plugins: [require('flowbite/plugin')],
 
     darkMode: 'class',

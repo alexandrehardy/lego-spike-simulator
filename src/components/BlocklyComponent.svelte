@@ -46,9 +46,9 @@
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <div class="relative w-full h-full flex flex-col overflow-hidden">
     <div class="flex flex-row bg-gray-100 gap-2 p-2">
-        <img width="32" height="32" src="icons/FolderMedium.svg" />
-        <img width="32" height="32" src="icons/SaveMedium.svg" />
-        <img width="32" height="32" src="icons/GenericPlayIcon.svg" />
+        <img alt="open" width="32" height="32" src="icons/FolderMedium.svg" />
+        <img alt="save" width="32" height="32" src="icons/SaveMedium.svg" />
+        <img alt="play" width="32" height="32" src="icons/GenericPlayIcon.svg" />
     </div>
     <div class="flex-1 w-full overflow-hidden">
         <div id="blocklyDiv" />
