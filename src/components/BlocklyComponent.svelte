@@ -23,6 +23,7 @@
         colourPkg.registerFieldColour();
         shareableProcedures.unregisterProcedureBlocks();
         Blockly.common.defineBlocks(shareableProcedures.blocks);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         Blockly.setLocale(En as any as Record<string, string>);
         registerInputShadowExtension(Blockly);
         Blockly.defineBlocksWithJsonArray(blocks);

@@ -10,12 +10,14 @@
  */
 
 import * as Blockly from 'blockly/core';
+// Patch blockly to get access to private members
+import '$lib/blockly/patch';
 
 export interface ImageProperties {
-  src: string;
-  alt: string;
-  width: number;
-  height: number;
+    src: string;
+    alt: string;
+    width: number;
+    height: number;
 }
 
 /**
@@ -246,7 +248,7 @@ export class FieldGridDropdown extends Blockly.FieldDropdown {
         if (this.maxItems == 1) {
             this.setValue(menuItem.getValue());
         } else {
-            if (menuItem.checked) {
+            if (menuItem.isChecked()) {
                 if (this.selected.length > this.minItems) {
                     const value = menuItem.getValue();
                     this.selected = this.selected.filter((v) => v !== value);
@@ -257,7 +259,7 @@ export class FieldGridDropdown extends Blockly.FieldDropdown {
                 if (value !== null) {
                     if (this.selected.length >= this.maxItems) {
                         this.selected = this.selected.slice(this.maxItems - 1);
-                        menu.menuItems.forEach((item: Blockly.MenuItem) =>
+                        menu.getItems().forEach((item: Blockly.MenuItem) =>
                             this.setChecked(
                                 item,
                                 this.selected.some((v) => v === item.getValue())
@@ -275,7 +277,7 @@ export class FieldGridDropdown extends Blockly.FieldDropdown {
         }
     }
 
-    protected override doClassValidation_(newValue: string,): string | null | undefined;
+    protected override doClassValidation_(newValue: string): string | null | undefined;
     protected override doClassValidation_(newValue?: string): string | null;
     protected override doClassValidation_(newValue?: string): string | null | undefined {
         const options = this.getOptions(true);
@@ -327,8 +329,9 @@ export class FieldGridDropdown extends Blockly.FieldDropdown {
     override applyColour() {
         // We override this to setup the dropdown menu
         super.applyColour();
-        if (this.maxItems !== 1 && this.menu_) {
-            this.menu_.menuItems.forEach((item: Blockly.MenuItem) =>
+        const menu = this.getMenu();
+        if (this.maxItems !== 1 && menu) {
+            menu.getItems().forEach((item: Blockly.MenuItem) =>
                 this.setChecked(
                     item,
                     this.selected.some((v) => v === item.getValue())

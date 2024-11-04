@@ -1,4 +1,6 @@
 import * as Blockly from 'blockly/core';
+// Patch blockly to get access to private members
+import '$lib/blockly/patch';
 
 /**
  * Class for a variable's dropdown field.
@@ -6,6 +8,7 @@ import * as Blockly from 'blockly/core';
 
 const NONE_AVAILABLE = 'NONE_AVAILABLE';
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnyDuringMigration = any;
 
 export class FieldVariableGetter extends Blockly.FieldVariable {
@@ -25,14 +28,14 @@ export class FieldVariableGetter extends Blockly.FieldVariable {
         if (!block) {
             throw new Blockly.UnattachedFieldError();
         }
-        if (this.variable) {
+        if (this.getVariable()) {
             return; // Initialization already happened.
         }
         const variable = Blockly.Variables.getVariable(
             block.workspace,
             null,
             this.defaultVariableName,
-            this.defaultType
+            this.getDefaultType()
         );
         if (variable) {
             // Don't call setValue because we don't want to cause a rerender.
@@ -44,11 +47,12 @@ export class FieldVariableGetter extends Blockly.FieldVariable {
         // Make sure the variable is initialized.
         this.initModel();
 
-        if (this.variable) {
-            fieldElement.id = this.variable.getId();
-            fieldElement.textContent = this.variable.name;
-            if (this.variable.type) {
-                fieldElement.setAttribute('variabletype', this.variable.type);
+        const variable = this.getVariable();
+        if (variable) {
+            fieldElement.id = variable.getId();
+            fieldElement.textContent = variable.name;
+            if (variable.type) {
+                fieldElement.setAttribute('variabletype', variable.type);
             }
         } else {
             fieldElement.id = '';
@@ -60,11 +64,12 @@ export class FieldVariableGetter extends Blockly.FieldVariable {
     override saveState(doFullSerialization?: boolean): AnyDuringMigration {
         // Make sure the variable is initialized.
         this.initModel();
-        if (this.variable) {
-            const state = { id: this.variable!.getId() };
+        const variable = this.getVariable();
+        if (variable) {
+            const state = { id: variable!.getId() };
             if (doFullSerialization) {
-                (state as AnyDuringMigration)['name'] = this.variable!.name;
-                (state as AnyDuringMigration)['type'] = this.variable!.type;
+                (state as AnyDuringMigration)['name'] = variable!.name;
+                (state as AnyDuringMigration)['type'] = variable!.type;
             }
             return state;
         } else {
