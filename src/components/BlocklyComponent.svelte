@@ -44,19 +44,23 @@
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
-<div>
-    <div id="blocklyDiv" />
-    <xml id="toolbox" style="display:none">
-        <slot />
-    </xml>
+<div class="relative w-full h-full flex flex-col overflow-hidden">
+    <div class="flex flex-row bg-gray-100 gap-2 p-2">
+        <img width="32" height="32" src="icons/FolderMedium.svg" />
+        <img width="32" height="32" src="icons/SaveMedium.svg" />
+        <img width="32" height="32" src="icons/GenericPlayIcon.svg" />
+    </div>
+    <div class="flex-1 w-full overflow-hidden">
+        <div id="blocklyDiv" />
+        <xml id="toolbox" style="display:none">
+            <slot />
+        </xml>
+    </div>
 </div>
 
 <style scoped>
     #blocklyDiv {
         height: 100%;
         width: 100%;
-        position: absolute;
-        bottom: 0;
-        text-align: left;
     }
 </style>

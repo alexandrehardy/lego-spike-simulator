@@ -7,6 +7,6 @@
     <meta name="description" content="Lego Spike Simulator" />
 </svelte:head>
 
-<section>
+<section class="h-dvh w-dvh overflow-hidden">
     <BlocklyPage />
 </section>
