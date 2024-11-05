@@ -100,9 +100,6 @@ export class FieldVariableGetter extends Blockly.FieldVariable {
             return [];
         }
 
-        for (const attribute in this) {
-            copy[attribute] = this[attribute];
-        }
         // Set variable to something so that the drop down list can
         // be created. Otherwise it errors out
         if (!copy.variable) {

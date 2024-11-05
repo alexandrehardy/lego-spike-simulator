@@ -86,6 +86,9 @@ export class FieldGridDropdown extends Blockly.FieldDropdown {
         config?: FieldGridDropdownConfig
     ) {
         super(menuGenerator, validator, config);
+        // Monkey patch private method
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (this as any).handleMenuActionEvent = this.newHandleMenuActionEvent;
 
         if (config?.columns) {
             this.setColumnsInternal(config.columns);
@@ -221,7 +224,7 @@ export class FieldGridDropdown extends Blockly.FieldDropdown {
         };
     }
 
-    private override handleMenuActionEvent(menuItem: Blockly.MenuItem) {
+    newHandleMenuActionEvent(menuItem: Blockly.MenuItem) {
         if (this.maxItems == 1) {
             Blockly.DropDownDiv.hideIfOwner(this, true);
         }
