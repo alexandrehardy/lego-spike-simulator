@@ -764,7 +764,7 @@ export const blocks = [
         args0: [
             {
                 type: 'field_image',
-                src: 'icons/GenericPlayIcon.svg',
+                src: 'icons/EventsStart.svg',
                 width: 24,
                 height: 24
             }
