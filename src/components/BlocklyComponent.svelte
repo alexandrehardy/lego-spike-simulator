@@ -4,6 +4,7 @@
     // Import the list of blocks so it gets loaded into blockly
     import 'blockly/blocks';
     import * as En from 'blockly/msg/en';
+    import '$lib/blockly/theme';
     import '$lib/blockly/field_variable_getter';
     import '$lib/blockly/field-bitmap';
     import '$lib/blockly/field-grid-dropdown';
@@ -19,7 +20,8 @@
     import { toolbox } from '$lib/blockly/toolbox';
     import { Button } from 'flowbite-svelte';
 
-    let workspace: Blockly.Workspace | undefined;
+    let workspace: Blockly.WorkspaceSvg | undefined;
+    let numberOfLoads = 0;
 
     onMount(() => {
         fieldAngle.registerFieldAngle();
@@ -44,13 +46,31 @@
         workspace = Blockly.inject(element, {
             renderer: 'zelos',
             grid: { spacing: 20, length: 3, colour: '#ccc', snap: true },
-            theme: 'zelos',
+            theme: 'spike',
             toolbox: toolbox
         });
         variableFlyout.registerVariableFlyout(workspace);
     });
 
     function loadState() {
+        const element = document.getElementById('load_project');
+        if (element) {
+            const fileElement = element as HTMLInputElement;
+            if (fileElement.files) {
+                if (fileElement.files.length > 0) {
+                    const first = fileElement.files[0];
+                    console.log(first);
+                    numberOfLoads++;
+                }
+            }
+        }
+    }
+
+    function askForFile() {
+        const element = document.getElementById('load_project');
+        if (element) {
+            element.click();
+        }
     }
 
     function saveState() {
@@ -60,21 +80,22 @@
         }
     }
 
-    function runRobot() {
-    }
+    function runRobot() {}
 </script>
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
+{#key numberOfLoads}
+    <input type="file" id="load_project" class="hidden" accept=".llsp3" on:change={loadState} />
+{/key}
 <div class="relative w-full h-full flex flex-col overflow-hidden">
     <div class="flex flex-row bg-gray-100 gap-2 p-2">
-        <Button color="light" class="!p-2" on:click={loadState}>
-        <img alt="open" width="32" height="32" src="icons/FolderMedium.svg" />
+        <Button color="light" class="!p-2" on:click={askForFile}>
+            <img alt="open" width="32" height="32" src="icons/FolderMedium.svg" />
         </Button>
         <Button color="light" class="!p-2" on:click={saveState}>
-        <img alt="save" width="32" height="32" src="icons/SaveMedium.svg" />
+            <img alt="save" width="32" height="32" src="icons/SaveMedium.svg" />
         </Button>
         <Button color="light" class="!p-2" on:click={runRobot}>
-        <img alt="play" width="32" height="32" src="icons/GenericPlayIcon.svg" />
+            <img alt="play" width="32" height="32" src="icons/GenericPlayIcon.svg" />
         </Button>
     </div>
     <div class="flex-1 w-full overflow-hidden">
