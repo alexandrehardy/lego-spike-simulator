@@ -2,6 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-svg[display="none"] {
+svg[display='none'] {
     display: none;
 }
