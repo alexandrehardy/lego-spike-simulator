@@ -19,6 +19,9 @@
     import { blocks } from '$lib/blockly/blocks';
     import { toolbox } from '$lib/blockly/toolbox';
     import { Button } from 'flowbite-svelte';
+    import { loadScratchSb3 } from '$lib/scratch/sb3';
+    import JSZip from 'jszip';
+    import FileSaver from 'file-saver';
 
     let workspace: Blockly.WorkspaceSvg | undefined;
     let numberOfLoads = 0;
@@ -52,6 +55,28 @@
         variableFlyout.registerVariableFlyout(workspace);
     });
 
+    // There is somewhat of a schema, but this is JSON
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    function convertToBlockly(project: any) {
+        if (!project.targets) {
+            return;
+        }
+    }
+
+    async function loadLlsp3(f: File) {
+        const zip = new JSZip();
+        const zipFile = await zip.loadAsync(f);
+        const file = zipFile.file('scratch.sb3');
+        if (!file) {
+            console.log('Missing scratch.sb3');
+            return;
+        }
+        const content = await file.async('arraybuffer');
+        const project = await loadScratchSb3(content);
+        console.log(project);
+        convertToBlockly(project);
+    }
+
     function loadState() {
         const element = document.getElementById('load_project');
         if (element) {
@@ -59,8 +84,8 @@
             if (fileElement.files) {
                 if (fileElement.files.length > 0) {
                     const first = fileElement.files[0];
-                    console.log(first);
                     numberOfLoads++;
+                    loadLlsp3(first);
                 }
             }
         }
@@ -73,10 +98,13 @@
         }
     }
 
-    function saveState() {
+    async function saveState() {
         if (workspace) {
             const state = Blockly.serialization.workspaces.save(workspace);
-            console.log(state);
+            const zip = new JSZip();
+            zip.file('project.json', JSON.stringify(state));
+            const content = await zip.generateAsync({ type: 'blob' });
+            FileSaver.saveAs(content, 'project.zip');
         }
     }
 
