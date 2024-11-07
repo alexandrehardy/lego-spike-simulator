@@ -133,7 +133,7 @@ export async function loadScratchSb3(sb3: ArrayBuffer): Promise<Sb3Project | und
     }
 
     const content = await file.async('text');
-    const promise = new Promise((resolve) => {
+    const promise = new Promise<Sb3Project[] | undefined>((resolve) => {
         scratchParser(content, false, (err, project) => {
             if (err) {
                 console.log(`Error opening file: ${err} ${typeof content}`);
@@ -148,5 +148,5 @@ export async function loadScratchSb3(sb3: ArrayBuffer): Promise<Sb3Project | und
     if (!result) {
         return undefined;
     }
-    return result as Sb3Project;
+    return result[0] as Sb3Project;
 }

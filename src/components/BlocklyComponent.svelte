@@ -20,6 +20,7 @@
     import { toolbox } from '$lib/blockly/toolbox';
     import { Button } from 'flowbite-svelte';
     import { loadScratchSb3 } from '$lib/scratch/sb3';
+    import { convertToBlockly } from '$lib/scratch/blockly';
     import JSZip from 'jszip';
     import FileSaver from 'file-saver';
 
@@ -55,14 +56,6 @@
         variableFlyout.registerVariableFlyout(workspace);
     });
 
-    // There is somewhat of a schema, but this is JSON
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    function convertToBlockly(project: any) {
-        if (!project.targets) {
-            return;
-        }
-    }
-
     async function loadLlsp3(f: File) {
         const zip = new JSZip();
         const zipFile = await zip.loadAsync(f);
@@ -73,8 +66,20 @@
         }
         const content = await file.async('arraybuffer');
         const project = await loadScratchSb3(content);
-        console.log(project);
-        convertToBlockly(project);
+        if (project) {
+            const state = convertToBlockly(project);
+            if (state) {
+                if (workspace) {
+                    Blockly.serialization.workspaces.load(state, workspace);
+                }
+            } else {
+                // TODO: Display an error
+                console.log('Failed to convert project');
+            }
+        } else {
+            // TODO: Display an error
+            console.log('Failed to load project');
+        }
     }
 
     function loadState() {
