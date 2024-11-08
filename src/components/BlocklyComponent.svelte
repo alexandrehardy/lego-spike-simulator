@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { onMount } from 'svelte';
+    import { onDestroy, onMount } from 'svelte';
     import * as Blockly from 'blockly/core';
     // Import the list of blocks so it gets loaded into blockly
     import 'blockly/blocks';
@@ -16,6 +16,7 @@
         applyInputShadowExtension
     } from '$lib/blockly/shadow_input';
     import * as colourPkg from '@blockly/field-colour';
+    import { ZoomToFitControl } from '@blockly/zoom-to-fit';
     import { blocks } from '$lib/blockly/blocks';
     import { toolbox } from '$lib/blockly/toolbox';
     import { Button } from 'flowbite-svelte';
@@ -25,6 +26,7 @@
     import FileSaver from 'file-saver';
 
     let workspace: Blockly.WorkspaceSvg | undefined;
+    let zoomToFit: ZoomToFitControl | undefined;
     let numberOfLoads = 0;
 
     onMount(() => {
@@ -51,9 +53,26 @@
             renderer: 'zelos',
             grid: { spacing: 20, length: 3, colour: '#ccc', snap: true },
             theme: 'spike',
+            zoom: {
+                controls: true,
+                wheel: true,
+                startScale: 1.0,
+                maxScale: 3,
+                minScale: 0.3,
+                scaleSpeed: 1.2,
+                pinch: true
+            },
             toolbox: toolbox
         });
         variableFlyout.registerVariableFlyout(workspace);
+        const zoomToFit = new ZoomToFitControl(workspace);
+        zoomToFit.init();
+    });
+
+    onDestroy(() => {
+        if (zoomToFit) {
+            zoomToFit.dispose();
+        }
     });
 
     async function loadLlsp3(f: File) {
