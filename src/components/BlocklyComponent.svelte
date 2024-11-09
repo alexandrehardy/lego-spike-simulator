@@ -4,6 +4,7 @@
     // Import the list of blocks so it gets loaded into blockly
     import 'blockly/blocks';
     import * as En from 'blockly/msg/en';
+    import '$lib/blockly/render';
     import '$lib/blockly/theme';
     import '$lib/blockly/field_variable_getter';
     import '$lib/blockly/field-bitmap';
@@ -50,12 +51,12 @@
             return;
         }
         workspace = Blockly.inject(element, {
-            renderer: 'zelos',
+            renderer: 'spike_renderer',
             grid: { spacing: 20, length: 3, colour: '#ccc', snap: true },
             theme: 'spike',
             zoom: {
                 controls: true,
-                wheel: true,
+                wheel: false,
                 startScale: 1.0,
                 maxScale: 3,
                 minScale: 0.3,
