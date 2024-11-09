@@ -1,5 +1,28 @@
 export const blocks = [
     {
+        type: 'flippermotor_multiple-port-selector',
+        message0: '%1',
+        args0: [
+            {
+                type: 'field_grid_dropdown',
+                name: 'PORT',
+                columns: 2,
+                maxItems: 6,
+                minItems: 1,
+                options: [
+                    ['A', 'A'],
+                    ['B', 'B'],
+                    ['C', 'C'],
+                    ['D', 'D'],
+                    ['E', 'E'],
+                    ['F', 'F']
+                ]
+            }
+        ],
+        output: 'String',
+        colour: '#ffb515'
+    },
+    {
         type: 'control_forever',
         id: 'control_forever',
         message0: 'forever',
@@ -1077,7 +1100,8 @@ export const blocks = [
             {
                 type: 'input_value',
                 name: 'TEXT',
-                value: 51
+                value: 51,
+                check: ['String']
             },
             {
                 type: 'field_image',
@@ -1453,19 +1477,10 @@ export const blocks = [
         message0: '%4 %1 go %2 to position %3',
         args0: [
             {
-                type: 'field_grid_dropdown',
+                type: 'input_value',
+                check: 'String',
                 name: 'PORT',
-                columns: 2,
-                maxItems: 6,
-                minItems: 1,
-                options: [
-                    ['A', 'A'],
-                    ['B', 'B'],
-                    ['C', 'C'],
-                    ['D', 'D'],
-                    ['E', 'E'],
-                    ['F', 'F']
-                ]
+                shadow: { type: 'flippermotor_multiple-port-selector', fields: { PORT: 'A' } }
             },
             {
                 type: 'field_dropdown',
