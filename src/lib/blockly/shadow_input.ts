@@ -49,42 +49,45 @@ export function registerInputShadowExtension(blockly: typeof Blockly) {
         thisBlock.inputList.forEach((input: Blockly.Input) => {
             if (<number>input.type === <number>blockly.ConnectionType.INPUT_VALUE) {
                 if (input.connection) {
+                    let shadow: State | undefined;
                     const checks = input.connection.getCheck();
                     let createShadow = false;
                     let isString = false;
-                    if (checks) {
-                        if (checks.indexOf('Number') >= 0) {
-                            createShadow = true;
-                        } else if (checks.indexOf('String') >= 0) {
-                            createShadow = true;
-                            isString = true;
-                        }
-                    } else {
-                        createShadow = true;
-                    }
-                    if (createShadow) {
-                        let shadow: State;
-                        if (isString) {
-                            shadow = { type: 'text', fields: { TEXT: 'Hello' } };
-                        } else {
-                            shadow = { type: 'math_number', fields: { NUM: 1 } };
-                        }
-                        if (blockDefinition) {
-                            let n = 0;
-                            while (blockDefinition[`args${n}`]) {
-                                const arglist = blockDefinition[`args${n}`];
-                                if (arglist) {
-                                    const def = arglist.find(
-                                        (x: NamedField) => x.name == input.name
-                                    );
-                                    if (def) {
-                                        if (def.shadow) {
-                                            shadow = def.shadow as State;
-                                            break;
-                                        }
+                    if (blockDefinition) {
+                        let n = 0;
+                        while (blockDefinition[`args${n}`]) {
+                            const arglist = blockDefinition[`args${n}`];
+                            if (arglist) {
+                                const def = arglist.find((x: NamedField) => x.name == input.name);
+                                if (def) {
+                                    if (def.shadow) {
+                                        shadow = def.shadow as State;
+                                        createShadow = true;
+                                        break;
                                     }
                                 }
-                                n++;
+                            }
+                            n++;
+                        }
+                    }
+                    if (!shadow) {
+                        if (checks) {
+                            if (checks.indexOf('Number') >= 0) {
+                                createShadow = true;
+                            } else if (checks.indexOf('String') >= 0) {
+                                createShadow = true;
+                                isString = true;
+                            }
+                        } else {
+                            createShadow = true;
+                        }
+                    }
+                    if (createShadow) {
+                        if (!shadow) {
+                            if (isString) {
+                                shadow = { type: 'text', fields: { TEXT: 'Hello' } };
+                            } else {
+                                shadow = { type: 'math_number', fields: { NUM: 1 } };
                             }
                         }
                         input.connection.setShadowState(shadow);
