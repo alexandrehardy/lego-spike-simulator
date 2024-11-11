@@ -1254,7 +1254,7 @@ export const blocks = [
                 type: 'field_variable_getter',
                 text: '',
                 name: 'VARIABLE',
-                variableTypes: ['Number', 'String', 'broadcast', 'list'],
+                variableTypes: ['Number'],
                 defaultType: 'Number'
             }
         ],
@@ -1276,7 +1276,7 @@ export const blocks = [
                 shadow: {
                     type: 'event_broadcast_menu',
                     fields: {
-                        field_event_broadcast_menu: 'message1'
+                        BROADCAST_OPTION: 'message1'
                     }
                 }
             }
@@ -1298,7 +1298,7 @@ export const blocks = [
                 shadow: {
                     type: 'event_broadcast_menu',
                     fields: {
-                        field_event_broadcast_menu: 'message1'
+                        BROADCAST_OPTION: 'message1'
                     }
                 }
             }
