@@ -2,13 +2,13 @@ export const blocks = [
     {
         type: 'bargraphmonitor_custom-color',
         message0: '%1',
-        args0: [{ type: '', name: 'field_bargraphmonitor_custom-color' }],
+        args0: [{ type: 'bargraphmonitor_custom-color', name: 'field_bargraphmonitor_custom-color' }],
         output: 'String'
     },
     {
         type: 'displaymonitor_custom-image',
         message0: '%1',
-        args0: [{ type: '', name: 'field_displaymonitor_custom-image' }],
+        args0: [{ type: 'displaymonitor_custom-image', name: 'field_displaymonitor_custom-image' }],
         output: 'String'
     },
     {
@@ -90,10 +90,10 @@ export const blocks = [
                 type: 'field_dropdown',
                 name: 'field_flipperevents_custom-tilted',
                 options: [
-                    ['forward', 'forward'],
-                    ['backward', 'backward'],
-                    ['left', 'left'],
-                    ['right', 'right']
+                    ['forward', '1'],
+                    ['backward', '2'],
+                    ['left', '3'],
+                    ['right', '4']
                 ]
             }
         ],
@@ -146,7 +146,7 @@ export const blocks = [
     {
         type: 'flipperlight_color-matrix-selector',
         message0: '%1',
-        args0: [{ type: '', name: 'field_flipperlight_color-matrix-selector' }],
+        args0: [{ type: 'flipperlight_color-matrix-selector', name: 'field_flipperlight_color-matrix-selector' }],
         output: 'String'
     },
     {
@@ -244,7 +244,7 @@ export const blocks = [
     {
         type: 'flipperlight_matrix-3x3-color-image',
         message0: '%1',
-        args0: [{ type: '', name: 'field_flipperlight_matrix-3x3-color-image' }],
+        args0: [{ type: 'flipperlight_matrix-3x3-color-image', name: 'field_flipperlight_matrix-3x3-color-image' }],
         output: 'String'
     },
     {
@@ -296,12 +296,12 @@ export const blocks = [
         args0: [
             {
                 type: 'field_dropdown',
-                name: 'field_flipperlight_menu_orientation',
+                name: 'orientation',
                 options: [
-                    ['upright', 'upright'],
-                    ['left', 'left'],
-                    ['right', 'right'],
-                    ['upside down', 'upside down']
+                    ['upright', '1'],
+                    ['left', '2'],
+                    ['right', '3'],
+                    ['upside down', '4']
                 ]
             }
         ],
@@ -310,7 +310,7 @@ export const blocks = [
     {
         type: 'flippermoremotor_menu_acceleration',
         message0: '%1',
-        args0: [{ type: '', name: 'field_flippermoremotor_menu_acceleration' }],
+        args0: [{ type: 'flippermoremotor_menu_acceleration', name: 'field_flippermoremotor_menu_acceleration' }],
         output: 'String'
     },
     {
@@ -323,6 +323,7 @@ export const blocks = [
                 columns: 2,
                 maxItems: 6,
                 minItems: 1,
+                separator: '',
                 options: [
                     ['A', 'A'],
                     ['B', 'B'],
@@ -360,7 +361,7 @@ export const blocks = [
     {
         type: 'flippermoremove_menu_acceleration',
         message0: '%1',
-        args0: [{ type: '', name: 'field_flippermoremove_menu_acceleration' }],
+        args0: [{ type: 'flippermoremove_menu_acceleration', name: 'field_flippermoremove_menu_acceleration' }],
         output: 'String'
     },
     {
@@ -424,6 +425,7 @@ export const blocks = [
                 columns: 2,
                 maxItems: 6,
                 minItems: 1,
+                separator: '',
                 options: [
                     ['A', 'A'],
                     ['B', 'B'],
@@ -492,6 +494,7 @@ export const blocks = [
                 maxItems: 2,
                 minItems: 2,
                 sorted: false,
+                separator: '',
                 options: [
                     ['A', 'A'],
                     ['B', 'B'],
@@ -521,13 +524,13 @@ export const blocks = [
     {
         type: 'flippermusic_menu_DRUM',
         message0: '%1',
-        args0: [{ type: '', name: 'field_flippermusic_menu_DRUM' }],
+        args0: [{ type: 'flippermusic_menu_DRUM', name: 'field_flippermusic_menu_DRUM' }],
         output: 'String'
     },
     {
         type: 'flippermusic_menu_INSTRUMENT',
         message0: '%1',
-        args0: [{ type: '', name: 'field_flippermusic_menu_INSTRUMENT' }],
+        args0: [{ type: 'flippermusic_menu_INSTRUMENT', name: 'field_flippermusic_menu_INSTRUMENT' }],
         output: 'String'
     },
     {
@@ -595,10 +598,10 @@ export const blocks = [
                 type: 'field_dropdown',
                 name: 'field_flippersensors_custom-tilted',
                 options: [
-                    ['forward', 'forward'],
-                    ['backward', 'backward'],
-                    ['left', 'left'],
-                    ['right', 'right']
+                    ['forward', '1'],
+                    ['backward', '2'],
+                    ['left', '3'],
+                    ['right', '4']
                 ]
             }
         ],
@@ -677,7 +680,7 @@ export const blocks = [
     {
         type: 'linegraphmonitor_custom-color',
         message0: '%1',
-        args0: [{ type: '', name: 'field_linegraphmonitor_custom-color' }],
+        args0: [{ type: 'linegraphmonitor_custom-color', name: 'field_linegraphmonitor_custom-color' }],
         output: 'String'
     },
     {
@@ -720,19 +723,19 @@ export const blocks = [
     {
         type: 'note',
         message0: '%1',
-        args0: [{ type: '', name: 'field_note' }],
+        args0: [{ type: 'note', name: 'field_note' }],
         output: 'String'
     },
     {
         type: 'procedures_prototype',
         message0: '%1',
-        args0: [{ type: '', name: 'field_procedures_prototype' }],
+        args0: [{ type: 'procedures_prototype', name: 'field_procedures_prototype' }],
         output: 'String'
     },
     {
         type: 'weather_menu_forecastTo',
         message0: '%1',
-        args0: [{ type: '', name: 'field_weather_menu_forecastTo' }],
+        args0: [{ type: 'weather_menu_forecastTo', name: 'field_weather_menu_forecastTo' }],
         output: 'String'
     },
     {
@@ -1459,9 +1462,9 @@ export const blocks = [
                 type: 'field_dropdown',
                 name: 'COMPARATOR',
                 options: [
-                    ['closer than', 'closer than'],
-                    ['exactly at', 'exactly at'],
-                    ['further than', 'further than']
+                    ['closer than', '<'],
+                    ['exactly at', '='],
+                    ['further than', '>']
                 ]
             },
             {
@@ -1500,9 +1503,9 @@ export const blocks = [
                 type: 'field_dropdown',
                 name: 'EVENT',
                 options: [
-                    ['shaken', 'shaken'],
+                    ['shaken', 'shake'],
                     ['tapped', 'tapped'],
-                    ['falling', 'falling']
+                    ['falling', 'freefall']
                 ]
             },
             {
@@ -1834,7 +1837,7 @@ export const blocks = [
                 shadow: {
                     type: 'flipperlight_menu_orientation',
                     fields: {
-                        field_flipperlight_menu_orientation: '1'
+                        orientation: '1'
                     }
                 }
             },
@@ -2286,7 +2289,7 @@ export const blocks = [
                 type: 'field_dropdown',
                 name: 'DIRECTION',
                 options: [
-                    ['shortest path', 'shortest path'],
+                    ['shortest path', 'shortest'],
                     ['clockwise', 'clockwise'],
                     ['counterclockwise', 'counterclockwise']
                 ]
@@ -2973,9 +2976,9 @@ export const blocks = [
                 type: 'field_dropdown',
                 name: 'COMPARATOR',
                 options: [
-                    ['closer than', 'closer than'],
-                    ['exactly at', 'exactly at'],
-                    ['further than', 'further than']
+                    ['closer than', '<'],
+                    ['exactly at', '='],
+                    ['further than', '>']
                 ]
             },
             {
@@ -3064,9 +3067,9 @@ export const blocks = [
                 type: 'field_dropdown',
                 name: 'COMPARATOR',
                 options: [
-                    ['<', 'closer than'],
-                    ['=', 'exactly at'],
-                    ['>', 'further than']
+                    ['<', '<'],
+                    ['=', '='],
+                    ['>', '>']
                 ]
             },
             {
@@ -3130,7 +3133,7 @@ export const blocks = [
                 type: 'field_dropdown',
                 name: 'MOTION',
                 options: [
-                    ['shaken', 'shaken'],
+                    ['shaken', 'shake'],
                     ['tapped', 'tapped'],
                     ['falling', 'falling']
                 ]
@@ -3156,10 +3159,12 @@ export const blocks = [
                 type: 'field_dropdown',
                 name: 'ORIENTATION',
                 options: [
-                    ['upright', 'upright'],
-                    ['left', 'left'],
-                    ['right', 'right'],
-                    ['upside down', 'upside down']
+                    ['front', 'front'],
+                    ['back', 'back'],
+                    ['top', 'top'],
+                    ['bottom', 'bottom'],
+                    ['left side', 'left side'],
+                    ['right side', 'right side']
                 ]
             },
             {
