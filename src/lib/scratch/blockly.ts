@@ -74,7 +74,7 @@ export function getConst(array: any[]): ConstBlock {
             // broadcast
             varName = array[1];
             varId = array[2];
-            blockType = 'Variable';
+            blockType = 'VariableBroadcast';
             break;
         case 12:
             // variable
@@ -90,7 +90,7 @@ export function getConst(array: any[]): ConstBlock {
             varId = array[2];
             x = array[3];
             y = array[4];
-            blockType = 'Variable';
+            blockType = 'VariableList';
             break;
     }
     return {
@@ -159,6 +159,25 @@ export function convertToBlockly(project: Sb3Project): BlocklyState | undefined 
                 variables.push({ id: id, name: varName, type: type });
             }
         }
+        if (target.lists) {
+            for (const key of Object.keys(target.lists)) {
+                const variable = target.lists[key];
+                const id = key;
+                const varName = variable[0];
+                // TODO: Figure out what to do with value
+                // const varValue = variable[1];
+                const type = 'list';
+                variables.push({ id: id, name: varName, type: type });
+            }
+        }
+        if (target.broadcasts) {
+            for (const key of Object.keys(target.broadcasts)) {
+                const variable = target.broadcasts[key];
+                const id = key;
+                const type = 'broadcast';
+                variables.push({ id: id, name: variable, type: type });
+            }
+        }
 
         if (!target.blocks) {
             continue;
@@ -198,6 +217,10 @@ export function convertToBlockly(project: Sb3Project): BlocklyState | undefined 
             } else if (value.type === 'String') {
                 block.fields[key] = value.stringValue;
             } else if (value.type === 'Variable') {
+                block.fields[key] = { id: value.varId };
+            } else if (value.type === 'VariableList') {
+                block.fields[key] = { id: value.varId };
+            } else if (value.type === 'VariableBroadcast') {
                 block.fields[key] = { id: value.varId };
             }
         } else {
@@ -256,6 +279,24 @@ export function convertToBlockly(project: Sb3Project): BlocklyState | undefined 
                         type: 'data_variable',
                         fields: {
                             VARIABLE: { id: value.varId }
+                        }
+                    }
+                };
+            } else if (value.type === 'VariableBroadcast') {
+                block.inputs[key] = {
+                    shadow: {
+                        type: 'event_broadcast_menu',
+                        fields: {
+                            BROADCAST_OPTION: { id: value.varId }
+                        }
+                    }
+                };
+            } else if (value.type === 'VariableList') {
+                block.inputs[key] = {
+                    block: {
+                        type: 'data_listcontents',
+                        fields: {
+                            LIST: { id: value.varId }
                         }
                     }
                 };
