@@ -2,7 +2,9 @@ export const blocks = [
     {
         type: 'bargraphmonitor_custom-color',
         message0: '%1',
-        args0: [{ type: 'bargraphmonitor_custom-color', name: 'field_bargraphmonitor_custom-color' }],
+        args0: [
+            { type: 'bargraphmonitor_custom-color', name: 'field_bargraphmonitor_custom-color' }
+        ],
         output: 'String'
     },
     {
@@ -16,7 +18,7 @@ export const blocks = [
         message0: '%1',
         args0: [
             {
-                type: 'field_variable_getter',
+                type: 'field_variable',
                 name: 'BROADCAST_OPTION',
                 variable: 'message1',
                 variableTypes: ['broadcast'],
@@ -146,7 +148,12 @@ export const blocks = [
     {
         type: 'flipperlight_color-matrix-selector',
         message0: '%1',
-        args0: [{ type: 'flipperlight_color-matrix-selector', name: 'field_flipperlight_color-matrix-selector' }],
+        args0: [
+            {
+                type: 'flipperlight_color-matrix-selector',
+                name: 'field_flipperlight_color-matrix-selector'
+            }
+        ],
         output: 'String'
     },
     {
@@ -244,7 +251,12 @@ export const blocks = [
     {
         type: 'flipperlight_matrix-3x3-color-image',
         message0: '%1',
-        args0: [{ type: 'flipperlight_matrix-3x3-color-image', name: 'field_flipperlight_matrix-3x3-color-image' }],
+        args0: [
+            {
+                type: 'flipperlight_matrix-3x3-color-image',
+                name: 'field_flipperlight_matrix-3x3-color-image'
+            }
+        ],
         output: 'String'
     },
     {
@@ -310,7 +322,12 @@ export const blocks = [
     {
         type: 'flippermoremotor_menu_acceleration',
         message0: '%1',
-        args0: [{ type: 'flippermoremotor_menu_acceleration', name: 'field_flippermoremotor_menu_acceleration' }],
+        args0: [
+            {
+                type: 'flippermoremotor_menu_acceleration',
+                name: 'field_flippermoremotor_menu_acceleration'
+            }
+        ],
         output: 'String'
     },
     {
@@ -361,7 +378,12 @@ export const blocks = [
     {
         type: 'flippermoremove_menu_acceleration',
         message0: '%1',
-        args0: [{ type: 'flippermoremove_menu_acceleration', name: 'field_flippermoremove_menu_acceleration' }],
+        args0: [
+            {
+                type: 'flippermoremove_menu_acceleration',
+                name: 'field_flippermoremove_menu_acceleration'
+            }
+        ],
         output: 'String'
     },
     {
@@ -530,7 +552,9 @@ export const blocks = [
     {
         type: 'flippermusic_menu_INSTRUMENT',
         message0: '%1',
-        args0: [{ type: 'flippermusic_menu_INSTRUMENT', name: 'field_flippermusic_menu_INSTRUMENT' }],
+        args0: [
+            { type: 'flippermusic_menu_INSTRUMENT', name: 'field_flippermusic_menu_INSTRUMENT' }
+        ],
         output: 'String'
     },
     {
@@ -680,7 +704,9 @@ export const blocks = [
     {
         type: 'linegraphmonitor_custom-color',
         message0: '%1',
-        args0: [{ type: 'linegraphmonitor_custom-color', name: 'field_linegraphmonitor_custom-color' }],
+        args0: [
+            { type: 'linegraphmonitor_custom-color', name: 'field_linegraphmonitor_custom-color' }
+        ],
         output: 'String'
     },
     {
@@ -1318,7 +1344,7 @@ export const blocks = [
         message0: 'when I receive %1',
         args0: [
             {
-                type: 'field_variable_getter',
+                type: 'field_variable',
                 name: 'BROADCAST_OPTION',
                 variable: 'message1'
             }

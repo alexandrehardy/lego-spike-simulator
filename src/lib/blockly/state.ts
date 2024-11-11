@@ -9,7 +9,7 @@ export interface BlocklyStateVariableRef {
 }
 
 export interface BlocklyStateShadow {
-    id: string;
+    id?: string;
     type: string;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     fields: Record<string, any>; // string, or number, or variable ref, or shadow
@@ -19,13 +19,17 @@ export interface BlocklyStateNextBlock {
     block: BlocklyStateBlock;
 }
 
+export interface BlockOrShadowState {
+    block?: BlocklyStateBlock;
+    shadow?: BlocklyStateShadow;
+}
+
 export interface BlocklyStateBlock {
-    id: string;
+    id?: string;
     type: string;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     fields: Record<string, any>; // string, or number, or variable ref, or shadow
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    inputs: Record<string, any>; // typically a block or a shadow
+    inputs: Record<string, BlockOrShadowState>; // typically a block or a shadow
     next?: BlocklyStateNextBlock;
     x?: number;
     y?: number;

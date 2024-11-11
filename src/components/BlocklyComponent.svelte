@@ -20,9 +20,12 @@
     import { ZoomToFitControl } from '@blockly/zoom-to-fit';
     import { blocks } from '$lib/blockly/blocks';
     import { toolbox } from '$lib/blockly/toolbox';
+    import { type BlocklyState } from '$lib/blockly/state';
     import { Button } from 'flowbite-svelte';
     import { loadScratchSb3 } from '$lib/scratch/sb3';
-    import { convertToBlockly } from '$lib/scratch/blockly';
+    import { createManifest } from '$lib/scratch/manifest';
+    import { convertToBlockly, convertToScratch } from '$lib/scratch/blockly';
+    import { cat } from '$lib/blockly/audio';
     import JSZip from 'jszip';
     import FileSaver from 'file-saver';
 
@@ -126,10 +129,21 @@
     async function saveState() {
         if (workspace) {
             const state = Blockly.serialization.workspaces.save(workspace);
+            const sb3 = convertToScratch(state as BlocklyState);
             const zip = new JSZip();
-            zip.file('project.json', JSON.stringify(state));
-            const content = await zip.generateAsync({ type: 'blob' });
-            FileSaver.saveAs(content, 'project.zip');
+            zip.file('project.json', JSON.stringify(sb3));
+            zip.file('deadc057000000000000000000000000.svg', '');
+            zip.file('1b8b032b06360a6cf7c31d86bddd144b.wav', cat, { base64: true });
+            const sb3content = await zip.generateAsync({ type: 'blob' });
+            const llsp3Zip = new JSZip();
+            llsp3Zip.file(
+                'manifest.json',
+                JSON.stringify(createManifest(workspace, sb3.extensions))
+            );
+            llsp3Zip.file('scratch.sb3', sb3content);
+            llsp3Zip.file('icon.svg', '');
+            const content = await llsp3Zip.generateAsync({ type: 'blob' });
+            FileSaver.saveAs(content, 'project.llsp3');
         }
     }
 

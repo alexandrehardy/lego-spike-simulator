@@ -1,4 +1,4 @@
-import { type Sb3Project, type Sb3Block } from '$lib/scratch/sb3';
+import { type Sb3Project, type Sb3Block, type Sb3Stage, type Sb3Sprite } from '$lib/scratch/sb3';
 import { blocks as blockDefinitions } from '$lib/blockly/blocks';
 
 import {
@@ -9,7 +9,7 @@ import {
 
 export interface ConstBlock {
     scratchType: number;
-    type: 'Number' | 'String' | 'Variable';
+    type: 'Number' | 'String' | 'Variable' | 'VariableBroadcast' | 'VariableList';
     numberValue?: number;
     stringValue?: string;
     varName?: string;
@@ -25,7 +25,7 @@ export interface BlocklyInterface {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function getConst(array: any[]): ConstBlock {
+export function decodeConst(array: any[]): ConstBlock {
     const type = array[0] as number;
     let numberValue: number | undefined;
     let stringValue: string | undefined;
@@ -33,7 +33,8 @@ export function getConst(array: any[]): ConstBlock {
     let varId: string | undefined;
     let x: number | undefined;
     let y: number | undefined;
-    let blockType: 'Number' | 'String' | 'Variable' = 'String';
+    let blockType: 'Number' | 'String' | 'Variable' | 'VariableBroadcast' | 'VariableList' =
+        'String';
     switch (type) {
         case 4:
             // number
@@ -192,7 +193,7 @@ export function convertToBlockly(project: Sb3Project): BlocklyState | undefined 
                     // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     const array = block as any as any[];
                     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                    const value = getConst(array);
+                    const value = decodeConst(array);
                     // TODO: We will figure out what to do with this later.
                 }
             }
@@ -211,7 +212,7 @@ export function convertToBlockly(project: Sb3Project): BlocklyState | undefined 
             block.fields[key] = { id: id };
         } else if (Array.isArray(id)) {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const value = getConst(id as any[]);
+            const value = decodeConst(id as any[]);
             if (value.type === 'Number') {
                 block.fields[key] = value.numberValue;
             } else if (value.type === 'String') {
@@ -264,7 +265,7 @@ export function convertToBlockly(project: Sb3Project): BlocklyState | undefined 
                 }
             }
         } else if (Array.isArray(id)) {
-            const value = getConst(id);
+            const value = decodeConst(id);
             if (value.type === 'Number') {
                 block.inputs[key] = {
                     shadow: { type: 'math_number', fields: { NUM: value.numberValue } }
@@ -279,7 +280,8 @@ export function convertToBlockly(project: Sb3Project): BlocklyState | undefined 
                         type: 'data_variable',
                         fields: {
                             VARIABLE: { id: value.varId }
-                        }
+                        },
+                        inputs: {}
                     }
                 };
             } else if (value.type === 'VariableBroadcast') {
@@ -297,7 +299,8 @@ export function convertToBlockly(project: Sb3Project): BlocklyState | undefined 
                         type: 'data_listcontents',
                         fields: {
                             LIST: { id: value.varId }
-                        }
+                        },
+                        inputs: {}
                     }
                 };
             }
@@ -320,6 +323,7 @@ export function convertToBlockly(project: Sb3Project): BlocklyState | undefined 
                 if (definition) {
                     if (definition.fields.indexOf(key) < 0) {
                         console.log(`BLOCK: ${block.type}, ${key} is not a field`);
+                        console.log(scratchBlock);
                     }
                 }
                 addField(block, key, field);
@@ -368,4 +372,212 @@ export function convertToBlockly(project: Sb3Project): BlocklyState | undefined 
     const state = { variables: variables, blocks: { languageVersion: 0, blocks: blocks } };
     console.log(state);
     return state;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function encodeConst(value: any, variables: BlocklyStateVariable[]) {
+    if (typeof value === 'number') {
+        return [value, null];
+    } else if (typeof value === 'string') {
+        return [value, null];
+    } else if (typeof value === 'boolean') {
+        return [value, null];
+    } else if (Array.isArray(value)) {
+        return [value, null];
+    } else {
+        // A variable, we need to get the list of
+        // variables to figure out if it is a
+        // broadcast or normal variable
+        const variable = variables.find((x) => value?.id === x?.id);
+        if (variable) {
+            if (variable.type === 'broadcast') {
+                return [1, [11, variable.name, variable.id]];
+            } else if (variable.type === 'list') {
+                return [1, [13, variable.name, variable.id]];
+            } else {
+                return [1, [12, variable.name, variable.id]];
+            }
+        } else {
+            console.log(`Variable not found in encoding: ${value?.id}`);
+            return ['', null];
+        }
+    }
+}
+
+export function convertToScratch(state: BlocklyState): Sb3Project {
+    console.log(state);
+    const linearBlocks: Record<string, Sb3Block> = {};
+    const extensions: string[] = [];
+
+    function recurseBlock(
+        block: BlocklyStateBlock,
+        topLevel: boolean,
+        parent: BlocklyStateBlock | null,
+        shadow: boolean
+    ) {
+        const sb3Block: Sb3Block = {
+            opcode: block.type,
+            next: block.next?.block?.id,
+            parent: parent?.id,
+            inputs: {},
+            fields: {},
+            shadow: shadow,
+            topLevel: topLevel,
+            x: block.x,
+            y: block.y,
+            mutation: undefined
+        };
+        if (block.fields) {
+            for (const key of Object.keys(block.fields)) {
+                const value = block.fields[key];
+                sb3Block.fields[key] = encodeConst(value, state.variables);
+            }
+        }
+        if (block.inputs) {
+            for (const key of Object.keys(block.inputs)) {
+                const value = block.inputs[key];
+                if (value.block) {
+                    recurseBlock(value.block, false, block, false);
+                    sb3Block.inputs[key] = [1, value.block.id];
+                } else if (value.shadow) {
+                    recurseBlock(
+                        {
+                            id: value.shadow.id,
+                            type: value.shadow.type,
+                            fields: value.shadow.fields,
+                            inputs: {}
+                        },
+                        false,
+                        block,
+                        true
+                    );
+                    sb3Block.inputs[key] = [1, value.shadow.id];
+                }
+            }
+        }
+        if (block.next?.block) {
+            recurseBlock(block.next.block, false, block, false);
+        }
+        console.log(sb3Block);
+        linearBlocks[block.id!] = sb3Block;
+    }
+
+    for (const block of state.blocks.blocks) {
+        recurseBlock(block, true, null, false);
+    }
+
+    for (const key of Object.keys(linearBlocks)) {
+        const sblock = linearBlocks[key];
+        if (sblock.opcode.startsWith('flipper')) {
+            const extension = sblock.opcode.split('_')[0];
+            if (extensions.findIndex((x) => x === extension) < 0) {
+                extensions.push(extension);
+            }
+        }
+    }
+
+    const project: Sb3Project = {
+        meta: {
+            // Don't put in the real agent. Spike says it only works on Chrome...
+            agent: 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36',
+            semver: '3.0.0',
+            vm: '0.2.0-prerelease.20200512204241'
+        },
+        monitors: [],
+        extensions: extensions,
+        targets: []
+    };
+
+    const broadcasts: Record<string, string> = {};
+    (state.variables ?? [])
+        .filter((v) => v.type === 'broadcast')
+        .forEach((v) => {
+            broadcasts[v.id] = v.name;
+        });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const lists: Record<string, any[]> = {};
+    (state.variables ?? [])
+        .filter((v) => v.type === 'list')
+        .forEach((v) => {
+            lists[v.id] = [v.name, []];
+        });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const variables: Record<string, any[]> = {};
+    // TODO: We should choose a constant to set the type
+    (state.variables ?? [])
+        .filter((v) => v.type !== 'list' && v.type !== 'broadcast')
+        .forEach((v) => {
+            variables[v.id] = [v.name, 0];
+        });
+    const stage: Sb3Stage = {
+        blocks: {},
+        broadcasts: broadcasts,
+        comments: {},
+        costumes: [
+            {
+                assetId: 'deadc057000000000000000000000000',
+                bitmapResolution: 1,
+                dataFormat: 'svg',
+                md5ext: 'deadc057000000000000000000000000.svg',
+                name: 'backdrop1',
+                rotationCenterX: 47,
+                rotationCenterY: 55
+            }
+        ],
+        currentCostume: 0,
+        isStage: true,
+        lists: {},
+        name: 'Stage',
+        sounds: [],
+        tempo: 60,
+        textToSpeechLanguage: null,
+        variables: {},
+        videoState: 'on',
+        videoTransparency: 50,
+        volume: 0
+    };
+
+    const program: Sb3Sprite = {
+        blocks: linearBlocks,
+        broadcasts: {},
+        comments: {},
+        costumes: [
+            {
+                assetId: 'deadc057000000000000000000000000',
+                bitmapResolution: 1,
+                dataFormat: 'svg',
+                md5ext: 'deadc057000000000000000000000000.svg',
+                name: 'T7Tg7VPJio4kLVAkfc1U',
+                rotationCenterX: 240,
+                rotationCenterY: 180
+            }
+        ],
+        currentCostume: 0,
+        direction: 90,
+        draggable: false,
+        isStage: false,
+        lists: lists,
+        name: 'SpikeWorkspace',
+        rotationStyle: 'all around',
+        size: 100,
+        sounds: [
+            {
+                assetId: '1b8b032b06360a6cf7c31d86bddd144b',
+                dataFormat: 'wav',
+                md5ext: '1b8b032b06360a6cf7c31d86bddd144b.wav',
+                name: 'Cat Meow 1',
+                rate: 44100,
+                sampleCount: 55125
+            }
+        ],
+        variables: variables,
+        visible: true,
+        volume: 100,
+        x: 0,
+        y: 0
+    };
+    project.targets.push(stage);
+    project.targets.push(program);
+    console.log(project);
+    return project;
 }

@@ -67,8 +67,8 @@ export interface Sb3Mutation {
 
 export interface Sb3Block {
     opcode: string;
-    next: string;
-    parent: string;
+    next?: string;
+    parent?: string;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     inputs: Record<string, any[]>; //array: [1=shadow/2=no shadow/3=obscured,id/const array,id?]
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -111,7 +111,7 @@ export interface Sb3Sprite extends Sb3Target {
     y: number;
     size: number;
     direction: number;
-    draggable: number;
+    draggable: boolean;
     rotationStyle: 'all around' | 'left-right' | "don't rotate";
 }
 
