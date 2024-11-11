@@ -30,6 +30,7 @@ export interface FieldGridDropdownConfig extends Blockly.FieldDropdownConfig {
     maxItems?: number;
     minItems?: number;
     sorted?: boolean;
+    separator?: string;
 }
 
 /**
@@ -62,6 +63,8 @@ export class FieldGridDropdown extends Blockly.FieldDropdown {
     private selected: Array<string | ImageProperties> = [];
 
     private sorted = true;
+
+    private separator = ',';
 
     /**
      * Class for an grid dropdown field.
@@ -112,6 +115,10 @@ export class FieldGridDropdown extends Blockly.FieldDropdown {
 
         if (config && config.sorted !== undefined) {
             this.sorted = config.sorted;
+        }
+
+        if (config && config.separator !== undefined) {
+            this.separator = config.separator;
         }
 
         this.selected = this.getOptions(false)
@@ -276,7 +283,7 @@ export class FieldGridDropdown extends Blockly.FieldDropdown {
                     this.setChecked(menuItem, true);
                 }
             }
-            this.setValue(this.selected.join(','));
+            this.setValue(this.selected.join(this.separator));
         }
     }
 
@@ -289,7 +296,7 @@ export class FieldGridDropdown extends Blockly.FieldDropdown {
         if (this.maxItems == 1) {
             isValueValid = options.some((option) => option[1] === newValue);
         } else {
-            const selected = newValue?.split(',') ?? [];
+            const selected = newValue?.split(this.separator) ?? [];
             const itemsValid = selected.map((v) => options.some((option) => option[1] === v));
             isValueValid = itemsValid.every((v) => v);
             if (selected.length > this.maxItems) {
@@ -326,7 +333,7 @@ export class FieldGridDropdown extends Blockly.FieldDropdown {
         if (this.maxItems == 1) {
             return super.getText();
         }
-        return this.selected.join(',');
+        return this.selected.join(this.separator);
     }
 
     override applyColour() {
