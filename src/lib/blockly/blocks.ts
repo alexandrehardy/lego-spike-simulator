@@ -1,11 +1,325 @@
 export const blocks = [
     {
-        type: 'flippermotor_multiple-port-selector',
+        type: 'bargraphmonitor_custom-color',
+        message0: '%1',
+        args0: [{ type: '', name: 'field_bargraphmonitor_custom-color' }],
+        output: 'String'
+    },
+    {
+        type: 'displaymonitor_custom-image',
+        message0: '%1',
+        args0: [{ type: '', name: 'field_displaymonitor_custom-image' }],
+        output: 'String'
+    },
+    {
+        type: 'event_broadcast_menu',
+        message0: '%1',
+        args0: [
+            {
+                type: 'field_variable_getter',
+                name: 'BROADCAST_OPTION',
+                variable: 'message1',
+                variableTypes: ['broadcast'],
+                defaultType: 'broadcast'
+            }
+        ],
+        output: 'broadcast'
+    },
+    {
+        type: 'flipperevents_color-selector',
+        message0: '%1',
+        args0: [
+            {
+                type: 'field_colour',
+                name: 'field_flipperevents_color-selector',
+                colour: '#e700a7',
+                colourOptions: [
+                    '#e700a7',
+                    '#0090f5',
+                    '#77e8ff',
+                    '#00a845',
+                    '#ffe360',
+                    '#ff000c',
+                    '#ffffff',
+                    '#000000',
+                    '#000000ff'
+                ],
+                colourTitles: [
+                    'magenta',
+                    'blue',
+                    'turquoise',
+                    'green',
+                    'yellow',
+                    'red',
+                    'white',
+                    'black',
+                    'none'
+                ],
+                columns: 3
+            }
+        ],
+        output: 'String'
+    },
+    {
+        type: 'flipperevents_color-sensor-selector',
         message0: '%1',
         args0: [
             {
                 type: 'field_grid_dropdown',
-                name: 'PORT',
+                name: 'field_flipperevents_color-sensor-selector',
+                columns: 2,
+                maxItems: 1,
+                minItems: 1,
+                options: [
+                    ['A', 'A'],
+                    ['B', 'B'],
+                    ['C', 'C'],
+                    ['D', 'D'],
+                    ['E', 'E'],
+                    ['F', 'F']
+                ]
+            }
+        ],
+        output: 'String'
+    },
+    {
+        type: 'flipperevents_custom-tilted',
+        message0: '%1',
+        args0: [
+            {
+                type: 'field_dropdown',
+                name: 'field_flipperevents_custom-tilted',
+                options: [
+                    ['forward', 'forward'],
+                    ['backward', 'backward'],
+                    ['left', 'left'],
+                    ['right', 'right']
+                ]
+            }
+        ],
+        output: 'String'
+    },
+    {
+        type: 'flipperevents_distance-sensor-selector',
+        message0: '%1',
+        args0: [
+            {
+                type: 'field_grid_dropdown',
+                name: 'field_flipperevents_distance-sensor-selector',
+                columns: 2,
+                maxItems: 1,
+                minItems: 1,
+                options: [
+                    ['A', 'A'],
+                    ['B', 'B'],
+                    ['C', 'C'],
+                    ['D', 'D'],
+                    ['E', 'E'],
+                    ['F', 'F']
+                ]
+            }
+        ],
+        output: 'String'
+    },
+    {
+        type: 'flipperevents_force-sensor-selector',
+        message0: '%1',
+        args0: [
+            {
+                type: 'field_grid_dropdown',
+                name: 'field_flipperevents_force-sensor-selector',
+                columns: 2,
+                maxItems: 1,
+                minItems: 1,
+                options: [
+                    ['A', 'A'],
+                    ['B', 'B'],
+                    ['C', 'C'],
+                    ['D', 'D'],
+                    ['E', 'E'],
+                    ['F', 'F']
+                ]
+            }
+        ],
+        output: 'String'
+    },
+    {
+        type: 'flipperlight_color-matrix-selector',
+        message0: '%1',
+        args0: [{ type: '', name: 'field_flipperlight_color-matrix-selector' }],
+        output: 'String'
+    },
+    {
+        type: 'flipperlight_color-selector-vertical',
+        message0: '%1',
+        args0: [
+            {
+                type: 'field_colour',
+                name: 'field_flipperlight_color-selector-vertical',
+                colour: '#e700a7',
+                colourOptions: [
+                    '#e700a7',
+                    '#0090f5',
+                    '#77e8ff',
+                    '#00a845',
+                    '#ffe360',
+                    '#ff000c',
+                    '#ffffff',
+                    '#000000',
+                    '#000000ff'
+                ],
+                colourTitles: [
+                    'magenta',
+                    'blue',
+                    'turquoise',
+                    'green',
+                    'yellow',
+                    'red',
+                    'white',
+                    'black',
+                    'none'
+                ],
+                columns: 3
+            }
+        ],
+        output: 'String'
+    },
+    {
+        type: 'flipperlight_custom-icon-direction',
+        message0: '%1',
+        args0: [
+            {
+                type: 'field_dropdown',
+                name: 'field_flipperlight_custom-icon-direction',
+                options: [
+                    ['clockwise', 'clockwise'],
+                    ['counterclockwise', 'counterclockwise']
+                ]
+            }
+        ],
+        output: 'String'
+    },
+    {
+        type: 'flipperlight_distance-sensor-selector',
+        message0: '%1',
+        args0: [
+            {
+                type: 'field_grid_dropdown',
+                name: 'field_flipperlight_distance-sensor-selector',
+                columns: 2,
+                maxItems: 1,
+                minItems: 1,
+                options: [
+                    ['A', 'A'],
+                    ['B', 'B'],
+                    ['C', 'C'],
+                    ['D', 'D'],
+                    ['E', 'E'],
+                    ['F', 'F']
+                ]
+            }
+        ],
+        output: 'String'
+    },
+    {
+        type: 'flipperlight_led-selector',
+        message0: '%1',
+        args0: [
+            {
+                type: 'field_grid_dropdown',
+                name: 'field_flipperlight_led-selector',
+                columns: 2,
+                maxItems: 4,
+                minItems: 0,
+                options: [
+                    ['TL', 'TL'],
+                    ['TR', 'TR'],
+                    ['BL', 'BL'],
+                    ['BR', 'BR']
+                ]
+            }
+        ],
+        output: 'String'
+    },
+    {
+        type: 'flipperlight_matrix-3x3-color-image',
+        message0: '%1',
+        args0: [{ type: '', name: 'field_flipperlight_matrix-3x3-color-image' }],
+        output: 'String'
+    },
+    {
+        type: 'flipperlight_matrix-5x5-brightness-image',
+        message0: '%1',
+        args0: [
+            {
+                type: 'field_bitmap',
+                name: 'field_flipperlight_matrix-5x5-brightness-image',
+                width: 5,
+                height: 5,
+                value: [
+                    [1, 1, 0, 1, 1],
+                    [1, 1, 0, 1, 1],
+                    [0, 0, 0, 0, 0],
+                    [1, 0, 0, 0, 1],
+                    [0, 1, 1, 1, 0]
+                ],
+                buttons: {
+                    randomize: false,
+                    clear: true
+                },
+                fieldHeight: 30
+            }
+        ],
+        output: 'String'
+    },
+    {
+        type: 'flipperlight_matrix-pixel-index',
+        message0: '%1',
+        args0: [
+            {
+                type: 'field_dropdown',
+                name: 'field_flipperlight_matrix-pixel-index',
+                options: [
+                    ['1', '1'],
+                    ['2', '2'],
+                    ['3', '3'],
+                    ['4', '4'],
+                    ['5', '5']
+                ]
+            }
+        ],
+        output: 'String'
+    },
+    {
+        type: 'flipperlight_menu_orientation',
+        message0: '%1',
+        args0: [
+            {
+                type: 'field_dropdown',
+                name: 'field_flipperlight_menu_orientation',
+                options: [
+                    ['upright', 'upright'],
+                    ['left', 'left'],
+                    ['right', 'right'],
+                    ['upside down', 'upside down']
+                ]
+            }
+        ],
+        output: 'String'
+    },
+    {
+        type: 'flippermoremotor_menu_acceleration',
+        message0: '%1',
+        args0: [{ type: '', name: 'field_flippermoremotor_menu_acceleration' }],
+        output: 'String'
+    },
+    {
+        type: 'flippermoremotor_multiple-port-selector',
+        message0: '%1',
+        args0: [
+            {
+                type: 'field_grid_dropdown',
+                name: 'field_flippermoremotor_multiple-port-selector',
                 columns: 2,
                 maxItems: 6,
                 minItems: 1,
@@ -19,8 +333,407 @@ export const blocks = [
                 ]
             }
         ],
-        output: 'String',
-        colour: '#ffb515'
+        output: 'String'
+    },
+    {
+        type: 'flippermoremotor_single-motor-selector',
+        message0: '%1',
+        args0: [
+            {
+                type: 'field_grid_dropdown',
+                name: 'field_flippermoremotor_single-motor-selector',
+                columns: 2,
+                maxItems: 1,
+                minItems: 1,
+                options: [
+                    ['A', 'A'],
+                    ['B', 'B'],
+                    ['C', 'C'],
+                    ['D', 'D'],
+                    ['E', 'E'],
+                    ['F', 'F']
+                ]
+            }
+        ],
+        output: 'String'
+    },
+    {
+        type: 'flippermoremove_menu_acceleration',
+        message0: '%1',
+        args0: [{ type: '', name: 'field_flippermoremove_menu_acceleration' }],
+        output: 'String'
+    },
+    {
+        type: 'flippermoresensors_color-sensor-selector',
+        message0: '%1',
+        args0: [
+            {
+                type: 'field_grid_dropdown',
+                name: 'field_flippermoresensors_color-sensor-selector',
+                columns: 2,
+                maxItems: 1,
+                minItems: 1,
+                options: [
+                    ['A', 'A'],
+                    ['B', 'B'],
+                    ['C', 'C'],
+                    ['D', 'D'],
+                    ['E', 'E'],
+                    ['F', 'F']
+                ]
+            }
+        ],
+        output: 'String'
+    },
+    {
+        type: 'flippermotor_custom-angle',
+        message0: '%1',
+        args0: [
+            {
+                type: 'field_angle',
+                name: 'field_flippermotor_custom-angle',
+                value: '0',
+                mode: 'compass',
+                precision: 1
+            }
+        ],
+        output: 'Number'
+    },
+    {
+        type: 'flippermotor_custom-icon-direction',
+        message0: '%1',
+        args0: [
+            {
+                type: 'field_dropdown',
+                name: 'field_flippermotor_custom-icon-direction',
+                options: [
+                    ['clockwise', 'clockwise'],
+                    ['counterclockwise', 'counterclockwise']
+                ]
+            }
+        ],
+        output: 'String'
+    },
+    {
+        type: 'flippermotor_multiple-port-selector',
+        message0: '%1',
+        args0: [
+            {
+                type: 'field_grid_dropdown',
+                name: 'field_flippermotor_multiple-port-selector',
+                columns: 2,
+                maxItems: 6,
+                minItems: 1,
+                options: [
+                    ['A', 'A'],
+                    ['B', 'B'],
+                    ['C', 'C'],
+                    ['D', 'D'],
+                    ['E', 'E'],
+                    ['F', 'F']
+                ]
+            }
+        ],
+        output: 'String'
+    },
+    {
+        type: 'flippermotor_single-motor-selector',
+        message0: '%1',
+        args0: [
+            {
+                type: 'field_grid_dropdown',
+                name: 'field_flippermotor_single-motor-selector',
+                columns: 2,
+                maxItems: 1,
+                minItems: 1,
+                options: [
+                    ['A', 'A'],
+                    ['B', 'B'],
+                    ['C', 'C'],
+                    ['D', 'D'],
+                    ['E', 'E'],
+                    ['F', 'F']
+                ]
+            }
+        ],
+        output: 'String'
+    },
+    {
+        type: 'flippermove_custom-icon-direction',
+        message0: '%1',
+        args0: [
+            {
+                type: 'field_dropdown',
+                name: 'field_flippermove_custom-icon-direction',
+                options: [
+                    ['forward', 'forward'],
+                    ['backward', 'backward']
+                ]
+            }
+        ],
+        output: 'String'
+    },
+    {
+        type: 'flippermove_custom-set-move-distance-number',
+        message0: '%1',
+        args0: [
+            { type: 'field_number', name: 'field_flippermove_custom-set-move-distance-number' }
+        ],
+        output: 'String'
+    },
+    {
+        type: 'flippermove_movement-port-selector',
+        message0: '%1',
+        args0: [
+            {
+                type: 'field_grid_dropdown',
+                name: 'field_flippermove_movement-port-selector',
+                columns: 2,
+                maxItems: 2,
+                minItems: 2,
+                sorted: false,
+                options: [
+                    ['A', 'A'],
+                    ['B', 'B'],
+                    ['C', 'C'],
+                    ['D', 'D'],
+                    ['E', 'E'],
+                    ['F', 'F']
+                ]
+            }
+        ],
+        output: 'String'
+    },
+    {
+        type: 'flippermove_rotation-wheel',
+        message0: '%1',
+        args0: [
+            {
+                type: 'field_angle',
+                name: 'field_flippermove_rotation-wheel',
+                value: '0',
+                mode: 'steering',
+                precision: 1
+            }
+        ],
+        output: 'Number'
+    },
+    {
+        type: 'flippermusic_menu_DRUM',
+        message0: '%1',
+        args0: [{ type: '', name: 'field_flippermusic_menu_DRUM' }],
+        output: 'String'
+    },
+    {
+        type: 'flippermusic_menu_INSTRUMENT',
+        message0: '%1',
+        args0: [{ type: '', name: 'field_flippermusic_menu_INSTRUMENT' }],
+        output: 'String'
+    },
+    {
+        type: 'flippersensors_color-selector',
+        message0: '%1',
+        args0: [
+            {
+                type: 'field_colour',
+                name: 'field_flippersensors_color-selector',
+                colour: '#e700a7',
+                colourOptions: [
+                    '#e700a7',
+                    '#0090f5',
+                    '#77e8ff',
+                    '#00a845',
+                    '#ffe360',
+                    '#ff000c',
+                    '#ffffff',
+                    '#000000',
+                    '#000000ff'
+                ],
+                colourTitles: [
+                    'magenta',
+                    'blue',
+                    'turquoise',
+                    'green',
+                    'yellow',
+                    'red',
+                    'white',
+                    'black',
+                    'none'
+                ],
+                columns: 3
+            }
+        ],
+        output: 'String'
+    },
+    {
+        type: 'flippersensors_color-sensor-selector',
+        message0: '%1',
+        args0: [
+            {
+                type: 'field_grid_dropdown',
+                name: 'field_flippersensors_color-sensor-selector',
+                columns: 2,
+                maxItems: 1,
+                minItems: 1,
+                options: [
+                    ['A', 'A'],
+                    ['B', 'B'],
+                    ['C', 'C'],
+                    ['D', 'D'],
+                    ['E', 'E'],
+                    ['F', 'F']
+                ]
+            }
+        ],
+        output: 'String'
+    },
+    {
+        type: 'flippersensors_custom-tilted',
+        message0: '%1',
+        args0: [
+            {
+                type: 'field_dropdown',
+                name: 'field_flippersensors_custom-tilted',
+                options: [
+                    ['forward', 'forward'],
+                    ['backward', 'backward'],
+                    ['left', 'left'],
+                    ['right', 'right']
+                ]
+            }
+        ],
+        output: 'String'
+    },
+    {
+        type: 'flippersensors_distance-sensor-selector',
+        message0: '%1',
+        args0: [
+            {
+                type: 'field_grid_dropdown',
+                name: 'field_flippersensors_distance-sensor-selector',
+                columns: 2,
+                maxItems: 1,
+                minItems: 1,
+                options: [
+                    ['A', 'A'],
+                    ['B', 'B'],
+                    ['C', 'C'],
+                    ['D', 'D'],
+                    ['E', 'E'],
+                    ['F', 'F']
+                ]
+            }
+        ],
+        output: 'String'
+    },
+    {
+        type: 'flippersensors_force-sensor-selector',
+        message0: '%1',
+        args0: [
+            {
+                type: 'field_grid_dropdown',
+                name: 'field_flippersensors_force-sensor-selector',
+                columns: 2,
+                maxItems: 1,
+                minItems: 1,
+                options: [
+                    ['A', 'A'],
+                    ['B', 'B'],
+                    ['C', 'C'],
+                    ['D', 'D'],
+                    ['E', 'E'],
+                    ['F', 'F']
+                ]
+            }
+        ],
+        output: 'String'
+    },
+    {
+        type: 'flippersound_custom-piano',
+        message0: '%1',
+        args0: [
+            {
+                type: 'field_number',
+                name: 'field_flippersound_custom-piano',
+                precision: 1,
+                min: 48,
+                max: 108
+            }
+        ],
+        output: 'Number'
+    },
+    {
+        type: 'flippersound_sound-selector',
+        message0: '%1',
+        args0: [
+            {
+                type: 'field_dropdown',
+                name: 'field_flippersound_sound-selector',
+                options: [['Cat Meow 1', '{"name":"Cat Meow 1","location":"device"}']]
+            }
+        ],
+        output: 'String'
+    },
+    {
+        type: 'linegraphmonitor_custom-color',
+        message0: '%1',
+        args0: [{ type: '', name: 'field_linegraphmonitor_custom-color' }],
+        output: 'String'
+    },
+    {
+        type: 'math_integer',
+        message0: '%1',
+        args0: [
+            {
+                type: 'field_number',
+                name: 'NUM',
+                precision: 1
+            }
+        ],
+        output: 'Number'
+    },
+    {
+        type: 'math_positive_number',
+        message0: '%1',
+        args0: [
+            {
+                type: 'field_number',
+                name: 'NUM',
+                min: 1
+            }
+        ],
+        output: 'Number'
+    },
+    {
+        type: 'math_whole_number',
+        message0: '%1',
+        args0: [
+            {
+                type: 'field_number',
+                name: 'NUM',
+                min: 0,
+                precision: 1
+            }
+        ],
+        output: 'Number'
+    },
+    {
+        type: 'note',
+        message0: '%1',
+        args0: [{ type: '', name: 'field_note' }],
+        output: 'String'
+    },
+    {
+        type: 'procedures_prototype',
+        message0: '%1',
+        args0: [{ type: '', name: 'field_procedures_prototype' }],
+        output: 'String'
+    },
+    {
+        type: 'weather_menu_forecastTo',
+        message0: '%1',
+        args0: [{ type: '', name: 'field_weather_menu_forecastTo' }],
+        output: 'String'
     },
     {
         type: 'control_forever',
@@ -112,7 +825,14 @@ export const blocks = [
         args0: [
             {
                 type: 'input_value',
-                name: 'TIMES'
+                name: 'TIMES',
+                check: 'Number',
+                shadow: {
+                    type: 'math_whole_number',
+                    fields: {
+                        NUM: '10'
+                    }
+                }
             }
         ],
         args1: [
@@ -177,7 +897,14 @@ export const blocks = [
         args0: [
             {
                 type: 'input_value',
-                name: 'DURATION'
+                name: 'DURATION',
+                check: 'Number',
+                shadow: {
+                    type: 'math_positive_number',
+                    fields: {
+                        NUM: '1'
+                    }
+                }
             }
         ],
         previousStatement: null,
@@ -206,7 +933,13 @@ export const blocks = [
         args0: [
             {
                 type: 'input_value',
-                name: 'ITEM'
+                name: 'ITEM',
+                shadow: {
+                    type: 'text',
+                    fields: {
+                        TEXT: 'thing'
+                    }
+                }
             },
             {
                 type: 'field_variable_getter',
@@ -215,6 +948,7 @@ export const blocks = [
                 defaultType: 'list'
             }
         ],
+        inputsInline: true,
         previousStatement: null,
         nextStatement: null,
         colour: '#ff9835',
@@ -232,9 +966,17 @@ export const blocks = [
             },
             {
                 type: 'input_value',
-                name: 'VALUE'
+                name: 'VALUE',
+                check: 'Number',
+                shadow: {
+                    type: 'math_number',
+                    fields: {
+                        NUM: '1'
+                    }
+                }
             }
         ],
+        inputsInline: true,
         previousStatement: null,
         nextStatement: null,
         colour: '#ff9835',
@@ -251,6 +993,7 @@ export const blocks = [
                 defaultType: 'list'
             }
         ],
+        inputsInline: true,
         previousStatement: null,
         nextStatement: null,
         colour: '#ff9835',
@@ -262,7 +1005,14 @@ export const blocks = [
         args0: [
             {
                 type: 'input_value',
-                name: 'INDEX'
+                name: 'INDEX',
+                check: 'Number',
+                shadow: {
+                    type: 'math_integer',
+                    fields: {
+                        field_math_integer: '1'
+                    }
+                }
             },
             {
                 type: 'field_variable_getter',
@@ -271,6 +1021,7 @@ export const blocks = [
                 defaultType: 'list'
             }
         ],
+        inputsInline: true,
         previousStatement: null,
         nextStatement: null,
         colour: '#ff9835',
@@ -282,11 +1033,24 @@ export const blocks = [
         args0: [
             {
                 type: 'input_value',
-                name: 'ITEM'
+                name: 'ITEM',
+                shadow: {
+                    type: 'text',
+                    fields: {
+                        TEXT: 'thing'
+                    }
+                }
             },
             {
                 type: 'input_value',
-                name: 'INDEX'
+                name: 'INDEX',
+                check: 'Number',
+                shadow: {
+                    type: 'math_integer',
+                    fields: {
+                        NUM: '1'
+                    }
+                }
             },
             {
                 type: 'field_variable_getter',
@@ -295,6 +1059,7 @@ export const blocks = [
                 defaultType: 'list'
             }
         ],
+        inputsInline: true,
         previousStatement: null,
         nextStatement: null,
         colour: '#ff9835',
@@ -306,7 +1071,13 @@ export const blocks = [
         args0: [
             {
                 type: 'input_value',
-                name: 'ITEM'
+                name: 'ITEM',
+                shadow: {
+                    type: 'text',
+                    fields: {
+                        TEXT: 'thing'
+                    }
+                }
             },
             {
                 type: 'field_variable_getter',
@@ -315,7 +1086,8 @@ export const blocks = [
                 defaultType: 'list'
             }
         ],
-        output: null,
+        inputsInline: true,
+        output: 'Number',
         outputShape: 2,
         colour: '#ff9835',
         extensions: ['shadow_input']
@@ -326,7 +1098,14 @@ export const blocks = [
         args0: [
             {
                 type: 'input_value',
-                name: 'INDEX'
+                name: 'INDEX',
+                check: 'Number',
+                shadow: {
+                    type: 'math_integer',
+                    fields: {
+                        NUM: '1'
+                    }
+                }
             },
             {
                 type: 'field_variable_getter',
@@ -335,6 +1114,7 @@ export const blocks = [
                 defaultType: 'list'
             }
         ],
+        inputsInline: true,
         output: null,
         outputShape: 2,
         colour: '#ff9835',
@@ -351,6 +1131,7 @@ export const blocks = [
                 defaultType: 'list'
             }
         ],
+        inputsInline: true,
         output: 'Number',
         colour: '#ff9835',
         extensions: ['shadow_input']
@@ -367,9 +1148,16 @@ export const blocks = [
             },
             {
                 type: 'input_value',
-                name: 'ITEM'
+                name: 'ITEM',
+                shadow: {
+                    type: 'text',
+                    fields: {
+                        TEXT: 'thing'
+                    }
+                }
             }
         ],
+        inputsInline: true,
         output: 'Boolean',
         colour: '#ff9835',
         extensions: ['shadow_input']
@@ -386,6 +1174,7 @@ export const blocks = [
                 defaultType: 'list'
             }
         ],
+        inputsInline: true,
         checkboxInFlyout: true,
         output: 'list',
         colour: '#ff9835',
@@ -397,7 +1186,14 @@ export const blocks = [
         args0: [
             {
                 type: 'input_value',
-                name: 'INDEX'
+                name: 'INDEX',
+                check: 'Number',
+                shadow: {
+                    type: 'math_integer',
+                    fields: {
+                        NUM: '1'
+                    }
+                }
             },
             {
                 type: 'field_variable_getter',
@@ -407,9 +1203,16 @@ export const blocks = [
             },
             {
                 type: 'input_value',
-                name: 'ITEM'
+                name: 'ITEM',
+                shadow: {
+                    type: 'text',
+                    fields: {
+                        TEXT: 'thing'
+                    }
+                }
             }
         ],
+        inputsInline: true,
         previousStatement: null,
         nextStatement: null,
         colour: '#ff9835',
@@ -427,9 +1230,16 @@ export const blocks = [
             },
             {
                 type: 'input_value',
-                name: 'VALUE'
+                name: 'VALUE',
+                shadow: {
+                    type: 'text',
+                    fields: {
+                        TEXT: '0'
+                    }
+                }
             }
         ],
+        inputsInline: true,
         previousStatement: null,
         nextStatement: null,
         colour: '#ff9835',
@@ -444,10 +1254,11 @@ export const blocks = [
                 type: 'field_variable_getter',
                 text: '',
                 name: 'VARIABLE',
-                variableTypes: ['Number'],
+                variableTypes: ['Number', 'String', 'broadcast', 'list'],
                 defaultType: 'Number'
             }
         ],
+        inputsInline: true,
         checkboxInFlyout: true,
         output: 'Number',
         colour: '#ff9835',
@@ -460,9 +1271,17 @@ export const blocks = [
         args0: [
             {
                 type: 'input_value',
-                name: 'BROADCAST_INPUT'
+                name: 'BROADCAST_INPUT',
+                check: 'broadcast',
+                shadow: {
+                    type: 'event_broadcast_menu',
+                    fields: {
+                        field_event_broadcast_menu: 'message1'
+                    }
+                }
             }
         ],
+        inputsInline: true,
         previousStatement: null,
         nextStatement: null,
         colour: '#f5c402',
@@ -474,9 +1293,17 @@ export const blocks = [
         args0: [
             {
                 type: 'input_value',
-                name: 'BROADCAST_INPUT'
+                name: 'BROADCAST_INPUT',
+                check: 'broadcast',
+                shadow: {
+                    type: 'event_broadcast_menu',
+                    fields: {
+                        field_event_broadcast_menu: 'message1'
+                    }
+                }
             }
         ],
+        inputsInline: true,
         previousStatement: null,
         nextStatement: null,
         colour: '#f5c402',
@@ -493,6 +1320,7 @@ export const blocks = [
                 variable: 'message1'
             }
         ],
+        inputsInline: true,
         colour: '#f5c402',
         nextStatement: null,
         extensions: ['shadow_input']
@@ -512,6 +1340,7 @@ export const blocks = [
                 ]
             }
         ],
+        inputsInline: true,
         colour: '#ffb515',
         tooltip: 'flippercontrol_stop',
         previousStatement: null,
@@ -554,6 +1383,7 @@ export const blocks = [
                 height: 24
             }
         ],
+        inputsInline: true,
         colour: '#f5c402',
         tooltip: 'flipperevents_whenButton',
         nextStatement: null,
@@ -564,47 +1394,24 @@ export const blocks = [
         message0: '%3 %1 when colour is %2',
         args0: [
             {
-                type: 'field_grid_dropdown',
+                type: 'input_value',
+                check: 'String',
                 name: 'PORT',
-                columns: 2,
-                maxItems: 6,
-                minItems: 1,
-                options: [
-                    ['A', 'A'],
-                    ['B', 'B'],
-                    ['C', 'C'],
-                    ['D', 'D'],
-                    ['E', 'E'],
-                    ['F', 'F']
-                ]
+                shadow: {
+                    type: 'flipperevents_color-sensor-selector',
+                    fields: { 'field_flipperevents_color-sensor-selector': 'A' }
+                }
             },
             {
-                type: 'field_colour',
+                type: 'input_value',
+                check: 'String',
                 name: 'OPTION',
-                colour: '#e700a7',
-                colourOptions: [
-                    '#e700a7',
-                    '#0090f5',
-                    '#77e8ff',
-                    '#00a845',
-                    '#ffe360',
-                    '#ff000c',
-                    '#ffffff',
-                    '#000000',
-                    '#000000ff'
-                ],
-                colourTitles: [
-                    'magenta',
-                    'blue',
-                    'turquoise',
-                    'green',
-                    'yellow',
-                    'red',
-                    'white',
-                    'black',
-                    'none'
-                ],
-                columns: 3
+                shadow: {
+                    type: 'flipperevents_color-selector',
+                    fields: {
+                        'field_flipperevents_color-selector': '9'
+                    }
+                }
             },
             {
                 type: 'field_image',
@@ -613,6 +1420,7 @@ export const blocks = [
                 height: 24
             }
         ],
+        inputsInline: true,
         colour: '#f5c402',
         tooltip: 'flipperevents_whenColor',
         nextStatement: null,
@@ -628,6 +1436,7 @@ export const blocks = [
                 check: 'Boolean'
             }
         ],
+        inputsInline: true,
         colour: '#f5c402',
         tooltip: 'flipperevents_whenCondition',
         nextStatement: null,
@@ -638,19 +1447,13 @@ export const blocks = [
         message0: '%5 %1 when %2  %3  %4',
         args0: [
             {
-                type: 'field_grid_dropdown',
+                type: 'input_value',
+                check: 'String',
                 name: 'PORT',
-                columns: 2,
-                maxItems: 6,
-                minItems: 1,
-                options: [
-                    ['A', 'A'],
-                    ['B', 'B'],
-                    ['C', 'C'],
-                    ['D', 'D'],
-                    ['E', 'E'],
-                    ['F', 'F']
-                ]
+                shadow: {
+                    type: 'flipperevents_distance-sensor-selector',
+                    fields: { 'field_flipperevents_distance-sensor-selector': 'A' }
+                }
             },
             {
                 type: 'field_dropdown',
@@ -664,7 +1467,8 @@ export const blocks = [
             {
                 type: 'input_value',
                 name: 'VALUE',
-                value: 36
+                value: 36,
+                check: 'Number'
             },
             {
                 type: 'field_dropdown',
@@ -682,6 +1486,7 @@ export const blocks = [
                 height: 24
             }
         ],
+        inputsInline: true,
         colour: '#f5c402',
         tooltip: 'flipperevents_whenDistance',
         nextStatement: null,
@@ -707,6 +1512,7 @@ export const blocks = [
                 height: 24
             }
         ],
+        inputsInline: true,
         colour: '#f5c402',
         tooltip: 'flipperevents_whenGesture',
         nextStatement: null,
@@ -735,6 +1541,7 @@ export const blocks = [
                 height: 24
             }
         ],
+        inputsInline: true,
         colour: '#f5c402',
         tooltip: 'flipperevents_whenOrientation',
         nextStatement: null,
@@ -745,19 +1552,13 @@ export const blocks = [
         message0: '%3 %1 when %2',
         args0: [
             {
-                type: 'field_grid_dropdown',
+                type: 'input_value',
+                check: 'String',
                 name: 'PORT',
-                columns: 2,
-                maxItems: 6,
-                minItems: 1,
-                options: [
-                    ['A', 'A'],
-                    ['B', 'B'],
-                    ['C', 'C'],
-                    ['D', 'D'],
-                    ['E', 'E'],
-                    ['F', 'F']
-                ]
+                shadow: {
+                    type: 'flipperevents_force-sensor-selector',
+                    fields: { 'field_flipperevents_force-sensor-selector': 'A' }
+                }
             },
             {
                 type: 'field_dropdown',
@@ -776,6 +1577,7 @@ export const blocks = [
                 height: 24
             }
         ],
+        inputsInline: true,
         colour: '#f5c402',
         tooltip: 'flipperevents_whenPressed',
         nextStatement: null,
@@ -792,6 +1594,7 @@ export const blocks = [
                 height: 24
             }
         ],
+        inputsInline: true,
         colour: '#f5c402',
         tooltip: 'flipperevents_whenProgramStarts',
         nextStatement: null,
@@ -802,14 +1605,15 @@ export const blocks = [
         message0: '%2 when tilted %1',
         args0: [
             {
-                type: 'field_dropdown',
+                type: 'input_value',
+                check: 'String',
                 name: 'VALUE',
-                options: [
-                    ['forward', 'forward'],
-                    ['backward', 'backward'],
-                    ['left', 'left'],
-                    ['right', 'right']
-                ]
+                shadow: {
+                    type: 'flipperevents_custom-tilted',
+                    fields: {
+                        'field_flipperevents_custom-tilted': '1'
+                    }
+                }
             },
             {
                 type: 'field_image',
@@ -818,6 +1622,7 @@ export const blocks = [
                 height: 24
             }
         ],
+        inputsInline: true,
         colour: '#f5c402',
         tooltip: 'flipperevents_whenTilted',
         nextStatement: null,
@@ -830,9 +1635,11 @@ export const blocks = [
             {
                 type: 'input_value',
                 name: 'VALUE',
-                value: 36
+                value: 36,
+                check: 'Number'
             }
         ],
+        inputsInline: true,
         colour: '#f5c402',
         tooltip: 'flipperevents_whenTimer',
         nextStatement: null,
@@ -843,32 +1650,15 @@ export const blocks = [
         message0: '%2 set Centre Button Light to %1',
         args0: [
             {
-                type: 'field_colour',
+                type: 'input_value',
+                check: 'String',
                 name: 'COLOR',
-                colour: '#e700a7',
-                colourOptions: [
-                    '#e700a7',
-                    '#0090f5',
-                    '#77e8ff',
-                    '#00a845',
-                    '#ffe360',
-                    '#ff000c',
-                    '#ffffff',
-                    '#000000',
-                    '#000000ff'
-                ],
-                colourTitles: [
-                    'magenta',
-                    'blue',
-                    'turquoise',
-                    'green',
-                    'yellow',
-                    'red',
-                    'white',
-                    'black',
-                    'none'
-                ],
-                columns: 3
+                shadow: {
+                    type: 'flipperlight_color-selector-vertical',
+                    fields: {
+                        'field_flipperlight_color-selector-vertical': '9'
+                    }
+                }
             },
             {
                 type: 'field_image',
@@ -877,6 +1667,7 @@ export const blocks = [
                 height: 24
             }
         ],
+        inputsInline: true,
         colour: '#9b6af6',
         tooltip: 'flipperlight_centerButtonLight',
         previousStatement: null,
@@ -888,22 +1679,16 @@ export const blocks = [
         message0: '%2 turn on %1',
         args0: [
             {
-                type: 'field_bitmap',
+                type: 'input_value',
+                check: 'String',
                 name: 'MATRIX',
-                width: 5,
-                height: 5,
-                value: [
-                    [1, 1, 0, 1, 1],
-                    [1, 1, 0, 1, 1],
-                    [0, 0, 0, 0, 0],
-                    [1, 0, 0, 0, 1],
-                    [0, 1, 1, 1, 0]
-                ],
-                buttons: {
-                    randomize: false,
-                    clear: true
-                },
-                fieldHeight: 30
+                shadow: {
+                    type: 'flipperlight_matrix-5x5-brightness-image',
+                    fields: {
+                        'field_flipperlight_matrix-5x5-brightness-image':
+                            '9909999099000009000909990'
+                    }
+                }
             },
             {
                 type: 'field_image',
@@ -912,6 +1697,7 @@ export const blocks = [
                 height: 24
             }
         ],
+        inputsInline: true,
         colour: '#9b6af6',
         tooltip: 'flipperlight_lightDisplayImageOn',
         previousStatement: null,
@@ -923,27 +1709,28 @@ export const blocks = [
         message0: '%3 turn on %1 for %2 seconds',
         args0: [
             {
-                type: 'field_bitmap',
+                type: 'input_value',
+                check: 'String',
                 name: 'MATRIX',
-                width: 5,
-                height: 5,
-                value: [
-                    [1, 1, 0, 1, 1],
-                    [1, 1, 0, 1, 1],
-                    [0, 0, 0, 0, 0],
-                    [1, 0, 0, 0, 1],
-                    [0, 1, 1, 1, 0]
-                ],
-                buttons: {
-                    randomize: false,
-                    clear: true
-                },
-                fieldHeight: 30
+                shadow: {
+                    type: 'flipperlight_matrix-5x5-brightness-image',
+                    fields: {
+                        'field_flipperlight_matrix-5x5-brightness-image':
+                            '9909999099000009000909990'
+                    }
+                }
             },
             {
                 type: 'input_value',
                 name: 'VALUE',
-                value: 36
+                check: 'Number',
+                value: 36,
+                shadow: {
+                    type: 'math_number',
+                    fields: {
+                        NUM: 2
+                    }
+                }
             },
             {
                 type: 'field_image',
@@ -952,6 +1739,7 @@ export const blocks = [
                 height: 24
             }
         ],
+        inputsInline: true,
         colour: '#9b6af6',
         tooltip: 'flipperlight_lightDisplayImageOnForTime',
         previousStatement: null,
@@ -969,6 +1757,7 @@ export const blocks = [
                 height: 24
             }
         ],
+        inputsInline: true,
         colour: '#9b6af6',
         tooltip: 'flipperlight_lightDisplayOff',
         previousStatement: null,
@@ -980,12 +1769,15 @@ export const blocks = [
         message0: '%2 rotate %1',
         args0: [
             {
-                type: 'field_dropdown',
+                type: 'input_value',
+                check: 'String',
                 name: 'DIRECTION',
-                options: [
-                    ['clockwise', 'clockwise'],
-                    ['counterclockwise', 'counterclockwise']
-                ]
+                shadow: {
+                    type: 'flipperlight_custom-icon-direction',
+                    fields: {
+                        'field_flipperlight_custom-icon-direction': 'clockwise'
+                    }
+                }
             },
             {
                 type: 'field_image',
@@ -994,6 +1786,7 @@ export const blocks = [
                 height: 24
             }
         ],
+        inputsInline: true,
         colour: '#9b6af6',
         tooltip: 'flipperlight_lightDisplayRotate',
         previousStatement: null,
@@ -1007,7 +1800,14 @@ export const blocks = [
             {
                 type: 'input_value',
                 name: 'BRIGHTNESS',
-                value: 2
+                value: 2,
+                check: 'Number',
+                shadow: {
+                    type: 'math_number',
+                    fields: {
+                        NUM: '75'
+                    }
+                }
             },
             {
                 type: 'field_image',
@@ -1016,6 +1816,7 @@ export const blocks = [
                 height: 24
             }
         ],
+        inputsInline: true,
         colour: '#9b6af6',
         tooltip: 'flipperlight_lightDisplaySetBrightness',
         previousStatement: null,
@@ -1027,14 +1828,15 @@ export const blocks = [
         message0: '%2 set orientation to %1',
         args0: [
             {
-                type: 'field_dropdown',
+                type: 'input_value',
+                check: 'String',
                 name: 'ORIENTATION',
-                options: [
-                    ['upright', 'upright'],
-                    ['left', 'left'],
-                    ['right', 'right'],
-                    ['upside down', 'upside down']
-                ]
+                shadow: {
+                    type: 'flipperlight_menu_orientation',
+                    fields: {
+                        field_flipperlight_menu_orientation: '1'
+                    }
+                }
             },
             {
                 type: 'field_image',
@@ -1043,6 +1845,7 @@ export const blocks = [
                 height: 24
             }
         ],
+        inputsInline: true,
         colour: '#9b6af6',
         tooltip: 'flipperlight_lightDisplaySetOrientation',
         previousStatement: null,
@@ -1054,31 +1857,38 @@ export const blocks = [
         message0: '%4 set pixel at %1 , %2 to %3 %%',
         args0: [
             {
-                type: 'field_dropdown',
+                type: 'input_value',
+                check: 'String',
                 name: 'X',
-                options: [
-                    ['1', '1'],
-                    ['2', '2'],
-                    ['3', '3'],
-                    ['4', '4'],
-                    ['5', '5']
-                ]
+                shadow: {
+                    type: 'flipperlight_matrix-pixel-index',
+                    fields: {
+                        'field_flipperlight_matrix-pixel-index': '1'
+                    }
+                }
             },
             {
-                type: 'field_dropdown',
+                type: 'input_value',
+                check: 'String',
                 name: 'Y',
-                options: [
-                    ['1', '1'],
-                    ['2', '2'],
-                    ['3', '3'],
-                    ['4', '4'],
-                    ['5', '5']
-                ]
+                shadow: {
+                    type: 'flipperlight_matrix-pixel-index',
+                    fields: {
+                        'field_flipperlight_matrix-pixel-index': '1'
+                    }
+                }
             },
             {
                 type: 'input_value',
                 name: 'BRIGHTNESS',
-                value: 2
+                value: 2,
+                check: 'Number',
+                shadow: {
+                    type: 'math_number',
+                    fields: {
+                        NUM: '100'
+                    }
+                }
             },
             {
                 type: 'field_image',
@@ -1087,6 +1897,7 @@ export const blocks = [
                 height: 24
             }
         ],
+        inputsInline: true,
         colour: '#9b6af6',
         tooltip: 'flipperlight_lightDisplaySetPixel',
         previousStatement: null,
@@ -1101,7 +1912,13 @@ export const blocks = [
                 type: 'input_value',
                 name: 'TEXT',
                 value: 51,
-                check: ['String']
+                check: ['String'],
+                shadow: {
+                    type: 'text',
+                    fields: {
+                        TEXT: 'Hello'
+                    }
+                }
             },
             {
                 type: 'field_image',
@@ -1110,6 +1927,7 @@ export const blocks = [
                 height: 24
             }
         ],
+        inputsInline: true,
         colour: '#9b6af6',
         tooltip: 'flipperlight_lightDisplayText',
         previousStatement: null,
@@ -1121,32 +1939,24 @@ export const blocks = [
         message0: '%3 %1 light up %2',
         args0: [
             {
-                type: 'field_grid_dropdown',
+                type: 'input_value',
+                check: 'String',
                 name: 'PORT',
-                columns: 2,
-                maxItems: 6,
-                minItems: 1,
-                options: [
-                    ['A', 'A'],
-                    ['B', 'B'],
-                    ['C', 'C'],
-                    ['D', 'D'],
-                    ['E', 'E'],
-                    ['F', 'F']
-                ]
+                shadow: {
+                    type: 'flipperlight_distance-sensor-selector',
+                    fields: { 'field_flipperlight_distance-sensor-selector': 'A' }
+                }
             },
             {
-                type: 'field_grid_dropdown',
+                type: 'input_value',
+                check: 'String',
                 name: 'VALUE',
-                columns: 2,
-                maxItems: 4,
-                minItems: 0,
-                options: [
-                    ['TL', 'TL'],
-                    ['TR', 'TR'],
-                    ['BL', 'BL'],
-                    ['BR', 'BR']
-                ]
+                shadow: {
+                    type: 'flipperlight_led-selector',
+                    fields: {
+                        'field_flipperlight_led-selector': '100 100 100 100'
+                    }
+                }
             },
             {
                 type: 'field_image',
@@ -1155,6 +1965,7 @@ export const blocks = [
                 height: 24
             }
         ],
+        inputsInline: true,
         colour: '#9b6af6',
         tooltip: 'flipperlight_ultrasonicLightUp',
         previousStatement: null,
@@ -1166,19 +1977,13 @@ export const blocks = [
         message0: '%4 %1 go to relative position %2 at %3 %% speed',
         args0: [
             {
-                type: 'field_grid_dropdown',
+                type: 'input_value',
+                check: 'String',
                 name: 'PORT',
-                columns: 2,
-                maxItems: 6,
-                minItems: 1,
-                options: [
-                    ['A', 'A'],
-                    ['B', 'B'],
-                    ['C', 'C'],
-                    ['D', 'D'],
-                    ['E', 'E'],
-                    ['F', 'F']
-                ]
+                shadow: {
+                    type: 'flippermoremotor_multiple-port-selector',
+                    fields: { 'field_flippermoremotor_multiple-port-selector': 'A' }
+                }
             },
             {
                 type: 'field_angle',
@@ -1190,7 +1995,14 @@ export const blocks = [
             {
                 type: 'input_value',
                 name: 'SPEED',
-                value: 29
+                check: 'Number',
+                value: 29,
+                shadow: {
+                    type: 'math_number',
+                    fields: {
+                        NUM: '100'
+                    }
+                }
             },
             {
                 type: 'field_image',
@@ -1199,6 +2011,7 @@ export const blocks = [
                 height: 24
             }
         ],
+        inputsInline: true,
         colour: '#0090f5',
         tooltip: 'flippermoremotor_motorGoToRelativePosition',
         previousStatement: null,
@@ -1210,19 +2023,13 @@ export const blocks = [
         message0: '%3 %1 set acceleration to %2 seconds',
         args0: [
             {
-                type: 'field_grid_dropdown',
+                type: 'input_value',
+                check: 'String',
                 name: 'PORT',
-                columns: 2,
-                maxItems: 6,
-                minItems: 1,
-                options: [
-                    ['A', 'A'],
-                    ['B', 'B'],
-                    ['C', 'C'],
-                    ['D', 'D'],
-                    ['E', 'E'],
-                    ['F', 'F']
-                ]
+                shadow: {
+                    type: 'flippermoremotor_multiple-port-selector',
+                    fields: { 'field_flippermoremotor_multiple-port-selector': 'A' }
+                }
             },
             {
                 type: 'input_value',
@@ -1236,6 +2043,7 @@ export const blocks = [
                 height: 24
             }
         ],
+        inputsInline: true,
         colour: '#0090f5',
         tooltip: 'flippermoremotor_motorSetAcceleration',
         previousStatement: null,
@@ -1247,19 +2055,13 @@ export const blocks = [
         message0: '%3 %1 set motors to %2 at stop',
         args0: [
             {
-                type: 'field_grid_dropdown',
+                type: 'input_value',
+                check: 'String',
                 name: 'PORT',
-                columns: 2,
-                maxItems: 6,
-                minItems: 1,
-                options: [
-                    ['A', 'A'],
-                    ['B', 'B'],
-                    ['C', 'C'],
-                    ['D', 'D'],
-                    ['E', 'E'],
-                    ['F', 'F']
-                ]
+                shadow: {
+                    type: 'flippermoremotor_multiple-port-selector',
+                    fields: { 'field_flippermoremotor_multiple-port-selector': 'A' }
+                }
             },
             {
                 type: 'input_value',
@@ -1273,6 +2075,7 @@ export const blocks = [
                 height: 24
             }
         ],
+        inputsInline: true,
         colour: '#0090f5',
         tooltip: 'flippermoremotor_motorSetStopMethod',
         previousStatement: null,
@@ -1284,24 +2087,24 @@ export const blocks = [
         message0: '%3 %1 start motor at %2 %% power',
         args0: [
             {
-                type: 'field_grid_dropdown',
+                type: 'input_value',
+                check: 'String',
                 name: 'PORT',
-                columns: 2,
-                maxItems: 6,
-                minItems: 1,
-                options: [
-                    ['A', 'A'],
-                    ['B', 'B'],
-                    ['C', 'C'],
-                    ['D', 'D'],
-                    ['E', 'E'],
-                    ['F', 'F']
-                ]
+                shadow: {
+                    type: 'flippermoremotor_multiple-port-selector',
+                    fields: { 'field_flippermoremotor_multiple-port-selector': 'A' }
+                }
             },
             {
                 type: 'input_value',
                 name: 'POWER',
-                value: 27
+                check: 'Number',
+                shadow: {
+                    type: 'math_number',
+                    fields: {
+                        NUM: '100'
+                    }
+                }
             },
             {
                 type: 'field_image',
@@ -1310,6 +2113,7 @@ export const blocks = [
                 height: 24
             }
         ],
+        inputsInline: true,
         colour: '#0090f5',
         tooltip: 'flippermoremotor_motorStartPower',
         previousStatement: null,
@@ -1336,6 +2140,7 @@ export const blocks = [
                 height: 24
             }
         ],
+        inputsInline: true,
         colour: '#34ccf1',
         tooltip: 'flippermoresensors_acceleration',
         output: 'Number',
@@ -1361,6 +2166,7 @@ export const blocks = [
                 height: 24
             }
         ],
+        inputsInline: true,
         colour: '#34ccf1',
         tooltip: 'flippermoresensors_angularVelocity',
         output: 'Number',
@@ -1377,6 +2183,7 @@ export const blocks = [
                 height: 24
             }
         ],
+        inputsInline: true,
         colour: '#34ccf1',
         tooltip: 'flippermoresensors_orientation',
         output: 'Number',
@@ -1387,19 +2194,13 @@ export const blocks = [
         message0: '%3 %1 raw %2',
         args0: [
             {
-                type: 'field_grid_dropdown',
+                type: 'input_value',
+                check: 'String',
                 name: 'PORT',
-                columns: 2,
-                maxItems: 6,
-                minItems: 1,
-                options: [
-                    ['A', 'A'],
-                    ['B', 'B'],
-                    ['C', 'C'],
-                    ['D', 'D'],
-                    ['E', 'E'],
-                    ['F', 'F']
-                ]
+                shadow: {
+                    type: 'flippermoresensors_color-sensor-selector',
+                    fields: { 'field_flippermoresensors_color-sensor-selector': 'A' }
+                }
             },
             {
                 type: 'field_colour',
@@ -1436,6 +2237,7 @@ export const blocks = [
                 height: 24
             }
         ],
+        inputsInline: true,
         colour: '#34ccf1',
         tooltip: 'flippermoresensors_rawColor',
         output: 'Number',
@@ -1446,19 +2248,13 @@ export const blocks = [
         message0: '%2 %1 position',
         args0: [
             {
-                type: 'field_grid_dropdown',
+                type: 'input_value',
+                check: 'String',
                 name: 'PORT',
-                columns: 2,
-                maxItems: 6,
-                minItems: 1,
-                options: [
-                    ['A', 'A'],
-                    ['B', 'B'],
-                    ['C', 'C'],
-                    ['D', 'D'],
-                    ['E', 'E'],
-                    ['F', 'F']
-                ]
+                shadow: {
+                    type: 'flippermotor_single-motor-selector',
+                    fields: { 'field_flippermotor_single-motor-selector': 'A' }
+                }
             },
             {
                 type: 'field_image',
@@ -1467,6 +2263,7 @@ export const blocks = [
                 height: 24
             }
         ],
+        inputsInline: true,
         colour: '#0090f5',
         tooltip: 'flippermotor_absolutePosition',
         output: 'Number',
@@ -1480,7 +2277,10 @@ export const blocks = [
                 type: 'input_value',
                 check: 'String',
                 name: 'PORT',
-                shadow: { type: 'flippermotor_multiple-port-selector', fields: { PORT: 'A' } }
+                shadow: {
+                    type: 'flippermotor_multiple-port-selector',
+                    fields: { 'field_flippermotor_multiple-port-selector': 'A' }
+                }
             },
             {
                 type: 'field_dropdown',
@@ -1492,11 +2292,15 @@ export const blocks = [
                 ]
             },
             {
-                type: 'field_angle',
+                type: 'input_value',
+                check: 'Number',
                 name: 'POSITION',
-                value: '0',
-                mode: 'compass',
-                precision: 1
+                shadow: {
+                    type: 'flippermotor_custom-angle',
+                    fields: {
+                        'field_flippermotor_custom-angle': '0'
+                    }
+                }
             },
             {
                 type: 'field_image',
@@ -1505,6 +2309,7 @@ export const blocks = [
                 height: 24
             }
         ],
+        inputsInline: true,
         colour: '#0090f5',
         tooltip: 'flippermotor_motorGoDirectionToPosition',
         previousStatement: null,
@@ -1516,24 +2321,25 @@ export const blocks = [
         message0: '%3 %1 set speed to %2 %%',
         args0: [
             {
-                type: 'field_grid_dropdown',
+                type: 'input_value',
+                check: 'String',
                 name: 'PORT',
-                columns: 2,
-                maxItems: 6,
-                minItems: 1,
-                options: [
-                    ['A', 'A'],
-                    ['B', 'B'],
-                    ['C', 'C'],
-                    ['D', 'D'],
-                    ['E', 'E'],
-                    ['F', 'F']
-                ]
+                shadow: {
+                    type: 'flippermotor_multiple-port-selector',
+                    fields: { 'field_flippermotor_multiple-port-selector': 'A' }
+                }
             },
             {
                 type: 'input_value',
                 name: 'SPEED',
-                value: 29
+                check: 'Number',
+                value: 29,
+                shadow: {
+                    type: 'math_number',
+                    fields: {
+                        NUM: '75'
+                    }
+                }
             },
             {
                 type: 'field_image',
@@ -1542,6 +2348,7 @@ export const blocks = [
                 height: 24
             }
         ],
+        inputsInline: true,
         colour: '#0090f5',
         tooltip: 'flippermotor_motorSetSpeed',
         previousStatement: null,
@@ -1553,27 +2360,22 @@ export const blocks = [
         message0: '%3 %1 start motor %2',
         args0: [
             {
-                type: 'field_grid_dropdown',
+                type: 'input_value',
+                check: 'String',
                 name: 'PORT',
-                columns: 2,
-                maxItems: 6,
-                minItems: 1,
-                options: [
-                    ['A', 'A'],
-                    ['B', 'B'],
-                    ['C', 'C'],
-                    ['D', 'D'],
-                    ['E', 'E'],
-                    ['F', 'F']
-                ]
+                shadow: {
+                    type: 'flippermotor_multiple-port-selector',
+                    fields: { 'field_flippermotor_multiple-port-selector': 'A' }
+                }
             },
             {
-                type: 'field_dropdown',
+                type: 'input_value',
+                check: 'String',
                 name: 'DIRECTION',
-                options: [
-                    ['clockwise', 'clockwise'],
-                    ['counterclockwise', 'counterclockwise']
-                ]
+                shadow: {
+                    type: 'flippermotor_custom-icon-direction',
+                    fields: { 'field_flippermotor_custom-icon-direction': 'clockwise' }
+                }
             },
             {
                 type: 'field_image',
@@ -1582,6 +2384,7 @@ export const blocks = [
                 height: 24
             }
         ],
+        inputsInline: true,
         colour: '#0090f5',
         tooltip: 'flippermotor_motorStartDirection',
         previousStatement: null,
@@ -1593,19 +2396,13 @@ export const blocks = [
         message0: '%2 %1 stop motor',
         args0: [
             {
-                type: 'field_grid_dropdown',
+                type: 'input_value',
+                check: 'String',
                 name: 'PORT',
-                columns: 2,
-                maxItems: 6,
-                minItems: 1,
-                options: [
-                    ['A', 'A'],
-                    ['B', 'B'],
-                    ['C', 'C'],
-                    ['D', 'D'],
-                    ['E', 'E'],
-                    ['F', 'F']
-                ]
+                shadow: {
+                    type: 'flippermotor_multiple-port-selector',
+                    fields: { 'field_flippermotor_multiple-port-selector': 'A' }
+                }
             },
             {
                 type: 'field_image',
@@ -1614,6 +2411,7 @@ export const blocks = [
                 height: 24
             }
         ],
+        inputsInline: true,
         colour: '#0090f5',
         tooltip: 'flippermotor_motorStop',
         previousStatement: null,
@@ -1625,32 +2423,28 @@ export const blocks = [
         message0: '%5 %1 run %2 for %3  %4',
         args0: [
             {
-                type: 'field_grid_dropdown',
+                type: 'input_value',
+                check: 'String',
                 name: 'PORT',
-                columns: 2,
-                maxItems: 6,
-                minItems: 1,
-                options: [
-                    ['A', 'A'],
-                    ['B', 'B'],
-                    ['C', 'C'],
-                    ['D', 'D'],
-                    ['E', 'E'],
-                    ['F', 'F']
-                ]
+                shadow: {
+                    type: 'flippermotor_multiple-port-selector',
+                    fields: { 'field_flippermotor_multiple-port-selector': 'A' }
+                }
             },
             {
-                type: 'field_dropdown',
+                type: 'input_value',
+                check: 'String',
                 name: 'DIRECTION',
-                options: [
-                    ['clockwise', 'clockwise'],
-                    ['counterclockwise', 'counterclockwise']
-                ]
+                shadow: {
+                    type: 'flippermotor_custom-icon-direction',
+                    fields: { 'field_flippermotor_custom-icon-direction': 'clockwise' }
+                }
             },
             {
                 type: 'input_value',
                 name: 'VALUE',
-                value: 36
+                value: 36,
+                check: 'Number'
             },
             {
                 type: 'field_dropdown',
@@ -1668,6 +2462,7 @@ export const blocks = [
                 height: 24
             }
         ],
+        inputsInline: true,
         colour: '#0090f5',
         tooltip: 'flippermotor_motorTurnForDirection',
         previousStatement: null,
@@ -1679,19 +2474,13 @@ export const blocks = [
         message0: '%2 %1 speed',
         args0: [
             {
-                type: 'field_grid_dropdown',
+                type: 'input_value',
+                check: 'String',
                 name: 'PORT',
-                columns: 2,
-                maxItems: 6,
-                minItems: 1,
-                options: [
-                    ['A', 'A'],
-                    ['B', 'B'],
-                    ['C', 'C'],
-                    ['D', 'D'],
-                    ['E', 'E'],
-                    ['F', 'F']
-                ]
+                shadow: {
+                    type: 'flippermotor_single-motor-selector',
+                    fields: { 'field_flippermotor_single-motor-selector': 'A' }
+                }
             },
             {
                 type: 'field_image',
@@ -1700,6 +2489,7 @@ export const blocks = [
                 height: 24
             }
         ],
+        inputsInline: true,
         colour: '#0090f5',
         tooltip: 'flippermotor_speed',
         output: 'Number',
@@ -1710,17 +2500,25 @@ export const blocks = [
         message0: '%4 move %1 for %2  %3',
         args0: [
             {
-                type: 'field_dropdown',
+                type: 'input_value',
+                check: 'String',
                 name: 'DIRECTION',
-                options: [
-                    ['forward', 'forward'],
-                    ['backward', 'backward']
-                ]
+                shadow: {
+                    type: 'flippermove_custom-icon-direction',
+                    fields: { 'field_flippermove_custom-icon-direction': 'forward' }
+                }
             },
             {
                 type: 'input_value',
                 name: 'VALUE',
-                value: 36
+                value: 36,
+                check: 'Number',
+                shadow: {
+                    type: 'math_number',
+                    fields: {
+                        NUM: '10'
+                    }
+                }
             },
             {
                 type: 'field_dropdown',
@@ -1740,6 +2538,7 @@ export const blocks = [
                 height: 24
             }
         ],
+        inputsInline: true,
         colour: '#ff4ccd',
         tooltip: 'flippermove_move',
         previousStatement: null,
@@ -1753,7 +2552,14 @@ export const blocks = [
             {
                 type: 'input_value',
                 name: 'SPEED',
-                value: 29
+                check: 'Number',
+                value: 29,
+                shadow: {
+                    type: 'math_number',
+                    fields: {
+                        NUM: 50
+                    }
+                }
             },
             {
                 type: 'field_image',
@@ -1762,6 +2568,7 @@ export const blocks = [
                 height: 24
             }
         ],
+        inputsInline: true,
         colour: '#ff4ccd',
         tooltip: 'flippermove_movementSpeed',
         previousStatement: null,
@@ -1774,8 +2581,14 @@ export const blocks = [
         args0: [
             {
                 type: 'input_value',
+                check: 'String',
                 name: 'DISTANCE',
-                value: 60
+                shadow: {
+                    type: 'flippermove_custom-set-move-distance-number',
+                    fields: {
+                        'field_flippermove_custom-set-move-distance-number': '17.5'
+                    }
+                }
             },
             {
                 type: 'field_dropdown',
@@ -1792,6 +2605,7 @@ export const blocks = [
                 height: 24
             }
         ],
+        inputsInline: true,
         colour: '#ff4ccd',
         tooltip: 'flippermove_setDistance',
         previousStatement: null,
@@ -1803,20 +2617,15 @@ export const blocks = [
         message0: '%2 set movement motors to %1',
         args0: [
             {
-                type: 'field_grid_dropdown',
+                type: 'input_value',
+                check: 'String',
                 name: 'PAIR',
-                columns: 2,
-                maxItems: 2,
-                minItems: 2,
-                sorted: false,
-                options: [
-                    ['A', 'A'],
-                    ['B', 'B'],
-                    ['C', 'C'],
-                    ['D', 'D'],
-                    ['E', 'E'],
-                    ['F', 'F']
-                ]
+                shadow: {
+                    type: 'flippermove_movement-port-selector',
+                    fields: {
+                        'field_flippermove_movement-port-selector': 'AB'
+                    }
+                }
             },
             {
                 type: 'field_image',
@@ -1825,6 +2634,7 @@ export const blocks = [
                 height: 24
             }
         ],
+        inputsInline: true,
         colour: '#ff4ccd',
         tooltip: 'flippermove_setMovementPair',
         previousStatement: null,
@@ -1836,12 +2646,13 @@ export const blocks = [
         message0: '%2 start moving %1',
         args0: [
             {
-                type: 'field_dropdown',
+                type: 'input_value',
+                check: 'String',
                 name: 'DIRECTION',
-                options: [
-                    ['forward', 'forward'],
-                    ['backward', 'backward']
-                ]
+                shadow: {
+                    type: 'flippermove_custom-icon-direction',
+                    fields: { 'field_flippermove_custom-icon-direction': 'forward' }
+                }
             },
             {
                 type: 'field_image',
@@ -1850,6 +2661,7 @@ export const blocks = [
                 height: 24
             }
         ],
+        inputsInline: true,
         colour: '#ff4ccd',
         tooltip: 'flippermove_startMove',
         previousStatement: null,
@@ -1861,11 +2673,15 @@ export const blocks = [
         message0: '%2 start moving %1',
         args0: [
             {
-                type: 'field_angle',
+                type: 'input_value',
+                check: 'Number',
                 name: 'STEERING',
-                value: '0',
-                mode: 'steering',
-                precision: 1
+                shadow: {
+                    type: 'flippermove_rotation-wheel',
+                    fields: {
+                        'field_flippermove_rotation-wheel': '30'
+                    }
+                }
             },
             {
                 type: 'field_image',
@@ -1874,6 +2690,7 @@ export const blocks = [
                 height: 24
             }
         ],
+        inputsInline: true,
         colour: '#ff4ccd',
         tooltip: 'flippermove_startSteer',
         previousStatement: null,
@@ -1885,16 +2702,27 @@ export const blocks = [
         message0: '%4 move %1 for %2  %3',
         args0: [
             {
-                type: 'field_angle',
+                type: 'input_value',
+                check: 'Number',
                 name: 'STEERING',
-                value: '0',
-                mode: 'steering',
-                precision: 1
+                shadow: {
+                    type: 'flippermove_rotation-wheel',
+                    fields: {
+                        'field_flippermove_rotation-wheel': '30'
+                    }
+                }
             },
             {
                 type: 'input_value',
                 name: 'VALUE',
-                value: 36
+                value: 36,
+                check: 'Number',
+                shadow: {
+                    type: 'math_number',
+                    fields: {
+                        NUM: '10'
+                    }
+                }
             },
             {
                 type: 'field_dropdown',
@@ -1912,6 +2740,7 @@ export const blocks = [
                 height: 24
             }
         ],
+        inputsInline: true,
         colour: '#ff4ccd',
         tooltip: 'flippermove_steer',
         previousStatement: null,
@@ -1929,6 +2758,7 @@ export const blocks = [
                 height: 24
             }
         ],
+        inputsInline: true,
         colour: '#ff4ccd',
         tooltip: 'flippermove_stopMove',
         previousStatement: null,
@@ -1955,6 +2785,7 @@ export const blocks = [
                 value: 13
             }
         ],
+        inputsInline: true,
         colour: '#00b94d',
         tooltip: 'flipperoperator_isInBetween',
         output: 'Boolean',
@@ -1987,6 +2818,7 @@ export const blocks = [
                 height: 24
             }
         ],
+        inputsInline: true,
         colour: '#3fccf1',
         tooltip: 'flippersensors_buttonIsPressed',
         output: 'Number',
@@ -1997,19 +2829,13 @@ export const blocks = [
         message0: '%2 %1 colour',
         args0: [
             {
-                type: 'field_grid_dropdown',
+                type: 'input_value',
+                check: 'String',
                 name: 'PORT',
-                columns: 2,
-                maxItems: 6,
-                minItems: 1,
-                options: [
-                    ['A', 'A'],
-                    ['B', 'B'],
-                    ['C', 'C'],
-                    ['D', 'D'],
-                    ['E', 'E'],
-                    ['F', 'F']
-                ]
+                shadow: {
+                    type: 'flippersensors_color-sensor-selector',
+                    fields: { 'field_flippersensors_color-sensor-selector': 'A' }
+                }
             },
             {
                 type: 'field_image',
@@ -2018,6 +2844,7 @@ export const blocks = [
                 height: 24
             }
         ],
+        inputsInline: true,
         colour: '#3fccf1',
         tooltip: 'flippersensors_color',
         output: 'Number',
@@ -2028,19 +2855,13 @@ export const blocks = [
         message0: '%3 %1 distance in %2',
         args0: [
             {
-                type: 'field_grid_dropdown',
+                type: 'input_value',
+                check: 'String',
                 name: 'PORT',
-                columns: 2,
-                maxItems: 6,
-                minItems: 1,
-                options: [
-                    ['A', 'A'],
-                    ['B', 'B'],
-                    ['C', 'C'],
-                    ['D', 'D'],
-                    ['E', 'E'],
-                    ['F', 'F']
-                ]
+                shadow: {
+                    type: 'flippersensors_distance-sensor-selector',
+                    fields: { 'field_flippersensors_distance-sensor-selector': 'A' }
+                }
             },
             {
                 type: 'field_dropdown',
@@ -2058,6 +2879,7 @@ export const blocks = [
                 height: 24
             }
         ],
+        inputsInline: true,
         colour: '#3fccf1',
         tooltip: 'flippersensors_distance',
         output: 'Number',
@@ -2068,19 +2890,13 @@ export const blocks = [
         message0: '%3 %1 pressure in %2',
         args0: [
             {
-                type: 'field_grid_dropdown',
+                type: 'input_value',
+                check: 'String',
                 name: 'PORT',
-                columns: 2,
-                maxItems: 6,
-                minItems: 1,
-                options: [
-                    ['A', 'A'],
-                    ['B', 'B'],
-                    ['C', 'C'],
-                    ['D', 'D'],
-                    ['E', 'E'],
-                    ['F', 'F']
-                ]
+                shadow: {
+                    type: 'flippersensors_force-sensor-selector',
+                    fields: { 'field_flippersensors_force-sensor-selector': 'A' }
+                }
             },
             {
                 type: 'field_dropdown',
@@ -2097,6 +2913,7 @@ export const blocks = [
                 height: 24
             }
         ],
+        inputsInline: true,
         colour: '#3fccf1',
         tooltip: 'flippersensors_force',
         output: 'Number',
@@ -2107,47 +2924,24 @@ export const blocks = [
         message0: '%3 %1 is colour %2 ?',
         args0: [
             {
-                type: 'field_grid_dropdown',
+                type: 'input_value',
+                check: 'String',
                 name: 'PORT',
-                columns: 2,
-                maxItems: 6,
-                minItems: 1,
-                options: [
-                    ['A', 'A'],
-                    ['B', 'B'],
-                    ['C', 'C'],
-                    ['D', 'D'],
-                    ['E', 'E'],
-                    ['F', 'F']
-                ]
+                shadow: {
+                    type: 'flippersensors_color-sensor-selector',
+                    fields: { 'field_flippersensors_color-sensor-selector': 'A' }
+                }
             },
             {
-                type: 'field_colour',
+                type: 'input_value',
+                check: 'String',
                 name: 'VALUE',
-                colour: '#e700a7',
-                colourOptions: [
-                    '#e700a7',
-                    '#0090f5',
-                    '#77e8ff',
-                    '#00a845',
-                    '#ffe360',
-                    '#ff000c',
-                    '#ffffff',
-                    '#000000',
-                    '#000000ff'
-                ],
-                colourTitles: [
-                    'magenta',
-                    'blue',
-                    'turquoise',
-                    'green',
-                    'yellow',
-                    'red',
-                    'white',
-                    'black',
-                    'none'
-                ],
-                columns: 3
+                shadow: {
+                    type: 'flippersensors_color-selector',
+                    fields: {
+                        'field_flippersensors_color-selector': '9'
+                    }
+                }
             },
             {
                 type: 'field_image',
@@ -2156,6 +2950,7 @@ export const blocks = [
                 height: 24
             }
         ],
+        inputsInline: true,
         colour: '#3fccf1',
         tooltip: 'flippersensors_isColor',
         output: 'Boolean',
@@ -2166,19 +2961,13 @@ export const blocks = [
         message0: '%5 %1 is %2  %3  %4 ?',
         args0: [
             {
-                type: 'field_grid_dropdown',
+                type: 'input_value',
+                check: 'String',
                 name: 'PORT',
-                columns: 2,
-                maxItems: 6,
-                minItems: 1,
-                options: [
-                    ['A', 'A'],
-                    ['B', 'B'],
-                    ['C', 'C'],
-                    ['D', 'D'],
-                    ['E', 'E'],
-                    ['F', 'F']
-                ]
+                shadow: {
+                    type: 'flippersensors_distance-sensor-selector',
+                    fields: { 'field_flippersensors_distance-sensor-selector': 'A' }
+                }
             },
             {
                 type: 'field_dropdown',
@@ -2192,7 +2981,14 @@ export const blocks = [
             {
                 type: 'input_value',
                 name: 'VALUE',
-                value: 36
+                value: 36,
+                check: 'Number',
+                shadow: {
+                    type: 'math_number',
+                    fields: {
+                        NUM: '15'
+                    }
+                }
             },
             {
                 type: 'field_dropdown',
@@ -2210,6 +3006,7 @@ export const blocks = [
                 height: 24
             }
         ],
+        inputsInline: true,
         colour: '#3fccf1',
         tooltip: 'flippersensors_isDistance',
         output: 'Boolean',
@@ -2220,19 +3017,13 @@ export const blocks = [
         message0: '%3 %1 is %2 ?',
         args0: [
             {
-                type: 'field_grid_dropdown',
+                type: 'input_value',
+                check: 'String',
                 name: 'PORT',
-                columns: 2,
-                maxItems: 6,
-                minItems: 1,
-                options: [
-                    ['A', 'A'],
-                    ['B', 'B'],
-                    ['C', 'C'],
-                    ['D', 'D'],
-                    ['E', 'E'],
-                    ['F', 'F']
-                ]
+                shadow: {
+                    type: 'flippersensors_force-sensor-selector',
+                    fields: { 'field_flippersensors_force-sensor-selector': 'A' }
+                }
             },
             {
                 type: 'field_dropdown',
@@ -2250,6 +3041,7 @@ export const blocks = [
                 height: 24
             }
         ],
+        inputsInline: true,
         colour: '#3fccf1',
         tooltip: 'flippersensors_isPressed',
         output: 'Boolean',
@@ -2260,19 +3052,13 @@ export const blocks = [
         message0: '%4 %1 reflection %2  %3 %% ?',
         args0: [
             {
-                type: 'field_grid_dropdown',
+                type: 'input_value',
+                check: 'String',
                 name: 'PORT',
-                columns: 2,
-                maxItems: 6,
-                minItems: 1,
-                options: [
-                    ['A', 'A'],
-                    ['B', 'B'],
-                    ['C', 'C'],
-                    ['D', 'D'],
-                    ['E', 'E'],
-                    ['F', 'F']
-                ]
+                shadow: {
+                    type: 'flippersensors_color-sensor-selector',
+                    fields: { 'field_flippersensors_color-sensor-selector': 'A' }
+                }
             },
             {
                 type: 'field_dropdown',
@@ -2286,7 +3072,14 @@ export const blocks = [
             {
                 type: 'input_value',
                 name: 'VALUE',
-                value: 36
+                value: 36,
+                check: 'Number',
+                shadow: {
+                    type: 'math_number',
+                    fields: {
+                        NUM: '50'
+                    }
+                }
             },
             {
                 type: 'field_image',
@@ -2295,6 +3088,7 @@ export const blocks = [
                 height: 24
             }
         ],
+        inputsInline: true,
         colour: '#3fccf1',
         tooltip: 'flippersensors_isReflectivity',
         output: 'Boolean',
@@ -2305,14 +3099,15 @@ export const blocks = [
         message0: '%2 Is tilted %1 ?',
         args0: [
             {
-                type: 'field_dropdown',
+                type: 'input_value',
+                check: 'String',
                 name: 'VALUE',
-                options: [
-                    ['forward', 'forward'],
-                    ['backward', 'backward'],
-                    ['left', 'left'],
-                    ['right', 'right']
-                ]
+                shadow: {
+                    type: 'flippersensors_custom-tilted',
+                    fields: {
+                        'field_flippersensors_custom-tilted': '1'
+                    }
+                }
             },
             {
                 type: 'field_image',
@@ -2321,6 +3116,7 @@ export const blocks = [
                 height: 24
             }
         ],
+        inputsInline: true,
         colour: '#3fccf1',
         tooltip: 'flippersensors_isTilted',
         output: 'Boolean',
@@ -2346,6 +3142,7 @@ export const blocks = [
                 height: 24
             }
         ],
+        inputsInline: true,
         colour: '#3fccf1',
         tooltip: 'flippersensors_ismotion',
         output: 'Boolean',
@@ -2372,6 +3169,7 @@ export const blocks = [
                 height: 24
             }
         ],
+        inputsInline: true,
         colour: '#3fccf1',
         tooltip: 'flippersensors_isorientation',
         output: 'Boolean',
@@ -2397,6 +3195,7 @@ export const blocks = [
                 height: 24
             }
         ],
+        inputsInline: true,
         colour: '#3fccf1',
         tooltip: 'flippersensors_orientationAxis',
         output: 'Number',
@@ -2407,19 +3206,13 @@ export const blocks = [
         message0: '%2 %1 reflected light',
         args0: [
             {
-                type: 'field_grid_dropdown',
+                type: 'input_value',
+                check: 'String',
                 name: 'PORT',
-                columns: 2,
-                maxItems: 6,
-                minItems: 1,
-                options: [
-                    ['A', 'A'],
-                    ['B', 'B'],
-                    ['C', 'C'],
-                    ['D', 'D'],
-                    ['E', 'E'],
-                    ['F', 'F']
-                ]
+                shadow: {
+                    type: 'flippersensors_color-sensor-selector',
+                    fields: { 'field_flippersensors_color-sensor-selector': 'A' }
+                }
             },
             {
                 type: 'field_image',
@@ -2428,6 +3221,7 @@ export const blocks = [
                 height: 24
             }
         ],
+        inputsInline: true,
         colour: '#3fccf1',
         tooltip: 'flippersensors_reflectivity',
         output: 'Number',
@@ -2454,6 +3248,7 @@ export const blocks = [
                 height: 24
             }
         ],
+        inputsInline: true,
         colour: '#3fccf1',
         tooltip: 'flippersensors_resetYaw',
         previousStatement: null,
@@ -2475,8 +3270,14 @@ export const blocks = [
         args0: [
             {
                 type: 'input_value',
+                check: 'Number',
                 name: 'NOTE',
-                value: 22
+                shadow: {
+                    type: 'flippersound_custom-piano',
+                    fields: {
+                        'field_flippersound_custom-piano': '60'
+                    }
+                }
             },
             {
                 type: 'field_image',
@@ -2485,6 +3286,7 @@ export const blocks = [
                 height: 24
             }
         ],
+        inputsInline: true,
         colour: '#c061f1',
         tooltip: 'flippersound_beep',
         previousStatement: null,
@@ -2498,12 +3300,26 @@ export const blocks = [
             {
                 type: 'input_value',
                 name: 'NOTE',
-                value: 22
+                value: 22,
+                check: 'Number',
+                shadow: {
+                    type: 'flippersound_custom-piano',
+                    fields: {
+                        'field_flippersound_custom-piano': '60'
+                    }
+                }
             },
             {
                 type: 'input_value',
                 name: 'DURATION',
-                value: 10
+                value: 10,
+                check: 'Number',
+                shadow: {
+                    type: 'math_number',
+                    fields: {
+                        NUM: '0.2'
+                    }
+                }
             },
             {
                 type: 'field_image',
@@ -2512,6 +3328,7 @@ export const blocks = [
                 height: 24
             }
         ],
+        inputsInline: true,
         colour: '#c061f1',
         tooltip: 'flippersound_beepForTime',
         previousStatement: null,
@@ -2523,11 +3340,19 @@ export const blocks = [
         message0: 'start sound %1',
         args0: [
             {
-                type: 'field_dropdown',
+                type: 'input_value',
+                check: 'String',
                 name: 'SOUND',
-                options: [['Cat Meow 1', 'Cat Meow 1']]
+                shadow: {
+                    type: 'flippersound_sound-selector',
+                    fields: {
+                        'field_flippersound_sound-selector':
+                            '{"name":"Cat Meow 1","location":"device"}'
+                    }
+                }
             }
         ],
+        inputsInline: true,
         colour: '#c061f1',
         tooltip: 'flippersound_playSound',
         previousStatement: null,
@@ -2539,11 +3364,19 @@ export const blocks = [
         message0: 'play sound %1 until done',
         args0: [
             {
-                type: 'field_dropdown',
+                type: 'input_value',
+                check: 'String',
                 name: 'SOUND',
-                options: [['Cat Meow 1', 'Cat Meow 1']]
+                shadow: {
+                    type: 'flippersound_sound-selector',
+                    fields: {
+                        'field_flippersound_sound-selector':
+                            '{"name":"Cat Meow 1","location":"device"}'
+                    }
+                }
             }
         ],
+        inputsInline: true,
         colour: '#c061f1',
         tooltip: 'flippersound_playSoundUntilDone',
         previousStatement: null,
@@ -2573,9 +3406,9 @@ export const blocks = [
                 name: 'NUM2'
             }
         ],
+        inputsInline: true,
         output: 'Number',
         colour: '#00b94d',
-        inputsInline: true,
         extensions: ['shadow_input']
     },
     {
@@ -2593,9 +3426,9 @@ export const blocks = [
                 check: 'Boolean'
             }
         ],
+        inputsInline: true,
         output: 'Boolean',
         colour: '#00b94d',
-        inputsInline: true,
         extensions: ['shadow_input']
     },
     {
@@ -2604,16 +3437,30 @@ export const blocks = [
         args0: [
             {
                 type: 'input_value',
-                name: 'STRING1'
+                name: 'STRING1',
+                check: 'String',
+                shadow: {
+                    type: 'text',
+                    fields: {
+                        TEXT: 'apple'
+                    }
+                }
             },
             {
                 type: 'input_value',
-                name: 'STRING2'
+                name: 'STRING2',
+                check: 'String',
+                shadow: {
+                    type: 'text',
+                    fields: {
+                        TEXT: 'a'
+                    }
+                }
             }
         ],
+        inputsInline: true,
         output: 'Boolean',
         colour: '#00b94d',
-        inputsInline: true,
         extensions: ['shadow_input']
     },
     {
@@ -2629,9 +3476,9 @@ export const blocks = [
                 name: 'NUM2'
             }
         ],
+        inputsInline: true,
         output: 'Number',
         colour: '#00b94d',
-        inputsInline: true,
         extensions: ['shadow_input']
     },
     {
@@ -2647,9 +3494,9 @@ export const blocks = [
                 name: 'OPERAND2'
             }
         ],
+        inputsInline: true,
         output: 'Boolean',
         colour: '#00b94d',
-        inputsInline: true,
         extensions: ['shadow_input']
     },
     {
@@ -2665,9 +3512,9 @@ export const blocks = [
                 name: 'OPERAND2'
             }
         ],
+        inputsInline: true,
         output: 'Boolean',
         colour: '#00b94d',
-        inputsInline: true,
         extensions: ['shadow_input']
     },
     {
@@ -2676,16 +3523,29 @@ export const blocks = [
         args0: [
             {
                 type: 'input_value',
-                name: 'STRING1'
+                name: 'STRING1',
+                check: 'String',
+                shadow: {
+                    type: 'text',
+                    fields: {
+                        TEXT: 'apple'
+                    }
+                }
             },
             {
                 type: 'input_value',
-                name: 'STRING2'
+                name: 'STRING2',
+                shadow: {
+                    type: 'text',
+                    fields: {
+                        TEXT: 'banana'
+                    }
+                }
             }
         ],
+        inputsInline: true,
         output: 'String',
         colour: '#00b94d',
-        inputsInline: true,
         extensions: ['shadow_input']
     },
     {
@@ -2694,12 +3554,19 @@ export const blocks = [
         args0: [
             {
                 type: 'input_value',
-                name: 'STRING'
+                name: 'STRING',
+                check: 'String',
+                shadow: {
+                    type: 'text',
+                    fields: {
+                        TEXT: 'apple'
+                    }
+                }
             }
         ],
+        inputsInline: true,
         output: 'String',
         colour: '#00b94d',
-        inputsInline: true,
         extensions: ['shadow_input']
     },
     {
@@ -2708,16 +3575,29 @@ export const blocks = [
         args0: [
             {
                 type: 'input_value',
-                name: 'LETTER'
+                name: 'LETTER',
+                shadow: {
+                    type: 'math_whole_number',
+                    fields: {
+                        NUM: '1'
+                    }
+                }
             },
             {
                 type: 'input_value',
-                name: 'STRING'
+                name: 'STRING',
+                check: 'String',
+                shadow: {
+                    type: 'text',
+                    fields: {
+                        TEXT: 'apple'
+                    }
+                }
             }
         ],
+        inputsInline: true,
         output: 'String',
         colour: '#00b94d',
-        inputsInline: true,
         extensions: ['shadow_input']
     },
     {
@@ -2733,9 +3613,9 @@ export const blocks = [
                 name: 'OPERAND2'
             }
         ],
+        inputsInline: true,
         output: 'Boolean',
         colour: '#00b94d',
-        inputsInline: true,
         extensions: ['shadow_input']
     },
     {
@@ -2767,9 +3647,9 @@ export const blocks = [
                 name: 'NUM'
             }
         ],
+        inputsInline: true,
         output: 'Number',
         colour: '#00b94d',
-        inputsInline: true,
         extensions: ['shadow_input']
     },
     {
@@ -2785,9 +3665,9 @@ export const blocks = [
                 name: 'NUM2'
             }
         ],
+        inputsInline: true,
         output: 'Number',
         colour: '#00b94d',
-        inputsInline: true,
         extensions: ['shadow_input']
     },
     {
@@ -2803,9 +3683,9 @@ export const blocks = [
                 name: 'NUM2'
             }
         ],
+        inputsInline: true,
         output: 'Number',
         colour: '#00b94d',
-        inputsInline: true,
         extensions: ['shadow_input']
     },
     {
@@ -2818,9 +3698,9 @@ export const blocks = [
                 check: 'Boolean'
             }
         ],
+        inputsInline: true,
         output: 'Boolean',
         colour: '#00b94d',
-        inputsInline: true,
         extensions: ['shadow_input']
     },
     {
@@ -2838,9 +3718,9 @@ export const blocks = [
                 check: 'Boolean'
             }
         ],
+        inputsInline: true,
         output: 'Boolean',
         colour: '#00b94d',
-        inputsInline: true,
         extensions: ['shadow_input']
     },
     {
@@ -2856,9 +3736,9 @@ export const blocks = [
                 name: 'TO'
             }
         ],
+        inputsInline: true,
         output: 'Number',
         colour: '#00b94d',
-        inputsInline: true,
         extensions: ['shadow_input']
     },
     {
@@ -2870,9 +3750,9 @@ export const blocks = [
                 name: 'NUM'
             }
         ],
+        inputsInline: true,
         output: 'Number',
         colour: '#00b94d',
-        inputsInline: true,
         extensions: ['shadow_input']
     },
     {
@@ -2888,9 +3768,9 @@ export const blocks = [
                 name: 'NUM2'
             }
         ],
+        inputsInline: true,
         output: 'Number',
         colour: '#00b94d',
-        inputsInline: true,
         extensions: ['shadow_input']
     },
     {
@@ -2926,9 +3806,11 @@ export const blocks = [
             },
             {
                 type: 'input_value',
-                name: 'VALUE'
+                name: 'VALUE',
+                check: 'Number'
             }
         ],
+        inputsInline: true,
         previousStatement: null,
         nextStatement: null,
         colour: '#c061f1',
@@ -2940,9 +3822,11 @@ export const blocks = [
         args0: [
             {
                 type: 'input_value',
-                name: 'VOLUME'
+                name: 'VOLUME',
+                check: 'Number'
             }
         ],
+        inputsInline: true,
         previousStatement: null,
         nextStatement: null,
         colour: '#c061f1',
@@ -2970,9 +3854,11 @@ export const blocks = [
             },
             {
                 type: 'input_value',
-                name: 'VALUE'
+                name: 'VALUE',
+                check: 'Number'
             }
         ],
+        inputsInline: true,
         previousStatement: null,
         nextStatement: null,
         colour: '#c061f1',
@@ -2984,9 +3870,11 @@ export const blocks = [
         args0: [
             {
                 type: 'input_value',
-                name: 'VOLUME'
+                name: 'VOLUME',
+                check: 'Number'
             }
         ],
+        inputsInline: true,
         previousStatement: null,
         nextStatement: null,
         colour: '#c061f1',
