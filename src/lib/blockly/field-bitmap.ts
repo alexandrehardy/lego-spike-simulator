@@ -11,11 +11,21 @@ Blockly.Msg['BUTTON_LABEL_CLEAR'] = 'Clear';
 
 export const DEFAULT_HEIGHT = 5;
 export const DEFAULT_WIDTH = 5;
-const DEFAULT_PIXEL_SIZE = 15;
-const DEFAULT_PIXEL_COLOURS: PixelColours = {
-    filled: '#fff',
-    empty: '#363d80'
-};
+const DEFAULT_PIXEL_SIZE = 30;
+const DEFAULT_PALETTE_HEIGHT = 15;
+const DEFAULT_PALETTE_WIDTH = 40;
+const DEFAULT_PIXEL_COLOURS = [
+    '#571cc1',
+    '#6a35c8',
+    '#7c4ec4',
+    '#8f68d6',
+    '#a281dd',
+    '#b49ae3',
+    '#c7b3ea',
+    '#dacdf1',
+    '#e8e2f4',
+    '#ffffff'
+];
 const DEFAULT_BUTTONS: Buttons = {
     randomize: true,
     clear: true
@@ -35,14 +45,17 @@ export class FieldBitmap extends Blockly.Field<string> {
     private boundEvents: Blockly.browserEvents.Data[] = [];
     /** References to UI elements */
     private editorPixels: HTMLElement[][] | null = null;
+    private paletteEntries: HTMLElement[] | null = null;
     private blockDisplayPixels: SVGElement[][] | null = null;
     /** Stateful variables */
     private mouseIsDown = false;
     private valToPaintWith?: number;
     buttonOptions: Buttons;
     pixelSize: number;
-    pixelColours: { empty: string; filled: string };
+    pixelColours: string[];
     fieldHeight?: number;
+    selectedColour = 9;
+    showPalette = true;
 
     /**
      * Constructor for the bitmap field.
@@ -61,7 +74,11 @@ export class FieldBitmap extends Blockly.Field<string> {
         this.SERIALIZABLE = true;
         this.CURSOR = 'default';
         this.buttonOptions = { ...DEFAULT_BUTTONS, ...config?.buttons };
-        this.pixelColours = { ...DEFAULT_PIXEL_COLOURS, ...config?.colours };
+        this.pixelColours = config?.colours ?? [];
+        this.showPalette = config?.showPalette === undefined ? true : config?.showPalette;
+        while (this.pixelColours.length < DEFAULT_PIXEL_COLOURS.length) {
+            this.pixelColours.push(DEFAULT_PIXEL_COLOURS[this.pixelColours.length]);
+        }
 
         // Configure value, height, and width
         const currentValue = this.getValue();
@@ -184,14 +201,10 @@ export class FieldBitmap extends Blockly.Field<string> {
                 const pixel = this.getPixel(r, c);
 
                 if (this.blockDisplayPixels) {
-                    this.blockDisplayPixels[r][c].style.fill = pixel
-                        ? this.pixelColours.filled
-                        : this.pixelColours.empty;
+                    this.blockDisplayPixels[r][c].style.fill = this.pixelColours[pixel];
                 }
                 if (this.editorPixels) {
-                    this.editorPixels[r][c].style.background = pixel
-                        ? this.pixelColours.filled
-                        : this.pixelColours.empty;
+                    this.editorPixels[r][c].style.background = this.pixelColours[pixel];
                 }
             });
         }
@@ -243,8 +256,10 @@ export class FieldBitmap extends Blockly.Field<string> {
         if (this.buttonOptions.randomize || this.buttonOptions.clear) {
             dropdownEditor.classList.add('has-buttons');
         }
+        const layout = this.createElementWithClassname('div', 'layout');
+        dropdownEditor.appendChild(layout);
         const pixelContainer = this.createElementWithClassname('div', 'pixelContainer');
-        dropdownEditor.appendChild(pixelContainer);
+        layout.appendChild(pixelContainer);
 
         // This prevents the normal max-height from adding a scroll bar for large images.
         Blockly.DropDownDiv.getContentDiv().classList.add('contains-bitmap-editor');
@@ -266,8 +281,8 @@ export class FieldBitmap extends Blockly.Field<string> {
                 rowDiv.appendChild(button);
 
                 // Load the current pixel colour
-                const isOn = this.getPixel(r, c);
-                button.style.background = isOn ? this.pixelColours.filled : this.pixelColours.empty;
+                const brightness = this.getPixel(r, c);
+                button.style.background = this.pixelColours[brightness];
 
                 // Handle clicking a pixel
                 this.bindEvent(button, 'mousedown', () => {
@@ -281,6 +296,27 @@ export class FieldBitmap extends Blockly.Field<string> {
                 });
             }
             pixelContainer.appendChild(rowDiv);
+        }
+
+        if (this.showPalette) {
+            this.paletteEntries = [];
+            // Add palette
+            const paletteContainer = this.createElementWithClassname('div', 'palette');
+            for (let i = 0; i < this.pixelColours.length; i++) {
+                const entry = this.createElementWithClassname('div', 'paletteEntry');
+                this.paletteEntries.push(entry);
+            }
+            for (let i = this.pixelColours.length - 1; i >= 0; i--) {
+                const entry = this.paletteEntries[i];
+                entry.style.background = this.pixelColours[i];
+                // Handle clicking a pixel
+                this.bindEvent(entry, 'mousedown', () => {
+                    this.onMouseDownInPalette(i);
+                    return true;
+                });
+                paletteContainer.appendChild(entry);
+            }
+            layout.appendChild(paletteContainer);
         }
 
         // Add control buttons below the pixel grid
@@ -303,9 +339,7 @@ export class FieldBitmap extends Blockly.Field<string> {
             this.forAllCells((r, c) => {
                 const pixel = this.getPixel(r, c);
                 if (this.editorPixels) {
-                    this.editorPixels[r][c].style.background = pixel
-                        ? this.pixelColours.filled
-                        : this.pixelColours.empty;
+                    this.editorPixels[r][c].style.background = this.pixelColours[pixel];
                 }
             });
         }
@@ -331,7 +365,7 @@ export class FieldBitmap extends Blockly.Field<string> {
                         y: r * this.pixelSize,
                         width: this.pixelSize,
                         height: this.pixelSize,
-                        fill: this.pixelColours.empty,
+                        fill: this.pixelColours[0],
                         stroke: '#000',
                         fill_opacity: 1
                     },
@@ -421,6 +455,23 @@ export class FieldBitmap extends Blockly.Field<string> {
     }
 
     /**
+     * Called when a mousedown event occurs within the bounds of a palette entry.
+     *
+     * @param index Index of palette entry.
+     */
+    private onMouseDownInPalette(index: number) {
+        this.selectedColour = index;
+        if (this.paletteEntries) {
+            for (let i = 0; i < this.paletteEntries.length; i++) {
+                this.paletteEntries[i].classList.remove('paletteEntrySelected');
+                this.paletteEntries[i].classList.add('paletteEntry');
+            }
+            this.paletteEntries[index].classList.remove('paletteEntry');
+            this.paletteEntries[index].classList.add('paletteEntrySelected');
+        }
+    }
+
+    /**
      * Called when a mousedown event occurs within the bounds of a pixel.
      *
      * @param r Row number of grid.
@@ -428,7 +479,8 @@ export class FieldBitmap extends Blockly.Field<string> {
      */
     private onMouseDownInPixel(r: number, c: number) {
         // Toggle that pixel to the opposite of its value
-        const newPixelValue = 9 - this.getPixel(r, c);
+        const colour = this.getPixel(r, c);
+        const newPixelValue = colour == this.selectedColour ? 0 : this.selectedColour;
         this.setPixel(r, c, newPixelValue);
         this.mouseIsDown = true;
         this.valToPaintWith = newPixelValue;
@@ -564,10 +616,6 @@ interface Buttons {
     readonly randomize: boolean;
     readonly clear: boolean;
 }
-interface PixelColours {
-    readonly empty: string;
-    readonly filled: string;
-}
 
 export interface FieldBitmapFromJsonConfig extends Blockly.FieldConfig {
     value?: string;
@@ -575,7 +623,8 @@ export interface FieldBitmapFromJsonConfig extends Blockly.FieldConfig {
     height?: number;
     buttons?: Buttons;
     fieldHeight?: number;
-    colours?: PixelColours;
+    colours?: string[];
+    showPalette?: boolean;
 }
 
 if (window) {
@@ -611,6 +660,27 @@ if (window) {
 }
 .pixelDisplay {
   white-space:pre-wrap;
+}
+.layout {
+    display: flex;
+    flex-direction: row;
+    gap: 2px;
+}
+.palette {
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+    margin: 20px;
+}
+.paletteEntry {
+    width: ${DEFAULT_PALETTE_WIDTH}px;
+    height: ${DEFAULT_PALETTE_HEIGHT}px;
+    border: 2px solid #000;
+}
+.paletteEntrySelected {
+    width: ${DEFAULT_PALETTE_WIDTH}px;
+    height: ${DEFAULT_PALETTE_HEIGHT}px;
+    border: 2px solid #dfff00;
 }
 .controlButton {
   margin: 5px 0;
