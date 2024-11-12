@@ -24,8 +24,8 @@ const DEFAULT_BUTTONS: Buttons = {
  * Field for inputting a small bitmap image.
  * Includes a grid of clickable pixels that's exported as a bitmap.
  */
-export class FieldBitmap extends Blockly.Field<number[][]> {
-    private initialValue: number[][] | null = null;
+export class FieldBitmap extends Blockly.Field<string> {
+    private initialValue: string | null = null;
     private imgHeight: number;
     private imgWidth: number;
     /**
@@ -52,8 +52,8 @@ export class FieldBitmap extends Blockly.Field<number[][]> {
      * @param config Config A map of options used to configure the field.
      */
     constructor(
-        value: number[][] | typeof Blockly.Field.SKIP_SETUP,
-        validator?: Blockly.FieldValidator<number[][]>,
+        value: string | typeof Blockly.Field.SKIP_SETUP,
+        validator?: Blockly.FieldValidator<string>,
         config?: FieldBitmapFromJsonConfig
     ) {
         super(value, validator, config);
@@ -65,15 +65,12 @@ export class FieldBitmap extends Blockly.Field<number[][]> {
 
         // Configure value, height, and width
         const currentValue = this.getValue();
-        if (currentValue !== null) {
-            this.imgHeight = currentValue.length;
-            this.imgWidth = currentValue[0].length || 0;
-        } else {
-            this.imgHeight = config?.height ?? DEFAULT_HEIGHT;
-            this.imgWidth = config?.width ?? DEFAULT_WIDTH;
+        if (currentValue === null) {
             // Set a default empty value
-            this.setValue(this.getEmptyArray());
+            this.setValue(this.getEmptyBitmap());
         }
+        this.imgHeight = config?.height ?? DEFAULT_HEIGHT;
+        this.imgWidth = config?.width ?? DEFAULT_WIDTH;
         this.fieldHeight = config?.fieldHeight;
         if (this.fieldHeight) {
             this.pixelSize = this.fieldHeight / this.imgHeight;
@@ -117,40 +114,26 @@ export class FieldBitmap extends Blockly.Field<number[][]> {
      * @param newValue The new value to be tested.
      * @returns The new value if it's valid, or null.
      */
-    protected override doClassValidation_(newValue: number[][]): number[][] | null | undefined;
-    protected override doClassValidation_(newValue?: number[][]): number[][] | null;
-    protected override doClassValidation_(newValue?: number[][]): number[][] | null | undefined {
+    protected override doClassValidation_(newValue: string): string | null | undefined;
+    protected override doClassValidation_(newValue?: string): string | null;
+    protected override doClassValidation_(newValue?: string): string | null | undefined {
         if (!newValue) {
             return null;
         }
-        // Check if the new value is an array
-        if (!Array.isArray(newValue)) {
-            return null;
-        }
-        const newHeight = newValue.length;
-        // The empty list is not an acceptable bitmap
-        if (newHeight == 0) {
+
+        if (typeof newValue !== 'string') {
             return null;
         }
 
-        // Check that the width matches the existing width of the image if it
-        // already has a value.
-        const newWidth = newValue[0].length;
-        for (const row of newValue) {
-            if (!Array.isArray(row)) {
-                return null;
-            }
-            if (row.length !== newWidth) {
-                return null;
-            }
+        if (newValue.length !== this.imgHeight * this.imgWidth) {
+            return null;
         }
 
-        // Check if all contents of the arrays are either 0 or 1
-        for (const row of newValue) {
-            for (const cell of row) {
-                if (cell !== 0 && cell !== 1) {
-                    return null;
-                }
+        // Check if all contents of the string are 0 to 9
+        for (let i = 0; i < newValue.length; i++) {
+            const char = newValue.charAt(i);
+            if (!('0' <= char && char <= '9')) {
+                return null;
             }
         }
         return newValue;
@@ -161,11 +144,9 @@ export class FieldBitmap extends Blockly.Field<number[][]> {
      *
      * @param newValue The value that's about to be set.
      */
-    protected override doValueUpdate_(newValue: number[][]) {
+    protected override doValueUpdate_(newValue: string) {
         super.doValueUpdate_(newValue);
         if (newValue) {
-            this.imgHeight = newValue.length;
-            this.imgWidth = newValue[0] ? newValue[0].length : 0;
             // If the field height is static, adjust the pixel size to fit.
             if (this.fieldHeight) {
                 this.pixelSize = this.fieldHeight / this.imgHeight;
@@ -429,12 +410,11 @@ export class FieldBitmap extends Blockly.Field<number[][]> {
      *
      * @returns The new value.
      */
-    private getEmptyArray(): number[][] {
-        const newVal: number[][] = [];
+    private getEmptyBitmap(): string {
+        let newVal: string = '';
         for (let r = 0; r < this.imgHeight; r++) {
-            newVal.push([]);
             for (let c = 0; c < this.imgWidth; c++) {
-                newVal[r].push(0);
+                newVal = newVal + '0';
             }
         }
         return newVal;
@@ -448,7 +428,7 @@ export class FieldBitmap extends Blockly.Field<number[][]> {
      */
     private onMouseDownInPixel(r: number, c: number) {
         // Toggle that pixel to the opposite of its value
-        const newPixelValue = 1 - this.getPixel(r, c);
+        const newPixelValue = 9 - this.getPixel(r, c);
         this.setPixel(r, c, newPixelValue);
         this.mouseIsDown = true;
         this.valToPaintWith = newPixelValue;
@@ -492,7 +472,7 @@ export class FieldBitmap extends Blockly.Field<number[][]> {
      * Sets all the pixels to 0.
      */
     private clearPixels() {
-        const cleared = this.getEmptyArray();
+        const cleared = this.getEmptyBitmap();
         this.fireIntermediateChangeEvent(cleared);
         this.setValue(cleared, false);
     }
@@ -505,10 +485,15 @@ export class FieldBitmap extends Blockly.Field<number[][]> {
      * @param newValue Value of the pixel.
      */
     private setPixel(r: number, c: number, newValue: number) {
-        const newGrid = JSON.parse(JSON.stringify(this.getValue()));
-        newGrid[r][c] = newValue;
-        this.fireIntermediateChangeEvent(newGrid);
-        this.setValue(newGrid, false);
+        let oldValue = this.getValue();
+        if (!oldValue) {
+            oldValue = this.getEmptyBitmap();
+        }
+        const grid = oldValue.split('');
+        grid[r * this.imgHeight + c] = newValue.toString();
+        const newString = grid.join('');
+        this.fireIntermediateChangeEvent(newString);
+        this.setValue(newString, false);
     }
 
     private getPixel(row: number, column: number): number {
@@ -517,7 +502,8 @@ export class FieldBitmap extends Blockly.Field<number[][]> {
             throw new Error('Attempted to retrieve a pixel value when no value is set');
         }
 
-        return value[row][column];
+        const char = value.charAt(row * this.imgHeight + column);
+        return +char;
     }
 
     /**
@@ -560,7 +546,7 @@ export class FieldBitmap extends Blockly.Field<number[][]> {
         );
     }
 
-    private fireIntermediateChangeEvent(newValue: number[][]) {
+    private fireIntermediateChangeEvent(newValue: string) {
         if (this.getSourceBlock()) {
             Blockly.Events.fire(
                 new (Blockly.Events.get(Blockly.Events.BLOCK_FIELD_INTERMEDIATE_CHANGE))(
@@ -584,7 +570,7 @@ interface PixelColours {
 }
 
 export interface FieldBitmapFromJsonConfig extends Blockly.FieldConfig {
-    value?: number[][];
+    value?: string;
     width?: number;
     height?: number;
     buttons?: Buttons;

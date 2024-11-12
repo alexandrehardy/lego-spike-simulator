@@ -268,13 +268,7 @@ export const blocks = [
                 name: 'field_flipperlight_matrix-5x5-brightness-image',
                 width: 5,
                 height: 5,
-                value: [
-                    [1, 1, 0, 1, 1],
-                    [1, 1, 0, 1, 1],
-                    [0, 0, 0, 0, 0],
-                    [1, 0, 0, 0, 1],
-                    [0, 1, 1, 1, 0]
-                ],
+                value: '9909999099000009000909990',
                 buttons: {
                     randomize: false,
                     clear: true
