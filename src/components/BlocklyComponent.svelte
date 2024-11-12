@@ -157,7 +157,7 @@
     <input type="file" id="load_project" class="hidden" accept=".llsp3" on:change={loadState} />
 {/key}
 <div class="relative w-full h-full flex flex-col overflow-hidden">
-    <div class="flex flex-row bg-gray-100 gap-2 p-2">
+    <div class="flex flex-row bg-gray-100 gap-2 p-2 items-center">
         <Button color="light" class="!p-2" on:click={askForFile}>
             <img alt="open" width="32" height="32" src="icons/FolderMedium.svg" />
         </Button>
@@ -167,6 +167,10 @@
         <Button color="light" class="!p-2" on:click={runRobot}>
             <img alt="play" width="32" height="32" src="icons/GenericPlayIcon.svg" />
         </Button>
+        <div class="flex-1" />
+        <a href="https://developers.google.com/blockly" target="_blank"
+            ><img class="w-32" src="icons/blockly.svg" /></a
+        >
     </div>
     <div class="flex-1 w-full overflow-hidden">
         <div id="blocklyDiv" />
