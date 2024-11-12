@@ -5,8 +5,8 @@ export const theme = Blockly.Theme.defineTheme('spike', {
     name: 'spike',
     startHats: true,
     blockStyles: {
-       procedure_blocks: {
-            'hat': 'none'
+        procedure_blocks: {
+            hat: 'none'
         }
     }
 });

@@ -168,9 +168,9 @@
             <img alt="play" width="32" height="32" src="icons/GenericPlayIcon.svg" />
         </Button>
         <div class="flex-1" />
-        <a href="https://developers.google.com/blockly" target="_blank"
-            ><img class="w-32" src="icons/blockly.svg" /></a
-        >
+        <a href="https://developers.google.com/blockly" target="_blank">
+            <img class="w-32" src="icons/blockly.svg" alt="blockly" />
+        </a>
     </div>
     <div class="flex-1 w-full overflow-hidden">
         <div id="blocklyDiv" />
