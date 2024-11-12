@@ -1,8 +1,7 @@
 export const procedureBlocks = [
   {
     type: 'procedures_defnoreturn',
-    message0: '%{BKY_PROCEDURES_DEFNORETURN_TITLE} %1 %2 %3',
-    message1: '%{BKY_PROCEDURES_DEFNORETURN_DO} %1',
+    message0: 'define %1 %2 %3',
     args0: [
       {
         type: 'field_input',
@@ -20,12 +19,6 @@ export const procedureBlocks = [
         name: 'TOP',
       },
     ],
-    args1: [
-      {
-        type: 'input_statement',
-        name: 'STACK',
-      },
-    ],
     style: 'procedure_blocks',
     helpUrl: '%{BKY_PROCEDURES_DEFNORETURN_HELPURL}',
     tooltip: '%{BKY_PROCEDURES_DEFNORETURN_TOOLTIP}',
@@ -37,10 +30,12 @@ export const procedureBlocks = [
       'procedure_def_onchange_mixin',
       'procedure_def_validator_helper',
       'procedure_defnoreturn_get_caller_block_mixin',
-      'procedure_defnoreturn_set_comment_helper',
+      //'procedure_defnoreturn_set_comment_helper',
       'procedure_def_set_no_return_helper',
     ],
-    mutator: 'procedure_def_mutator',
+    nextStatement: null,
+    hat: false,
+    //mutator: 'procedure_def_mutator',
   },
   {
     type: 'procedures_callnoreturn',

@@ -9,6 +9,8 @@
     import '$lib/blockly/field_variable_getter';
     import '$lib/blockly/field-bitmap';
     import '$lib/blockly/field-grid-dropdown';
+    import { procedureBlocks } from '$lib/blockly/procedure_blocks';
+    import * as procedureFlyout from '$lib/blockly/procedure_flyout';
     import * as variableFlyout from '$lib/blockly/variable_flyout';
     import * as fieldAngle from '$lib/blockly/field_angle';
     import * as shareableProcedures from '@blockly/block-shareable-procedures';
@@ -37,7 +39,7 @@
         fieldAngle.registerFieldAngle();
         colourPkg.registerFieldColour();
         shareableProcedures.unregisterProcedureBlocks();
-        Blockly.common.defineBlocks(shareableProcedures.blocks);
+        Blockly.common.defineBlocksWithJsonArray(procedureBlocks);
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         Blockly.setLocale(En as any as Record<string, string>);
         registerInputShadowExtension(Blockly);
@@ -69,6 +71,7 @@
             toolbox: toolbox
         });
         variableFlyout.registerVariableFlyout(workspace);
+        procedureFlyout.registerProcedureFlyout(workspace);
         const zoomToFit = new ZoomToFitControl(workspace);
         zoomToFit.init();
     });

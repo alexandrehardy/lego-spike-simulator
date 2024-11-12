@@ -483,8 +483,14 @@ export const toolbox = {
         },
         {
             kind: 'category',
-            name: 'MY BLOCKS',
+            name: 'PROCS',
             custom: 'PROCEDURE',
+            colour: '#ff5d64'
+        },
+        {
+            kind: 'category',
+            name: 'MY BLOCKS',
+            custom: 'SPIKE_BLOCKS',
             colour: '#ff5d64'
         }
     ]
