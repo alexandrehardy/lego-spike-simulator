@@ -4,19 +4,43 @@ import {
     ObservableParameterModel
 } from '@blockly/block-shareable-procedures';
 
+export interface ParameterDefinition {
+    name: string;
+    type?: string[];
+}
+
+export interface ProcedureDefinition {
+    name: string;
+    label?: string;
+    parameters: ParameterDefinition[];
+    returnType?: string[];
+}
+
+export type ProcedureCreateCallback = (proc: ProcedureDefinition) => boolean;
+export type ProcedureDialog = (callback: ProcedureCreateCallback) => void;
+
+let procedureCreateDialog: ProcedureDialog | undefined;
+
 function blockButtonClickHandler(button: Blockly.FlyoutButton) {
     const workspace = button.getTargetWorkspace();
-    const newBlock = Blockly.serialization.blocks.append(
-        { type: 'procedures_defnoreturn' },
-        workspace
-    );
-    const newBlockSvg = newBlock as Blockly.BlockSvg;
-    newBlockSvg.moveBy(300, 100);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const procedure = (newBlock as any as IProcedureBlock).getProcedureModel();
-    procedure.setName('Flyout');
-    procedure.insertParameter(new ObservableParameterModel(workspace, 'x'), 0);
-    procedure.insertParameter(new ObservableParameterModel(workspace, 'y'), 1);
+
+    function onCreateProcedure(proc: ProcedureDefinition) {
+        const newBlock = Blockly.serialization.blocks.append(
+            { type: 'procedures_defnoreturn' },
+            workspace
+        );
+        const newBlockSvg = newBlock as Blockly.BlockSvg;
+        newBlockSvg.moveBy(300, 100);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const procedure = (newBlock as any as IProcedureBlock).getProcedureModel();
+        procedure.setName('Flyout');
+        procedure.insertParameter(new ObservableParameterModel(workspace, 'x'), 0);
+        procedure.insertParameter(new ObservableParameterModel(workspace, 'y'), 1);
+        return true;
+    }
+    if (procedureCreateDialog) {
+        procedureCreateDialog(onCreateProcedure);
+    }
 }
 
 // Returns an array of objects.
@@ -48,7 +72,11 @@ function proceduresFlyoutCallback(workspace: Blockly.Workspace) {
     return blockList;
 }
 
-export function registerProcedureFlyout(workspace: Blockly.WorkspaceSvg) {
+export function registerProcedureFlyout(
+    workspace: Blockly.WorkspaceSvg,
+    dialogCreator: ProcedureDialog
+) {
     workspace.registerButtonCallback('CREATE_SPIKE_BLOCK', blockButtonClickHandler);
     workspace.registerToolboxCategoryCallback('SPIKE_BLOCKS', proceduresFlyoutCallback);
+    procedureCreateDialog = dialogCreator;
 }

@@ -1,5 +1,7 @@
 <script lang="ts">
     import { onDestroy, onMount } from 'svelte';
+    import VariableDialog from '$components/VariableDialog.svelte';
+    import ProcedureDialog from '$components/ProcedureDialog.svelte';
     import * as Blockly from 'blockly/core';
     // Import the list of blocks so it gets loaded into blockly
     import 'blockly/blocks';
@@ -35,6 +37,22 @@
     let workspace: Blockly.WorkspaceSvg | undefined;
     let zoomToFit: ZoomToFitControl | undefined;
     let numberOfLoads = 0;
+    let variableType = '';
+    let variableDialogOpen = false;
+    let variableCreateCallback: variableFlyout.VariableCreateCallback | undefined = undefined;
+    let procedureDialogOpen = false;
+    let procedureCreateCallback: procedureFlyout.ProcedureCreateCallback | undefined = undefined;
+
+    function createProcedureDialog(callback: procedureFlyout.ProcedureCreateCallback) {
+        procedureCreateCallback = callback;
+        procedureDialogOpen = true;
+    }
+
+    function createVariableDialog(type: string, callback: variableFlyout.VariableCreateCallback) {
+        variableCreateCallback = callback;
+        variableType = type;
+        variableDialogOpen = true;
+    }
 
     onMount(() => {
         fieldAngle.registerFieldAngle();
@@ -71,8 +89,8 @@
             },
             toolbox: toolbox
         });
-        variableFlyout.registerVariableFlyout(workspace);
-        procedureFlyout.registerProcedureFlyout(workspace);
+        variableFlyout.registerVariableFlyout(workspace, createVariableDialog);
+        procedureFlyout.registerProcedureFlyout(workspace, createProcedureDialog);
         const zoomToFit = new ZoomToFitControl(workspace);
         zoomToFit.init();
     });
@@ -157,6 +175,12 @@
 {#key numberOfLoads}
     <input type="file" id="load_project" class="hidden" accept=".llsp3" on:change={loadState} />
 {/key}
+<VariableDialog
+    bind:modalOpen={variableDialogOpen}
+    bind:callback={variableCreateCallback}
+    bind:type={variableType}
+/>
+<ProcedureDialog bind:modalOpen={procedureDialogOpen} bind:callback={procedureCreateCallback} />
 <div class="relative w-full h-full flex flex-col overflow-hidden">
     <div class="flex flex-row bg-gray-100 gap-2 p-2 items-center">
         <Button color="light" class="!p-2" on:click={askForFile}>

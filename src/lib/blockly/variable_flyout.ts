@@ -1,12 +1,64 @@
 import { variable_blocks, list_variable_blocks } from '$lib/blockly/variable_blocks';
 import * as Blockly from 'blockly/core';
 
+export interface VariableDefinition {
+    name: string;
+    type: string;
+}
+
+export type VariableCreateCallback = (v: VariableDefinition) => boolean;
+export type VariableDialog = (type: string, callback: VariableCreateCallback) => void;
+
+let variableCreateDialog: VariableDialog | undefined;
+
 function numberButtonClickHandler(button: Blockly.FlyoutButton) {
-    Blockly.Variables.createVariableButtonHandler(button.getTargetWorkspace(), undefined, 'Number');
+    const workspace = button.getTargetWorkspace();
+    function onCreateVariable(v: VariableDefinition) {
+        const existing = Blockly.Variables.nameUsedWithAnyType(v.name, workspace);
+        if (!existing) {
+            // No conflict
+            workspace.createVariable(v.name, v.type);
+            return true;
+        }
+
+        let msg;
+        if (existing.type === v.type) {
+            msg = Blockly.Msg['VARIABLE_ALREADY_EXISTS'].replace('%1', existing.name);
+        } else {
+            msg = Blockly.Msg['VARIABLE_ALREADY_EXISTS_FOR_ANOTHER_TYPE'];
+            msg = msg.replace('%1', existing.name).replace('%2', existing.type);
+        }
+        Blockly.dialog.alert(msg);
+        return false;
+    }
+    if (variableCreateDialog) {
+        variableCreateDialog('Number', onCreateVariable);
+    }
 }
 
 function listButtonClickHandler(button: Blockly.FlyoutButton) {
-    Blockly.Variables.createVariableButtonHandler(button.getTargetWorkspace(), undefined, 'list');
+    const workspace = button.getTargetWorkspace();
+    function onCreateVariable(v: VariableDefinition) {
+        const existing = Blockly.Variables.nameUsedWithAnyType(v.name, workspace);
+        if (!existing) {
+            // No conflict
+            workspace.createVariable(v.name, v.type);
+            return true;
+        }
+
+        let msg;
+        if (existing.type === v.type) {
+            msg = Blockly.Msg['VARIABLE_ALREADY_EXISTS'].replace('%1', existing.name);
+        } else {
+            msg = Blockly.Msg['VARIABLE_ALREADY_EXISTS_FOR_ANOTHER_TYPE'];
+            msg = msg.replace('%1', existing.name).replace('%2', existing.type);
+        }
+        Blockly.dialog.alert(msg);
+        return false;
+    }
+    if (variableCreateDialog) {
+        variableCreateDialog('list', onCreateVariable);
+    }
 }
 
 // Returns an array of objects.
@@ -69,8 +121,12 @@ function variablesFlyoutCallback(workspace: Blockly.Workspace) {
     return blockList;
 }
 
-export function registerVariableFlyout(workspace: Blockly.WorkspaceSvg) {
+export function registerVariableFlyout(
+    workspace: Blockly.WorkspaceSvg,
+    dialogCreator: VariableDialog
+) {
     workspace.registerButtonCallback('CREATE_SPIKE_NUMBER_VARIABLE', numberButtonClickHandler);
     workspace.registerButtonCallback('CREATE_SPIKE_LIST_VARIABLE', listButtonClickHandler);
     workspace.registerToolboxCategoryCallback('SPIKE_VARIABLES', variablesFlyoutCallback);
+    variableCreateDialog = dialogCreator;
 }
