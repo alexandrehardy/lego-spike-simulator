@@ -9,6 +9,7 @@
     import '$lib/blockly/field_variable_getter';
     import '$lib/blockly/field-bitmap';
     import '$lib/blockly/field-grid-dropdown';
+    import '$lib/blockly/field-ultra-sound';
     import { procedureBlocks } from '$lib/blockly/procedure_blocks';
     import * as procedureFlyout from '$lib/blockly/procedure_flyout';
     import * as variableFlyout from '$lib/blockly/variable_flyout';

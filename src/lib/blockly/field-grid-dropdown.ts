@@ -50,21 +50,21 @@ export class FieldGridDropdown extends Blockly.FieldDropdown {
      * The number of columns in the dropdown grid. Must be an integer value
      * greater than 0. Defaults to 3.
      */
-    private columns = 3;
+    protected columns = 3;
 
-    private primaryColour?: string;
+    protected primaryColour?: string;
 
-    private borderColour?: string;
+    protected borderColour?: string;
 
-    private maxItems = 1;
+    protected maxItems = 1;
 
-    private minItems = 1;
+    protected minItems = 1;
 
-    private selected: Array<string | ImageProperties> = [];
+    protected selected: Array<string | ImageProperties> = [];
 
-    private sorted = true;
+    protected sorted = true;
 
-    private separator = ',';
+    protected separator = ',';
 
     /**
      * Class for an grid dropdown field.
@@ -105,7 +105,7 @@ export class FieldGridDropdown extends Blockly.FieldDropdown {
             this.borderColour = config.borderColour;
         }
 
-        if (config && config.minItems) {
+        if (config && config.minItems !== undefined) {
             this.minItems = config.minItems;
         }
 
@@ -123,7 +123,7 @@ export class FieldGridDropdown extends Blockly.FieldDropdown {
 
         this.selected = this.getOptions(false)
             .slice(0, this.minItems)
-            .map((v) => v[0]);
+            .map((v) => v[1]);
     }
 
     /**
@@ -145,6 +145,17 @@ export class FieldGridDropdown extends Blockly.FieldDropdown {
         // `this` might be a subclass of FieldDropdown if that class doesn't
         // override the static fromJson method.
         return new this(config.options, undefined, config);
+    }
+
+    override fromXml(fieldElement: Element) {
+        super.fromXml(fieldElement);
+        this.selected = this.fromStringValue(this.getValue()) ?? [];
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    override loadState(state: any) {
+        super.loadState(state);
+        this.selected = this.fromStringValue(this.getValue()) ?? [];
     }
 
     /**
@@ -180,7 +191,6 @@ export class FieldGridDropdown extends Blockly.FieldDropdown {
      */
     protected showEditor_(e?: MouseEvent) {
         super.showEditor_(e);
-
         const colours = this.getColours();
         if (colours && colours.border) {
             Blockly.DropDownDiv.setColour(colours.primary, colours.border);
@@ -198,7 +208,7 @@ export class FieldGridDropdown extends Blockly.FieldDropdown {
     /**
      * Updates the styling for number of columns on the dropdown.
      */
-    private updateColumnsStyling_() {
+    protected updateColumnsStyling_() {
         const menuElement = this.menu_ ? this.menu_.getElement() : null;
         if (menuElement) {
             menuElement.style.gridTemplateColumns = `repeat(${this.columns}, min-content)`;
@@ -283,7 +293,7 @@ export class FieldGridDropdown extends Blockly.FieldDropdown {
                     this.setChecked(menuItem, true);
                 }
             }
-            this.setValue(this.selected.join(this.separator));
+            this.setValue(this.getStringValue());
         }
     }
 
@@ -296,7 +306,10 @@ export class FieldGridDropdown extends Blockly.FieldDropdown {
         if (this.maxItems == 1) {
             isValueValid = options.some((option) => option[1] === newValue);
         } else {
-            const selected = newValue?.split(this.separator) ?? [];
+            const selected = this.fromStringValue(newValue);
+            if (selected === undefined) {
+                return null;
+            }
             const itemsValid = selected.map((v) => options.some((option) => option[1] === v));
             isValueValid = itemsValid.every((v) => v);
             if (selected.length > this.maxItems) {
@@ -329,11 +342,26 @@ export class FieldGridDropdown extends Blockly.FieldDropdown {
         return newValue;
     }
 
+    protected getStringValue(): string {
+        return this.selected.join(this.separator);
+    }
+
+    protected fromStringValue(value: string | undefined | null): string[] | undefined {
+        return value?.split(this.separator) ?? [];
+    }
+
     override getText(): string {
         if (this.maxItems == 1) {
             return super.getText();
         }
-        return this.selected.join(this.separator);
+        const options = this.getOptions(false);
+        const selectedValues = this.selected.map((k) => {
+            const entry = options.find((v) => v[1] == k);
+            if (entry) {
+                return entry[0];
+            }
+        });
+        return selectedValues.join(this.separator);
     }
 
     override applyColour() {

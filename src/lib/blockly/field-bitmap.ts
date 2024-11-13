@@ -664,7 +664,7 @@ if (window) {
 .layout {
     display: flex;
     flex-direction: row;
-    gap: 2px;
+    gap: 0px;
 }
 .palette {
     display: flex;

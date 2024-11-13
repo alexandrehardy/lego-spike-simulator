@@ -233,17 +233,8 @@ export const blocks = [
         message0: '%1',
         args0: [
             {
-                type: 'field_grid_dropdown',
-                name: 'field_flipperlight_led-selector',
-                columns: 2,
-                maxItems: 4,
-                minItems: 0,
-                options: [
-                    ['TL', 'TL'],
-                    ['TR', 'TR'],
-                    ['BL', 'BL'],
-                    ['BR', 'BR']
-                ]
+                type: 'field_ultra_sound',
+                name: 'field_flipperlight_led-selector'
             }
         ],
         output: 'String'
