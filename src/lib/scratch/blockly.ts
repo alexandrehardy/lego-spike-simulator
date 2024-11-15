@@ -332,7 +332,6 @@ export function convertToBlockly(project: Sb3Project): BlocklyState | undefined 
         if (scratchBlock.inputs) {
             for (const key of Object.keys(scratchBlock.inputs)) {
                 const input = scratchBlock.inputs[key];
-                addInput(block, key, input);
                 if (definition) {
                     if (definition.inputs.indexOf(key) < 0) {
                         console.log(`BLOCK: ${block.type}, ${key} is not an INPUT`);
@@ -462,8 +461,10 @@ export function convertToScratch(state: BlocklyState): Sb3Project {
         linearBlocks[block.id!] = sb3Block;
     }
 
-    for (const block of state.blocks.blocks) {
-        recurseBlock(block, true, null, false);
+    if (state.blocks) {
+        for (const block of state.blocks.blocks) {
+            recurseBlock(block, true, null, false);
+        }
     }
 
     for (const key of Object.keys(linearBlocks)) {

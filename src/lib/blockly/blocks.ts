@@ -738,12 +738,6 @@ export const blocks = [
         output: 'String'
     },
     {
-        type: 'procedures_prototype',
-        message0: '%1',
-        args0: [{ type: 'procedures_prototype', name: 'field_procedures_prototype' }],
-        output: 'String'
-    },
-    {
         type: 'weather_menu_forecastTo',
         message0: '%1',
         args0: [{ type: 'weather_menu_forecastTo', name: 'field_weather_menu_forecastTo' }],
@@ -3789,25 +3783,6 @@ export const blocks = [
         inputsInline: true,
         output: 'Number',
         colour: '#00b94d',
-        extensions: ['shadow_input']
-    },
-    {
-        type: 'procedures_call',
-        previousStatement: null,
-        nextStatement: null,
-        colour: '#ff5d64',
-        extensions: ['shadow_input']
-    },
-    {
-        type: 'procedures_definition',
-        message0: 'define %1',
-        args0: [
-            {
-                type: 'input_statement',
-                name: 'custom_block'
-            }
-        ],
-        colour: '#ff5d64',
         extensions: ['shadow_input']
     },
     {

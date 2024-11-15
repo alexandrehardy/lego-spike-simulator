@@ -1,12 +1,8 @@
 import * as Blockly from 'blockly/core';
-import {
-    type IProcedureBlock,
-    ObservableParameterModel
-} from '@blockly/block-shareable-procedures';
 
 export interface ParameterDefinition {
     name: string;
-    type?: string[];
+    type: string[];
 }
 
 export interface ProcedureDefinition {
@@ -15,6 +11,14 @@ export interface ProcedureDefinition {
     parameters: ParameterDefinition[];
     returnType?: string[];
 }
+
+interface BlockProcedure {
+    id: string;
+    block: Blockly.Block;
+    definition: ProcedureDefinition;
+}
+
+const procedureMap: Record<string, BlockProcedure> = {};
 
 export type ProcedureCreateCallback = (proc: ProcedureDefinition) => boolean;
 export type ProcedureDialog = (callback: ProcedureCreateCallback) => void;
@@ -26,16 +30,78 @@ function blockButtonClickHandler(button: Blockly.FlyoutButton) {
 
     function onCreateProcedure(proc: ProcedureDefinition) {
         const newBlock = Blockly.serialization.blocks.append(
-            { type: 'procedures_defnoreturn' },
+            {
+                type: 'procedures_definition',
+                inputs: {
+                    custom_block: {
+                        block: {
+                            type: 'procedures_prototype',
+                            fields: {
+                                NAME: proc.name
+                            }
+                        }
+                    }
+                }
+            },
             workspace
         );
+        if (!newBlock || !newBlock.inputList || newBlock.inputList.length == 0) {
+            return false;
+        }
+        const prototype = newBlock.inputList[0].connection?.targetBlock();
+        if (!prototype) {
+            return false;
+        }
+        prototype.setMovable(false);
+        procedureMap[newBlock.id] = { id: newBlock.id, block: newBlock, definition: proc };
+        let lastInput: Blockly.Input | undefined;
+        for (let i = 0; i < proc.parameters.length; i++) {
+            lastInput = prototype.appendValueInput(proc.parameters[i].name);
+            lastInput.setCheck(proc.parameters[i].type);
+            if (proc.parameters[i].type.length > 0 && proc.parameters[i].type[0] == 'Boolean') {
+                if (lastInput.connection) {
+                    lastInput.connection.setShadowState({
+                        type: 'argument_reporter_boolean',
+                        fields: { VALUE: proc.parameters[i].name }
+                    });
+                }
+                const argBlock = Blockly.serialization.blocks.append(
+                    {
+                        type: 'argument_reporter_boolean',
+                        fields: { VALUE: proc.parameters[i].name }
+                    },
+                    workspace
+                );
+                if (lastInput.connection && argBlock.outputConnection) {
+                    lastInput.connection.connect(argBlock.outputConnection);
+                }
+            } else {
+                if (lastInput.connection) {
+                    lastInput.connection.setShadowState({
+                        type: 'argument_reporter_string_number',
+                        fields: { VALUE: proc.parameters[i].name }
+                    });
+                }
+                const argBlock = Blockly.serialization.blocks.append(
+                    {
+                        type: 'argument_reporter_string_number',
+                        fields: { VALUE: proc.parameters[i].name }
+                    },
+                    workspace
+                );
+                if (lastInput.connection && argBlock.outputConnection) {
+                    lastInput.connection.connect(argBlock.outputConnection);
+                }
+            }
+        }
+        if (proc.label) {
+            prototype
+                .appendDummyInput()
+                .appendField(new Blockly.FieldLabelSerializable(proc.label), 'LABEL');
+        }
         const newBlockSvg = newBlock as Blockly.BlockSvg;
         newBlockSvg.moveBy(300, 100);
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const procedure = (newBlock as any as IProcedureBlock).getProcedureModel();
-        procedure.setName('Flyout');
-        procedure.insertParameter(new ObservableParameterModel(workspace, 'x'), 0);
-        procedure.insertParameter(new ObservableParameterModel(workspace, 'y'), 1);
+        workspace.refreshToolboxSelection();
         return true;
     }
     if (procedureCreateDialog) {
@@ -53,19 +119,15 @@ function proceduresFlyoutCallback(workspace: Blockly.Workspace) {
         callbackkey: 'CREATE_SPIKE_BLOCK'
     });
 
-    const tuple = Blockly.Procedures.allProcedures(workspace);
-    const procedureList = tuple[0];
-    for (let i = 0; i < procedureList.length; i++) {
-        const name = procedureList[i][0];
-        const args = procedureList[i][1];
+    for (const value of Object.values(procedureMap)) {
         blockList.push({
             kind: 'block',
-            type: 'procedures_callnoreturn',
+            type: 'procedures_call',
+            fields: { NAME: value.definition.name, ID: value.id },
             extraState: {
-                name: name,
-                params: args
-            },
-            fields: {}
+                name: value.definition.name,
+                params: value.definition.parameters
+            }
         });
     }
 
@@ -76,7 +138,66 @@ export function registerProcedureFlyout(
     workspace: Blockly.WorkspaceSvg,
     dialogCreator: ProcedureDialog
 ) {
+    function onDeleteProcedure(event: Blockly.Events.Abstract) {
+        if (event.type == Blockly.Events.BLOCK_DELETE) {
+            const deleteEvent = event as Blockly.Events.BlockDelete;
+            if (deleteEvent.oldJson?.type === 'procedures_definition') {
+                const blockId = deleteEvent.blockId;
+                if (blockId) {
+                    delete procedureMap[blockId];
+                    workspace.refreshToolboxSelection();
+                }
+            }
+        }
+    }
+
+    function onDragArgument(event: Blockly.Events.Abstract) {
+        if (event.type == Blockly.Events.BLOCK_MOVE) {
+            const moveEvent = event as Blockly.Events.BlockMove;
+            if (moveEvent.reason) {
+                if (!moveEvent.oldParentId) {
+                    return;
+                }
+                if (!moveEvent.oldInputName) {
+                    return;
+                }
+                if (!moveEvent.blockId) {
+                    return;
+                }
+                if (moveEvent.reason.find((x) => x == 'disconnect')) {
+                    const movingBlock = workspace.getBlockById(moveEvent.blockId);
+                    if (!movingBlock) {
+                        return;
+                    }
+                    const block = workspace.getBlockById(moveEvent.oldParentId);
+                    if (!block) {
+                        return;
+                    }
+                    if (block.type != 'procedures_prototype') {
+                        return;
+                    }
+                    const input = block.getInput(moveEvent.oldInputName);
+                    if (!input) {
+                        return;
+                    }
+                    const argBlock = Blockly.serialization.blocks.append(
+                        {
+                            type: movingBlock.type,
+                            fields: { VALUE: moveEvent.oldInputName }
+                        },
+                        workspace
+                    );
+                    if (argBlock.outputConnection && input.connection) {
+                        input.connection.connect(argBlock.outputConnection);
+                    }
+                }
+            }
+        }
+    }
+
     workspace.registerButtonCallback('CREATE_SPIKE_BLOCK', blockButtonClickHandler);
     workspace.registerToolboxCategoryCallback('SPIKE_BLOCKS', proceduresFlyoutCallback);
     procedureCreateDialog = dialogCreator;
+    workspace.addChangeListener(onDeleteProcedure);
+    workspace.addChangeListener(onDragArgument);
 }

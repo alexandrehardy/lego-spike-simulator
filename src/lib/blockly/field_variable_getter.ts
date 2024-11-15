@@ -9,7 +9,7 @@ import '$lib/blockly/patch';
 const NONE_AVAILABLE = 'NONE_AVAILABLE';
 
 interface FieldVariableGetterConfig extends Blockly.FieldVariableConfig {
-    fixed?: bool;
+    fixed?: boolean;
 }
 
 interface FieldVariableGetterFromJsonConfig extends FieldVariableGetterConfig {
@@ -20,17 +20,17 @@ interface FieldVariableGetterFromJsonConfig extends FieldVariableGetterConfig {
 type AnyDuringMigration = any;
 
 export class FieldVariableGetter extends Blockly.FieldVariable {
-    protected fixed: bool = false;
+    protected fixed: boolean = false;
     constructor(
         varName: string | null | typeof Blockly.Field.SKIP_SETUP,
         validator?: Blockly.FieldVariableValidator,
         variableTypes?: string[],
         defaultType?: string,
-        config?: Blockly.FieldVariableGetterConfig
+        config?: FieldVariableGetterConfig
     ) {
         super(varName, validator, variableTypes, defaultType, config);
         this.menuGenerator_ = FieldVariableGetter.dropdownCreate as Blockly.MenuGenerator;
-        if (config.fixed !== undefined) {
+        if (config && config.fixed !== undefined) {
             this.fixed = config.fixed;
         }
     }
@@ -94,9 +94,7 @@ export class FieldVariableGetter extends Blockly.FieldVariable {
         }
     }
 
-    static override fromJson(
-        options: Blockly.FieldVariableGetterFromJsonConfig
-    ): Blockly.FieldVariable {
+    static override fromJson(options: FieldVariableGetterFromJsonConfig): FieldVariableGetter {
         const varName = options.variable;
         // `this` might be a subclass of FieldVariable if that class doesn't
         // override the static fromJson method.
@@ -156,7 +154,7 @@ export class FieldVariableGetter extends Blockly.FieldVariable {
         }
     }
 
-    protected override shouldAddBorderRect_(): boolean {
+    public override shouldAddBorderRect_(): boolean {
         if (!this.fixed) {
             return super.shouldAddBorderRect_();
         }

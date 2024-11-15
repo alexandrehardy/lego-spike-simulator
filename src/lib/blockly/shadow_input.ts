@@ -46,8 +46,12 @@ export function registerInputShadowExtension(blockly: typeof Blockly) {
             return;
         }
         const blockDefinition = blockMap.get(thisBlock.type);
+        console.log(thisBlock.type);
+        console.log(thisBlock.inputList.length);
         thisBlock.inputList.forEach((input: Blockly.Input) => {
-            if (<number>input.type === <number>blockly.ConnectionType.INPUT_VALUE) {
+            console.log('INPUT');
+            console.log(input.type);
+            if (input.type === Blockly.inputs.inputTypes.VALUE) {
                 if (input.connection) {
                     let shadow: State | undefined;
                     const checks = input.connection.getCheck();

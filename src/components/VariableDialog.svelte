@@ -44,5 +44,5 @@
 >
     <Input id="variable_name" size="lg" placeholder="myVariable" bind:value={variableName} />
     <Button on:click={cancel}>CANCEL</Button>
-    <Button on:click={createVariable} color="alternative">OK</Button>
+    <Button on:click={createVariable} color="green">OK</Button>
 </Modal>

@@ -12,11 +12,11 @@
     import '$lib/blockly/field-bitmap';
     import '$lib/blockly/field-grid-dropdown';
     import '$lib/blockly/field-ultra-sound';
+    import '$lib/blockly/field_metadata';
     import { procedureBlocks } from '$lib/blockly/procedure_blocks';
     import * as procedureFlyout from '$lib/blockly/procedure_flyout';
     import * as variableFlyout from '$lib/blockly/variable_flyout';
     import * as fieldAngle from '$lib/blockly/field_angle';
-    import * as shareableProcedures from '@blockly/block-shareable-procedures';
     import {
         registerInputShadowExtension,
         applyInputShadowExtension
@@ -57,7 +57,6 @@
     onMount(() => {
         fieldAngle.registerFieldAngle();
         colourPkg.registerFieldColour();
-        shareableProcedures.unregisterProcedureBlocks();
         Blockly.common.defineBlocksWithJsonArray(procedureBlocks);
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         Blockly.setLocale(En as any as Record<string, string>);
@@ -67,9 +66,6 @@
         // don't declare they use it.
         applyInputShadowExtension(Blockly);
         // Only include procedure defintion, like spike does
-        delete Blockly.Blocks['procedures_callreturn'];
-        delete Blockly.Blocks['procedures_ifreturn'];
-        delete Blockly.Blocks['procedures_defreturn'];
         const element = document.getElementById('blocklyDiv');
         if (element == null) {
             return;

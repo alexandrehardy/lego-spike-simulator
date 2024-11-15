@@ -36,7 +36,6 @@
     },
     "type": "module",
     "dependencies": {
-        "@blockly/block-shareable-procedures": "^5.0.9",
         "@blockly/field-colour": "^5.0.9",
         "@blockly/field-grid-dropdown": "^5.0.9",
         "@blockly/zoom-to-fit": "^6.0.9",

@@ -1,139 +1,75 @@
 export const procedureBlocks = [
     {
-        type: 'procedures_defnoreturn',
-        message0: 'define %1 %2 %3',
+        //top: 1,
+        type: 'procedures_definition',
+        message0: 'define %1',
         args0: [
             {
-                type: 'field_input',
-                name: 'NAME',
-                text: '',
-                spellcheck: false
-            },
-            {
-                type: 'field_label',
-                name: 'PARAMS',
-                text: ''
-            },
-            {
-                type: 'input_dummy',
-                name: 'TOP'
+                type: 'input_statement',
+                name: 'custom_block'
             }
         ],
         style: 'procedure_blocks',
-        helpUrl: '%{BKY_PROCEDURES_DEFNORETURN_HELPURL}',
-        tooltip: '%{BKY_PROCEDURES_DEFNORETURN_TOOLTIP}',
-        extensions: [
-            'procedure_def_get_def_mixin',
-            'procedure_def_var_mixin',
-            'procedure_def_update_shape_mixin',
-            'procedure_def_context_menu_mixin',
-            'procedure_def_onchange_mixin',
-            'procedure_def_validator_helper',
-            'procedure_defnoreturn_get_caller_block_mixin',
-            //'procedure_defnoreturn_set_comment_helper',
-            'procedure_def_set_no_return_helper'
-        ],
         nextStatement: null,
+        inputsInline: true,
         hat: false
-        //mutator: 'procedure_def_mutator',
     },
     {
-        type: 'procedures_callnoreturn',
-        message0: '%1 %2',
+        type: 'procedures_prototype',
+        message0: '%1',
         args0: [
-            { type: 'field_label', name: 'NAME', text: '%{BKY_UNNAMED_KEY}' },
             {
-                type: 'input_dummy',
-                name: 'TOPROW'
+                type: 'field_label_serializable',
+                name: 'NAME'
             }
         ],
-        nextStatement: null,
-        previousStatement: null,
         style: 'procedure_blocks',
-        helpUrl: '%{BKY_PROCEDURES_CALLNORETURN_HELPURL}',
-        extensions: [
-            'procedure_caller_get_def_mixin',
-            'procedure_caller_var_mixin',
-            'procedure_caller_update_shape_mixin',
-            'procedure_caller_context_menu_mixin',
-            'procedure_caller_onchange_mixin',
-            'procedure_callernoreturn_get_def_block_mixin'
-        ],
-        mutator: 'procedure_caller_mutator',
+        previousStatement: null,
+        nextStatement: null,
         inputsInline: true
     },
     {
-        type: 'procedures_defreturn',
-        message0: '%{BKY_PROCEDURES_DEFRETURN_TITLE} %1 %2 %3',
-        message1: '%{BKY_PROCEDURES_DEFRETURN_DO} %1',
-        message2: '%{BKY_PROCEDURES_DEFRETURN_RETURN} %1',
-        args0: [
-            {
-                type: 'field_input',
-                name: 'NAME',
-                text: '',
-                spellcheck: false
-            },
-            {
-                type: 'field_label',
-                name: 'PARAMS',
-                text: ''
-            },
-            {
-                type: 'input_dummy',
-                name: 'TOP'
-            }
-        ],
-        args1: [
-            {
-                type: 'input_statement',
-                name: 'STACK'
-            }
-        ],
-        args2: [
-            {
-                type: 'input_value',
-                align: 'right',
-                name: 'RETURN'
-            }
-        ],
-        style: 'procedure_blocks',
-        helpUrl: '%{BKY_PROCEDURES_DEFRETURN_HELPURL}',
-        tooltip: '%{BKY_PROCEDURES_DEFRETURN_TOOLTIP}',
-        extensions: [
-            'procedure_def_get_def_mixin',
-            'procedure_def_var_mixin',
-            'procedure_def_update_shape_mixin',
-            'procedure_def_context_menu_mixin',
-            'procedure_def_onchange_mixin',
-            'procedure_def_validator_helper',
-            'procedure_defreturn_get_caller_block_mixin',
-            'procedure_defreturn_set_comment_helper',
-            'procedure_def_set_return_helper'
-        ],
-        mutator: 'procedure_def_mutator'
-    },
-    {
-        type: 'procedures_callreturn',
+        type: 'procedures_call',
         message0: '%1 %2',
         args0: [
-            { type: 'field_label', name: 'NAME', text: '%{BKY_UNNAMED_KEY}' },
             {
-                type: 'input_dummy',
-                name: 'TOPROW'
+                type: 'field_metadata',
+                name: 'ID'
+            },
+            {
+                type: 'field_label_serializable',
+                name: 'NAME'
             }
         ],
-        output: null,
         style: 'procedure_blocks',
-        helpUrl: '%{BKY_PROCEDURES_CALLRETURN_HELPURL}',
-        extensions: [
-            'procedure_caller_get_def_mixin',
-            'procedure_caller_var_mixin',
-            'procedure_caller_update_shape_mixin',
-            'procedure_caller_context_menu_mixin',
-            'procedure_caller_onchange_mixin',
-            'procedure_callerreturn_get_def_block_mixin'
+        previousStatement: null,
+        nextStatement: null,
+        inputsInline: true
+    },
+    {
+        type: 'argument_reporter_boolean',
+        message0: ' %1',
+        args0: [
+            {
+                type: 'field_label_serializable',
+                name: 'VALUE',
+                text: ''
+            }
         ],
-        mutator: 'procedure_caller_mutator'
+        style: 'procedure_blocks',
+        output: ['Boolean']
+    },
+    {
+        type: 'argument_reporter_string_number',
+        message0: ' %1',
+        args0: [
+            {
+                type: 'field_label_serializable',
+                name: 'VALUE',
+                text: ''
+            }
+        ],
+        style: 'procedure_blocks',
+        output: ['Number', 'String']
     }
 ];
