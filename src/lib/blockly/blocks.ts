@@ -1185,7 +1185,8 @@ export const blocks = [
                 text: '',
                 name: 'LIST',
                 variableTypes: ['list'],
-                defaultType: 'list'
+                defaultType: 'list',
+                fixed: true
             }
         ],
         inputsInline: true,
@@ -1269,7 +1270,8 @@ export const blocks = [
                 text: '',
                 name: 'VARIABLE',
                 variableTypes: ['Number'],
-                defaultType: 'Number'
+                defaultType: 'Number',
+                fixed: true
             }
         ],
         inputsInline: true,
