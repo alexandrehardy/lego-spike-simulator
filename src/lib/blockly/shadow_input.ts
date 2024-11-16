@@ -1,27 +1,6 @@
 import * as Blockly from 'blockly/core';
 import { blocks as blockDefinitions } from '$lib/blockly/blocks';
 
-export interface State {
-    type: string;
-    id?: string;
-    x?: number;
-    y?: number;
-    collapsed?: boolean;
-    deletable?: boolean;
-    movable?: boolean;
-    editable?: boolean;
-    enabled?: boolean;
-    disabledReasons?: string[];
-    inline?: boolean;
-    data?: string;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    extraState?: any;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    icons?: { [key: string]: any };
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    fields?: { [key: string]: any };
-}
-
 export interface NamedField {
     name: string;
 }
