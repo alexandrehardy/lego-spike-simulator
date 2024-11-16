@@ -1,29 +1,92 @@
 import * as Blockly from 'blockly/core';
 
 export interface ParameterDefinition {
+    id?: string;
     name: string;
     type: string[];
 }
 
 export interface ProcedureDefinition {
+    id?: string;
     name: string;
     label?: string;
     parameters: ParameterDefinition[];
     returnType?: string[];
 }
 
-interface BlockProcedure {
+export interface BlockProcedure {
     id: string;
     block: Blockly.Block;
     definition: ProcedureDefinition;
 }
 
-const procedureMap: Record<string, BlockProcedure> = {};
-
 export type ProcedureCreateCallback = (proc: ProcedureDefinition) => boolean;
 export type ProcedureDialog = (callback: ProcedureCreateCallback) => void;
 
 let procedureCreateDialog: ProcedureDialog | undefined;
+const procedureMap: Record<string, BlockProcedure> = {};
+
+export function getProcedureById(id: string): BlockProcedure | undefined {
+    return procedureMap[id];
+}
+
+export function setupProtototypeBlock(prototype: Blockly.Block, proc: ProcedureDefinition) {
+    if (!proc.id) {
+        proc.id = prototype.id;
+    }
+    prototype.data = prototype.id;
+    Object.assign(prototype, { procedureDefinition: proc });
+    procedureMap[prototype.id] = { id: prototype.id, block: prototype, definition: proc };
+    prototype.setMovable(false);
+    let lastInput: Blockly.Input | undefined;
+    for (let i = 0; i < proc.parameters.length; i++) {
+        if (!proc.parameters[i].id) {
+            proc.parameters[i].id = Blockly.utils.idGenerator.genUid();
+        }
+        lastInput = prototype.appendValueInput(proc.parameters[i].name);
+        lastInput.setCheck(proc.parameters[i].type);
+        if (proc.parameters[i].type.length > 0 && proc.parameters[i].type[0] == 'Boolean') {
+            if (lastInput.connection) {
+                lastInput.connection.setShadowState({
+                    type: 'argument_reporter_boolean',
+                    fields: { VALUE: proc.parameters[i].name }
+                });
+            }
+            const argBlock = Blockly.serialization.blocks.append(
+                {
+                    type: 'argument_reporter_boolean',
+                    fields: { VALUE: proc.parameters[i].name }
+                },
+                prototype.workspace
+            );
+            if (lastInput.connection && argBlock.outputConnection) {
+                lastInput.connection.connect(argBlock.outputConnection);
+            }
+        } else {
+            if (lastInput.connection) {
+                lastInput.connection.setShadowState({
+                    type: 'argument_reporter_string_number',
+                    fields: { VALUE: proc.parameters[i].name }
+                });
+            }
+            const argBlock = Blockly.serialization.blocks.append(
+                {
+                    type: 'argument_reporter_string_number',
+                    fields: { VALUE: proc.parameters[i].name }
+                },
+                prototype.workspace
+            );
+            if (lastInput.connection && argBlock.outputConnection) {
+                lastInput.connection.connect(argBlock.outputConnection);
+            }
+        }
+    }
+    if (proc.label) {
+        prototype
+            .appendDummyInput()
+            .appendField(new Blockly.FieldLabelSerializable(proc.label), 'LABEL');
+    }
+}
 
 function blockButtonClickHandler(button: Blockly.FlyoutButton) {
     const workspace = button.getTargetWorkspace();
@@ -52,53 +115,7 @@ function blockButtonClickHandler(button: Blockly.FlyoutButton) {
         if (!prototype) {
             return false;
         }
-        prototype.setMovable(false);
-        procedureMap[newBlock.id] = { id: newBlock.id, block: newBlock, definition: proc };
-        let lastInput: Blockly.Input | undefined;
-        for (let i = 0; i < proc.parameters.length; i++) {
-            lastInput = prototype.appendValueInput(proc.parameters[i].name);
-            lastInput.setCheck(proc.parameters[i].type);
-            if (proc.parameters[i].type.length > 0 && proc.parameters[i].type[0] == 'Boolean') {
-                if (lastInput.connection) {
-                    lastInput.connection.setShadowState({
-                        type: 'argument_reporter_boolean',
-                        fields: { VALUE: proc.parameters[i].name }
-                    });
-                }
-                const argBlock = Blockly.serialization.blocks.append(
-                    {
-                        type: 'argument_reporter_boolean',
-                        fields: { VALUE: proc.parameters[i].name }
-                    },
-                    workspace
-                );
-                if (lastInput.connection && argBlock.outputConnection) {
-                    lastInput.connection.connect(argBlock.outputConnection);
-                }
-            } else {
-                if (lastInput.connection) {
-                    lastInput.connection.setShadowState({
-                        type: 'argument_reporter_string_number',
-                        fields: { VALUE: proc.parameters[i].name }
-                    });
-                }
-                const argBlock = Blockly.serialization.blocks.append(
-                    {
-                        type: 'argument_reporter_string_number',
-                        fields: { VALUE: proc.parameters[i].name }
-                    },
-                    workspace
-                );
-                if (lastInput.connection && argBlock.outputConnection) {
-                    lastInput.connection.connect(argBlock.outputConnection);
-                }
-            }
-        }
-        if (proc.label) {
-            prototype
-                .appendDummyInput()
-                .appendField(new Blockly.FieldLabelSerializable(proc.label), 'LABEL');
-        }
+        setupProtototypeBlock(prototype, proc);
         const newBlockSvg = newBlock as Blockly.BlockSvg;
         newBlockSvg.moveBy(300, 100);
         workspace.refreshToolboxSelection();
@@ -110,6 +127,7 @@ function blockButtonClickHandler(button: Blockly.FlyoutButton) {
 }
 
 // Returns an array of objects.
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function proceduresFlyoutCallback(workspace: Blockly.Workspace) {
     const blockList = [];
 
@@ -123,11 +141,8 @@ function proceduresFlyoutCallback(workspace: Blockly.Workspace) {
         blockList.push({
             kind: 'block',
             type: 'procedures_call',
-            fields: { NAME: value.definition.name, ID: value.id },
-            extraState: {
-                name: value.definition.name,
-                params: value.definition.parameters
-            }
+            fields: {},
+            extraState: value.definition
         });
     }
 

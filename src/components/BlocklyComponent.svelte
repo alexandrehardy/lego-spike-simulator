@@ -21,6 +21,7 @@
         registerInputShadowExtension,
         applyInputShadowExtension
     } from '$lib/blockly/shadow_input';
+    import { registerProcedureCallExtension } from '$lib/blockly/procedure_call_extension';
     import * as colourPkg from '@blockly/field-colour';
     import { ZoomToFitControl } from '@blockly/zoom-to-fit';
     import { blocks } from '$lib/blockly/blocks';
@@ -61,6 +62,7 @@
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         Blockly.setLocale(En as any as Record<string, string>);
         registerInputShadowExtension(Blockly);
+        registerProcedureCallExtension(Blockly);
         Blockly.defineBlocksWithJsonArray(blocks);
         // Also apply the shadow extension to any blocks that
         // don't declare they use it.

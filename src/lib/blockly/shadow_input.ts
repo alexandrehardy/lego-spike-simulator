@@ -33,8 +33,6 @@ for (const definition of blockDefinitions) {
 }
 
 export function registerInputShadowExtension(blockly: typeof Blockly) {
-    // This extension sets the block's tooltip to be a function which displays
-    // the parent block's tooltip (if it exists).
     if (blockly.Extensions.isRegistered('shadow_input')) {
         blockly.Extensions.unregister('shadow_input');
     }
@@ -46,14 +44,10 @@ export function registerInputShadowExtension(blockly: typeof Blockly) {
             return;
         }
         const blockDefinition = blockMap.get(thisBlock.type);
-        console.log(thisBlock.type);
-        console.log(thisBlock.inputList.length);
         thisBlock.inputList.forEach((input: Blockly.Input) => {
-            console.log('INPUT');
-            console.log(input.type);
             if (input.type === Blockly.inputs.inputTypes.VALUE) {
                 if (input.connection) {
-                    let shadow: State | undefined;
+                    let shadow: Blockly.serialization.blocks.State | undefined;
                     const checks = input.connection.getCheck();
                     let createShadow = false;
                     let isString = false;
@@ -65,7 +59,7 @@ export function registerInputShadowExtension(blockly: typeof Blockly) {
                                 const def = arglist.find((x: NamedField) => x.name == input.name);
                                 if (def) {
                                     if (def.shadow) {
-                                        shadow = def.shadow as State;
+                                        shadow = def.shadow as Blockly.serialization.blocks.State;
                                         createShadow = true;
                                         break;
                                     }

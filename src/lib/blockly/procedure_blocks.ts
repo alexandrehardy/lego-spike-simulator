@@ -25,26 +25,18 @@ export const procedureBlocks = [
         ],
         style: 'procedure_blocks',
         previousStatement: null,
-        nextStatement: null,
-        inputsInline: true
+        inputsInline: true,
+        mutator: 'procedures_prototype_mutator'
     },
     {
         type: 'procedures_call',
-        message0: '%1 %2',
-        args0: [
-            {
-                type: 'field_metadata',
-                name: 'ID'
-            },
-            {
-                type: 'field_label_serializable',
-                name: 'NAME'
-            }
-        ],
+        message0: '',
+        args0: [],
         style: 'procedure_blocks',
         previousStatement: null,
         nextStatement: null,
-        inputsInline: true
+        inputsInline: true,
+        mutator: 'procedures_call_mutator'
     },
     {
         type: 'argument_reporter_boolean',
