@@ -258,7 +258,7 @@ export function convertToBlockly(project: Sb3Project): BlocklyState | undefined 
             const ref = allBlocks.get(id);
             if (ref) {
                 const refBlock = buildBlock(id, ref);
-                if (ref.shadow) {
+                if (ref.shadow && ref.opcode != 'procedures_prototype') {
                     block.inputs[key] = { shadow: refBlock };
                 } else {
                     block.inputs[key] = { block: refBlock };
@@ -345,6 +345,70 @@ export function convertToBlockly(project: Sb3Project): BlocklyState | undefined 
         }
         if (scratchBlock.y) {
             block.y = scratchBlock.y;
+        }
+        if (scratchBlock.mutation) {
+            if (scratchBlock.opcode == 'procedures_prototype') {
+                //const argumentDefaults = JSON.parse(scratchBlock.mutation.argumentdefaults);
+                const argumentIds = JSON.parse(scratchBlock.mutation.argumentids!);
+                const argumentNames = JSON.parse(scratchBlock.mutation.argumentnames!);
+                const procCode = scratchBlock.mutation.proccode;
+                const parts = procCode.split(' ');
+                const name = parts.shift();
+                const params = [];
+                let label = '';
+                while (parts.length > 0) {
+                    const nextPart = parts.shift();
+                    if (nextPart == '%s') {
+                        //const default = argumentDefaults.shift();
+                        const id = argumentIds.shift();
+                        const argName = argumentNames.shift();
+                        params.push({ id: id, name: argName, type: ['String', 'Number'] });
+                    } else if (nextPart == '%b') {
+                        //const default = argumentDefaults.shift();
+                        const id = argumentIds.shift();
+                        const argName = argumentNames.shift();
+                        params.push({ id: id, name: argName, type: ['Boolean'] });
+                    } else {
+                        label = label + nextPart;
+                    }
+                }
+                block.extraState = {
+                    id: id,
+                    name: name,
+                    label: label.length > 0 ? label : undefined,
+                    parameters: params
+                };
+            } else if (scratchBlock.opcode == 'procedures_call') {
+                const argumentIds = JSON.parse(scratchBlock.mutation.argumentids);
+                const procCode = scratchBlock.mutation.proccode;
+                const parts = procCode.split(' ');
+                const name = parts.shift();
+                const params = [];
+                let label = '';
+                let count = 0;
+                while (parts.length > 0) {
+                    const nextPart = parts.shift();
+                    if (nextPart == '%s') {
+                        const id = argumentIds.shift();
+                        const argName = 'p' + count.toString();
+                        count++;
+                        params.push({ id: id, name: argName, type: ['String', 'Number'] });
+                    } else if (nextPart == '%b') {
+                        const id = argumentIds.shift();
+                        const argName = 'p' + count.toString();
+                        count++;
+                        params.push({ id: id, name: argName, type: ['Boolean'] });
+                    } else {
+                        label = label + nextPart;
+                    }
+                }
+                block.extraState = {
+                    id: id,
+                    name: name,
+                    label: label.length > 0 ? label : undefined,
+                    parameters: params
+                };
+            }
         }
         if (scratchBlock.next) {
             const nextId = scratchBlock.next;

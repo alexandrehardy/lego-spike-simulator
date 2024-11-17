@@ -16,13 +16,8 @@ export const procedureBlocks = [
     },
     {
         type: 'procedures_prototype',
-        message0: '%1',
-        args0: [
-            {
-                type: 'field_label_serializable',
-                name: 'NAME'
-            }
-        ],
+        message0: '',
+        args0: [],
         style: 'procedure_blocks',
         previousStatement: null,
         inputsInline: true,

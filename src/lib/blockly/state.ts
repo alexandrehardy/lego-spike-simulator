@@ -33,6 +33,8 @@ export interface BlocklyStateBlock {
     next?: BlocklyStateNextBlock;
     x?: number;
     y?: number;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    extraState?: any;
 }
 
 export interface BlocklyStateVersionedBlocks {

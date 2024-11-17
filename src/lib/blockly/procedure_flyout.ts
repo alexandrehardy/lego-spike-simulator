@@ -39,11 +39,12 @@ export function setupProtototypeBlock(prototype: Blockly.Block, proc: ProcedureD
     procedureMap[prototype.id] = { id: prototype.id, block: prototype, definition: proc };
     prototype.setMovable(false);
     let lastInput: Blockly.Input | undefined;
+    prototype.appendDummyInput().appendField(new Blockly.FieldLabel(proc.name), 'NAME');
     for (let i = 0; i < proc.parameters.length; i++) {
         if (!proc.parameters[i].id) {
             proc.parameters[i].id = Blockly.utils.idGenerator.genUid();
         }
-        lastInput = prototype.appendValueInput(proc.parameters[i].name);
+        lastInput = prototype.appendValueInput(proc.parameters[i].id!);
         lastInput.setCheck(proc.parameters[i].type);
         if (proc.parameters[i].type.length > 0 && proc.parameters[i].type[0] == 'Boolean') {
             if (lastInput.connection) {
@@ -82,9 +83,7 @@ export function setupProtototypeBlock(prototype: Blockly.Block, proc: ProcedureD
         }
     }
     if (proc.label) {
-        prototype
-            .appendDummyInput()
-            .appendField(new Blockly.FieldLabelSerializable(proc.label), 'LABEL');
+        prototype.appendDummyInput().appendField(new Blockly.FieldLabel(proc.label), 'LABEL');
     }
 }
 
@@ -198,7 +197,7 @@ export function registerProcedureFlyout(
                     const argBlock = Blockly.serialization.blocks.append(
                         {
                             type: movingBlock.type,
-                            fields: { VALUE: moveEvent.oldInputName }
+                            fields: { VALUE: movingBlock.getFieldValue('VALUE') }
                         },
                         workspace
                     );

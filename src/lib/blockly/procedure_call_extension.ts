@@ -1,5 +1,5 @@
 import * as Blockly from 'blockly/core';
-import { getProcedureById } from '$lib/blockly/procedure_flyout';
+import { getProcedureById, setupProtototypeBlock } from '$lib/blockly/procedure_flyout';
 
 export function registerProcedureCallExtension(blockly: typeof Blockly) {
     if (blockly.Extensions.isRegistered('procedures_call_mutator')) {
@@ -20,7 +20,7 @@ export function registerProcedureCallExtension(blockly: typeof Blockly) {
                 let lastInput = this.appendDummyInput();
                 lastInput.appendField(new Blockly.FieldLabel(definition.name), 'NAME');
                 for (let i = 0; i < definition.parameters.length; i++) {
-                    lastInput = thisBlock.appendValueInput(definition.parameters[i].name);
+                    lastInput = thisBlock.appendValueInput(definition.parameters[i].id);
                     lastInput.setCheck(definition.parameters[i].type);
                 }
                 if (definition.label) {
@@ -47,12 +47,9 @@ export function registerProcedureCallExtension(blockly: typeof Blockly) {
             return;
         }
         Object.assign(thisBlock, {
-            loadExtraState: function (
-                this: Blockly.Block,
-                state: Blockly.serialization.blocks.State
-            ) {
-                Object.assign(this, { procedureDefinition: state });
-                this.data = state.id ?? null;
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            loadExtraState: function (this: Blockly.Block, state: any) {
+                setupProtototypeBlock(this, state);
             },
             // eslint-disable-next-line @typescript-eslint/no-explicit-any,@typescript-eslint/no-unused-vars
             saveExtraState: function (this: Blockly.Block, doFullSerialization: boolean): any {

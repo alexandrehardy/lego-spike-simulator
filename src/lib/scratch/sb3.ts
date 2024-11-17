@@ -58,10 +58,10 @@ export interface Sb3Mutation {
     tagName: 'mutation';
     children: string[];
     proccode: string;
-    argumentids: string[];
+    argumentids: string;
     warp: boolean;
-    argumentnames?: string[];
-    argumentdefaults?: string[];
+    argumentnames?: string;
+    argumentdefaults?: string;
     hasnext?: boolean;
 }
 
