@@ -59,7 +59,7 @@ export interface Sb3Mutation {
     children: string[];
     proccode: string;
     argumentids: string;
-    warp: boolean;
+    warp: string;
     argumentnames?: string;
     argumentdefaults?: string;
     hasnext?: boolean;

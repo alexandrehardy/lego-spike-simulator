@@ -369,7 +369,11 @@ export function convertToBlockly(project: Sb3Project): BlocklyState | undefined 
                         const argName = argumentNames.shift();
                         params.push({ id: id, name: argName, type: ['Boolean'] });
                     } else {
-                        label = label + nextPart;
+                        if (label.length > 0) {
+                            label = label + ' ' + nextPart;
+                        } else {
+                            label = nextPart;
+                        }
                     }
                 }
                 block.extraState = {
@@ -399,7 +403,11 @@ export function convertToBlockly(project: Sb3Project): BlocklyState | undefined 
                         count++;
                         params.push({ id: id, name: argName, type: ['Boolean'] });
                     } else {
-                        label = label + nextPart;
+                        if (label.length > 0) {
+                            label = label + ' ' + nextPart;
+                        } else {
+                            label = nextPart;
+                        }
                     }
                 }
                 block.extraState = {
@@ -520,6 +528,57 @@ export function convertToScratch(state: BlocklyState): Sb3Project {
         }
         if (block.next?.block) {
             recurseBlock(block.next.block, false, block, false);
+        }
+        if (block.type == 'procedures_prototype') {
+            sb3Block.shadow = true;
+            const proccodeParts = [block.extraState.name];
+            const argumentids: string[] = [];
+            const argumentdefaults: string[] = [];
+            const argumentnames: string[] = [];
+            for (const param of block.extraState.parameters) {
+                if (param.type[0] == 'Boolean') {
+                    proccodeParts.push('%b');
+                    argumentdefaults.push('false');
+                } else {
+                    proccodeParts.push('%s');
+                    argumentdefaults.push('');
+                }
+                argumentids.push(param.id);
+                argumentnames.push(param.name);
+            }
+            if (block.extraState.label) {
+                proccodeParts.push(block.extraState.label);
+            }
+            sb3Block.mutation = {
+                tagName: 'mutation',
+                children: [],
+                proccode: proccodeParts.join(' '),
+                argumentids: JSON.stringify(argumentids),
+                argumentdefaults: JSON.stringify(argumentdefaults),
+                argumentnames: JSON.stringify(argumentnames),
+                warp: 'false'
+            };
+        } else if (block.type == 'procedures_call') {
+            const proccodeParts = [block.extraState.name];
+            const argumentids: string[] = [];
+            for (const param of block.extraState.parameters) {
+                if (param.type[0] == 'Boolean') {
+                    proccodeParts.push('%b');
+                } else {
+                    proccodeParts.push('%s');
+                }
+                argumentids.push(param.id);
+            }
+            if (block.extraState.label) {
+                proccodeParts.push(block.extraState.label);
+            }
+            sb3Block.mutation = {
+                tagName: 'mutation',
+                children: [],
+                proccode: proccodeParts.join(' '),
+                argumentids: JSON.stringify(argumentids),
+                warp: 'false'
+            };
         }
         console.log(sb3Block);
         linearBlocks[block.id!] = sb3Block;
