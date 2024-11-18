@@ -2,6 +2,7 @@
     import { onDestroy, onMount } from 'svelte';
     import VariableDialog from '$components/VariableDialog.svelte';
     import ProcedureDialog from '$components/ProcedureDialog.svelte';
+    import SpikeSimulatorWindow from '$components/SpikeSimulatorWindow.svelte';
     import * as Blockly from 'blockly/core';
     // Import the list of blocks so it gets loaded into blockly
     import 'blockly/blocks';
@@ -43,6 +44,7 @@
     let variableCreateCallback: variableFlyout.VariableCreateCallback | undefined = undefined;
     let procedureDialogOpen = false;
     let procedureCreateCallback: procedureFlyout.ProcedureCreateCallback | undefined = undefined;
+    let simulatorOpen = false;
 
     function createProcedureDialog(callback: procedureFlyout.ProcedureCreateCallback) {
         procedureCreateCallback = callback;
@@ -76,6 +78,7 @@
             renderer: 'spike_renderer',
             grid: { spacing: 20, length: 3, colour: '#ccc', snap: true },
             theme: 'spike',
+            media: 'blockly/media/',
             zoom: {
                 controls: true,
                 wheel: false,
@@ -167,7 +170,9 @@
         }
     }
 
-    function runRobot() {}
+    function runRobot() {
+        simulatorOpen = true;
+    }
 </script>
 
 {#key numberOfLoads}
@@ -179,6 +184,7 @@
     bind:type={variableType}
 />
 <ProcedureDialog bind:modalOpen={procedureDialogOpen} bind:callback={procedureCreateCallback} />
+<SpikeSimulatorWindow bind:modalOpen={simulatorOpen} />
 <div class="relative w-full h-full flex flex-col overflow-hidden">
     <div class="flex flex-row bg-gray-100 gap-2 p-2 items-center">
         <Button color="light" class="!p-2" on:click={askForFile}>
@@ -197,9 +203,6 @@
     </div>
     <div class="flex-1 w-full overflow-hidden">
         <div id="blocklyDiv" />
-        <xml id="toolbox" style="display:none">
-            <slot />
-        </xml>
     </div>
 </div>
 

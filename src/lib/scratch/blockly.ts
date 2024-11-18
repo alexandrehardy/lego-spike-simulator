@@ -372,7 +372,7 @@ export function convertToBlockly(project: Sb3Project): BlocklyState | undefined 
                         if (label.length > 0) {
                             label = label + ' ' + nextPart;
                         } else {
-                            label = nextPart;
+                            label = nextPart ?? '';
                         }
                     }
                 }
@@ -406,7 +406,7 @@ export function convertToBlockly(project: Sb3Project): BlocklyState | undefined 
                         if (label.length > 0) {
                             label = label + ' ' + nextPart;
                         } else {
-                            label = nextPart;
+                            label = nextPart ?? '';
                         }
                     }
                 }
