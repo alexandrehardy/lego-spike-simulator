@@ -40,7 +40,6 @@
     dialogClass="fixed top-0 start-0 end-0 h-modal md:inset-0 md:h-full z-[90] w-full p-4 flex"
     {title}
     bind:open={modalOpen}
-    autoclose
 >
     <Input id="variable_name" size="lg" placeholder="myVariable" bind:value={variableName} />
     <Button on:click={cancel}>CANCEL</Button>

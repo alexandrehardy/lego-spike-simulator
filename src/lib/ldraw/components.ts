@@ -1,3 +1,4 @@
+import { writable } from 'svelte/store';
 import JSZip from 'jszip';
 
 export type Matrix = number[];
@@ -57,11 +58,16 @@ export interface PartDetail {
     model: Model;
 }
 
-type ResolverCallback = (part: PartDetail) => boolean;
+export interface LDrawStore {
+    robotModel: Model | undefined;
+    unresolved: string[];
+}
+
+type ResolverCallback = (part: PartDetail) => void;
 
 export let robotModel: Model | undefined;
 export const components = new Map<string, Model>();
-export const unresolved = new Map<string, Model[]>();
+export const unresolved = new Map<string, ResolverCallback[]>();
 
 export function getUnresolvedParts() {
     return Array.from(unresolved.keys());
@@ -69,7 +75,29 @@ export function getUnresolvedParts() {
 
 export async function setRobotFromFile(file: File) {
     robotModel = loadModel(await file.text());
+    console.log(robotModel);
+    componentStore.set({ robotModel: robotModel, unresolved: getUnresolvedParts() });
     return robotModel;
+}
+
+export function getRobotModel() {
+    return robotModel;
+}
+
+export function resolveSubpart(subpart: Subpart) {
+    const model = components.get(subpart.modelNumber);
+    if (model) {
+        subpart.model = model;
+    } else {
+        let callbacks = unresolved.get(subpart.modelNumber);
+        if (!callbacks) {
+            callbacks = [];
+        }
+        callbacks.push((part: PartDetail) => {
+            subpart.model = part.model;
+        });
+        unresolved.set(subpart.modelNumber, callbacks);
+    }
 }
 
 export function loadModel(content: string): Model {
@@ -99,15 +127,14 @@ export function loadModel(content: string): Model {
             const h = parts[12];
             const i = parts[13];
             const subpart = parts[14];
-            const entry = {
+            const entry: Subpart = {
                 colour: +colour,
                 matrix: [+a, +b, +c, +x, +d, +e, +f, +y, +g, +h, +i, +z, 0, 0, 0, 1],
                 model: undefined,
                 modelNumber: subpart
             };
-            // TODO: Check for if the model is defined
-            // And register a resolver if not
             model.subparts.push(entry);
+            resolveSubpart(entry);
         } else if (parts[0] == '2') {
             // line
             const colour = parts[1];
@@ -177,7 +204,7 @@ export function loadModel(content: string): Model {
             const x4 = parts[11];
             const y4 = parts[12];
             const z4 = parts[13];
-            model.quads.push({
+            model.optionalLines.push({
                 colour: +colour,
                 p1: { x: +x1, y: +y1, z: +z1 },
                 p2: { x: +x2, y: +y2, z: +z2 },
@@ -189,4 +216,39 @@ export function loadModel(content: string): Model {
     return model;
 }
 
-export function resolveFromZip(zipFile: File) {}
+export async function resolveFromZip(f: File) {
+    let unresolvedParts = getUnresolvedParts();
+    const failedParts: string[] = [];
+    const zip = new JSZip();
+    const zipFile = await zip.loadAsync(f);
+    while (unresolvedParts.length > 0) {
+        for (const part of unresolvedParts) {
+            const unixPart = part.replace('\\', '/');
+            console.log(part);
+            let file = zipFile.file(`ldraw/parts/${unixPart}`);
+            if (!file) {
+                file = zipFile.file(`ldraw/p/${unixPart}`);
+            }
+            if (!file) {
+                console.log(`Missing ldraw/parts/${unixPart} in part library`);
+                failedParts.push(part);
+                continue;
+            }
+            const content = await file.async('string');
+            const model = loadModel(content);
+            components.set(part, model);
+            const callbacks = unresolved.get(part);
+            if (callbacks) {
+                for (const callback of callbacks) {
+                    callback({ partNumber: part, model: model });
+                }
+            }
+            unresolved.delete(part);
+        }
+        unresolvedParts = getUnresolvedParts();
+        componentStore.set({ robotModel: robotModel, unresolved: unresolvedParts });
+        unresolvedParts = unresolvedParts.filter((p) => failedParts.findIndex((v) => v == p) < 0);
+    }
+}
+
+export const componentStore = writable<LDrawStore>({ robotModel: undefined, unresolved: [] });

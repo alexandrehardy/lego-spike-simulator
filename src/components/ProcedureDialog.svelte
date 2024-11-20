@@ -112,7 +112,6 @@
     dialogClass="fixed top-0 start-0 end-0 h-modal md:inset-0 md:h-full z-[90] w-full p-4 flex"
     title="Make a block"
     bind:open={modalOpen}
-    autoclose
 >
     <div class="flex flex-col gap-2">
         <div
