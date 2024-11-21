@@ -86,8 +86,8 @@
     onMount(() => {
         const canvas = document.getElementById('robot_preview');
         if (canvas) {
-            gl = new WebGL(canvas as HTMLCanvasElement);
-            if (gl.enabled) {
+            gl = WebGL.create(canvas as HTMLCanvasElement);
+            if (gl) {
                 renderSetup();
             }
         } else {
