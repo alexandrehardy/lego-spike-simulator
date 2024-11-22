@@ -5,14 +5,14 @@ import {
     type Triangle,
     type Quad,
     type Colour,
-    type InheritColour
+    type BrickColour
 } from '$lib/ldraw/components';
 
 import * as m4 from '$lib/ldraw/m4';
 
 export interface CompiledModel {
     vertices: Float32Array;
-    colors: Float32Array;
+    colours: Float32Array;
     lineOffset: number;
     lines: number;
     triangleOffset: number;
@@ -27,14 +27,14 @@ export class WebGL {
     modelMatrix: m4.Matrix4;
     matrixStack: m4.Matrix4[];
     vertexAttribute: GLint;
-    colorAttribute: GLint;
+    colourAttribute: GLint;
     projectionMatrixUniform: WebGLUniformLocation | null;
     modelMatrixUniform: WebGLUniformLocation | null;
     vertexBuffer: WebGLBuffer | null;
-    colorBuffer: WebGLBuffer | null;
-    parentColor: Colour;
+    colourBuffer: WebGLBuffer | null;
+    parentColour: BrickColour;
     compileVertices: number[];
-    compileColors: number[];
+    compileColours: number[];
     compileMatrix: m4.Matrix4;
     compiledLines: number;
     compiledTriangles: number;
@@ -55,16 +55,21 @@ export class WebGL {
         this.modelMatrix = m4.identity();
         this.projectionMatrix = m4.identity();
         this.vertexAttribute = -1;
-        this.colorAttribute = -1;
+        this.colourAttribute = -1;
         this.projectionMatrixUniform = -1;
         this.modelMatrixUniform = -1;
         this.projectionMatrixUniform = null;
         this.modelMatrixUniform = null;
         this.vertexBuffer = null;
-        this.colorBuffer = null;
-        this.parentColor = { r: 1.0, g: 1.0, b: 1.0, a: 1.0 };
+        this.colourBuffer = null;
+        this.parentColour = {
+            inheritSurface: false,
+            inheritEdge: false,
+            surface: { r: 1.0, g: 1.0, b: 1.0, a: 1.0 },
+            edge: { r: 1.0, g: 1.0, b: 1.0, a: 1.0 }
+        };
         this.compileMatrix = m4.identity();
-        this.compileColors = [];
+        this.compileColours = [];
         this.compileVertices = [];
         this.compiledLines = 0;
         this.compiledTriangles = 0;
@@ -159,7 +164,7 @@ export class WebGL {
         }
     }
 
-    clearColor(r: number, g: number, b: number) {
+    clearColour(r: number, g: number, b: number) {
         this.gl.clearColor(r, g, b, 1.0);
     }
 
@@ -171,45 +176,61 @@ export class WebGL {
         this.gl.flush();
     }
 
-    getColour(colour: Colour | InheritColour): Colour {
-        const inherit = colour as InheritColour;
-        if (inherit.edge || inherit.surface) {
-            return this.parentColor;
+    getColour(colour: BrickColour, edge: boolean): Colour {
+        if (colour.inheritEdge) {
+            return this.parentColour.edge;
         }
-        return colour as Colour;
+        if (colour.inheritSurface) {
+            return this.parentColour.surface;
+        }
+        if (edge) {
+            return colour.edge;
+        } else {
+            return colour.surface;
+        }
+    }
+
+    getParentColour(colour: BrickColour): BrickColour {
+        const inherit = colour.inheritEdge || colour.inheritSurface;
+        return {
+            inheritEdge: false,
+            inheritSurface: false,
+            edge: inherit ? this.parentColour.edge : colour.edge,
+            surface: inherit ? this.parentColour.surface : colour.surface
+        };
     }
 
     drawTriangles(triangles: Triangle[]) {
         if (!this.vertexBuffer) {
             return;
         }
-        if (!this.colorBuffer) {
+        if (!this.colourBuffer) {
             return;
         }
         const vertices: number[] = [];
-        const colors: number[] = [];
+        const colours: number[] = [];
         for (const t of triangles) {
-            const colour = this.getColour(t.colour);
-            colors.push(colour.r);
-            colors.push(colour.g);
-            colors.push(colour.b);
-            colors.push(colour.a);
+            const colour = this.getColour(t.colour, false);
+            colours.push(colour.r);
+            colours.push(colour.g);
+            colours.push(colour.b);
+            colours.push(colour.a);
             vertices.push(t.p1.x);
             vertices.push(t.p1.y);
             vertices.push(t.p1.z);
             vertices.push(1.0);
-            colors.push(colour.r);
-            colors.push(colour.g);
-            colors.push(colour.b);
-            colors.push(colour.a);
+            colours.push(colour.r);
+            colours.push(colour.g);
+            colours.push(colour.b);
+            colours.push(colour.a);
             vertices.push(t.p2.x);
             vertices.push(t.p2.y);
             vertices.push(t.p2.z);
             vertices.push(1.0);
-            colors.push(colour.r);
-            colors.push(colour.g);
-            colors.push(colour.b);
-            colors.push(colour.a);
+            colours.push(colour.r);
+            colours.push(colour.g);
+            colours.push(colour.b);
+            colours.push(colour.a);
             vertices.push(t.p3.x);
             vertices.push(t.p3.y);
             vertices.push(t.p3.z);
@@ -218,9 +239,9 @@ export class WebGL {
         this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.vertexBuffer);
         this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(vertices), this.gl.STATIC_DRAW);
         this.gl.vertexAttribPointer(this.vertexAttribute, 4, this.gl.FLOAT, false, 0, 0);
-        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.colorBuffer);
-        this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(colors), this.gl.STATIC_DRAW);
-        this.gl.vertexAttribPointer(this.colorAttribute, 4, this.gl.FLOAT, false, 0, 0);
+        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.colourBuffer);
+        this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(colours), this.gl.STATIC_DRAW);
+        this.gl.vertexAttribPointer(this.colourAttribute, 4, this.gl.FLOAT, false, 0, 0);
         this.gl.drawArrays(this.gl.TRIANGLES, 0, triangles.length * 3);
     }
 
@@ -228,25 +249,25 @@ export class WebGL {
         if (!this.vertexBuffer) {
             return;
         }
-        if (!this.colorBuffer) {
+        if (!this.colourBuffer) {
             return;
         }
         const vertices: number[] = [];
-        const colors: number[] = [];
+        const colours: number[] = [];
         for (const l of lines) {
-            const colour = this.getColour(l.colour);
-            colors.push(colour.r);
-            colors.push(colour.g);
-            colors.push(colour.b);
-            colors.push(colour.a);
+            const colour = this.getColour(l.colour, true);
+            colours.push(colour.r);
+            colours.push(colour.g);
+            colours.push(colour.b);
+            colours.push(colour.a);
             vertices.push(l.p1.x);
             vertices.push(l.p1.y);
             vertices.push(l.p1.z);
             vertices.push(1.0);
-            colors.push(colour.r);
-            colors.push(colour.g);
-            colors.push(colour.b);
-            colors.push(colour.a);
+            colours.push(colour.r);
+            colours.push(colour.g);
+            colours.push(colour.b);
+            colours.push(colour.a);
             vertices.push(l.p2.x);
             vertices.push(l.p2.y);
             vertices.push(l.p2.z);
@@ -255,9 +276,9 @@ export class WebGL {
         this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.vertexBuffer);
         this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(vertices), this.gl.STATIC_DRAW);
         this.gl.vertexAttribPointer(this.vertexAttribute, 4, this.gl.FLOAT, false, 0, 0);
-        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.colorBuffer);
-        this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(colors), this.gl.STATIC_DRAW);
-        this.gl.vertexAttribPointer(this.colorAttribute, 4, this.gl.FLOAT, false, 0, 0);
+        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.colourBuffer);
+        this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(colours), this.gl.STATIC_DRAW);
+        this.gl.vertexAttribPointer(this.colourAttribute, 4, this.gl.FLOAT, false, 0, 0);
         this.gl.drawArrays(this.gl.LINES, 0, lines.length * 2);
     }
 
@@ -265,57 +286,57 @@ export class WebGL {
         if (!this.vertexBuffer) {
             return;
         }
-        if (!this.colorBuffer) {
+        if (!this.colourBuffer) {
             return;
         }
         const vertices: number[] = [];
-        const colors: number[] = [];
+        const colours: number[] = [];
         for (const q of quads) {
-            const colour = this.getColour(q.colour);
-            colors.push(colour.r);
-            colors.push(colour.g);
-            colors.push(colour.b);
-            colors.push(colour.a);
+            const colour = this.getColour(q.colour, false);
+            colours.push(colour.r);
+            colours.push(colour.g);
+            colours.push(colour.b);
+            colours.push(colour.a);
             vertices.push(q.p1.x);
             vertices.push(q.p1.y);
             vertices.push(q.p1.z);
             vertices.push(1.0);
-            colors.push(colour.r);
-            colors.push(colour.g);
-            colors.push(colour.b);
-            colors.push(colour.a);
+            colours.push(colour.r);
+            colours.push(colour.g);
+            colours.push(colour.b);
+            colours.push(colour.a);
             vertices.push(q.p2.x);
             vertices.push(q.p2.y);
             vertices.push(q.p2.z);
             vertices.push(1.0);
-            colors.push(colour.r);
-            colors.push(colour.g);
-            colors.push(colour.b);
-            colors.push(colour.a);
+            colours.push(colour.r);
+            colours.push(colour.g);
+            colours.push(colour.b);
+            colours.push(colour.a);
             vertices.push(q.p4.x);
             vertices.push(q.p4.y);
             vertices.push(q.p4.z);
             vertices.push(1.0);
-            colors.push(colour.r);
-            colors.push(colour.g);
-            colors.push(colour.b);
-            colors.push(colour.a);
+            colours.push(colour.r);
+            colours.push(colour.g);
+            colours.push(colour.b);
+            colours.push(colour.a);
             vertices.push(q.p4.x);
             vertices.push(q.p4.y);
             vertices.push(q.p4.z);
             vertices.push(1.0);
-            colors.push(colour.r);
-            colors.push(colour.g);
-            colors.push(colour.b);
-            colors.push(colour.a);
+            colours.push(colour.r);
+            colours.push(colour.g);
+            colours.push(colour.b);
+            colours.push(colour.a);
             vertices.push(q.p2.x);
             vertices.push(q.p2.y);
             vertices.push(q.p2.z);
             vertices.push(1.0);
-            colors.push(colour.r);
-            colors.push(colour.g);
-            colors.push(colour.b);
-            colors.push(colour.a);
+            colours.push(colour.r);
+            colours.push(colour.g);
+            colours.push(colour.b);
+            colours.push(colour.a);
             vertices.push(q.p3.x);
             vertices.push(q.p3.y);
             vertices.push(q.p3.z);
@@ -324,9 +345,9 @@ export class WebGL {
         this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.vertexBuffer);
         this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(vertices), this.gl.STATIC_DRAW);
         this.gl.vertexAttribPointer(this.vertexAttribute, 4, this.gl.FLOAT, false, 0, 0);
-        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.colorBuffer);
-        this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(colors), this.gl.STATIC_DRAW);
-        this.gl.vertexAttribPointer(this.colorAttribute, 4, this.gl.FLOAT, false, 0, 0);
+        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.colourBuffer);
+        this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(colours), this.gl.STATIC_DRAW);
+        this.gl.vertexAttribPointer(this.colourAttribute, 4, this.gl.FLOAT, false, 0, 0);
         this.gl.drawArrays(this.gl.TRIANGLES, 0, quads.length * 6);
     }
 
@@ -334,34 +355,34 @@ export class WebGL {
         this.drawLines(model.lines);
         this.drawTriangles(model.triangles);
         this.drawQuads(model.quads);
-        const oldParent = this.parentColor;
+        const oldParent = this.parentColour;
         for (const subpart of model.subparts) {
-            this.parentColor = this.getColour(subpart.colour);
+            this.parentColour = this.getParentColour(subpart.colour);
             if (subpart.model) {
                 this.pushMatrix();
                 this.multMatrix(subpart.matrix);
                 this.drawModel(subpart.model);
                 this.popMatrix();
             }
-            this.parentColor = oldParent;
+            this.parentColour = oldParent;
         }
     }
 
     compileQuads(quads: Quad[]) {
         for (const q of quads) {
-            const colour = this.getColour(q.colour);
-            this.compileColors.push(colour.r);
-            this.compileColors.push(colour.g);
-            this.compileColors.push(colour.b);
-            this.compileColors.push(colour.a);
-            this.compileColors.push(colour.r);
-            this.compileColors.push(colour.g);
-            this.compileColors.push(colour.b);
-            this.compileColors.push(colour.a);
-            this.compileColors.push(colour.r);
-            this.compileColors.push(colour.g);
-            this.compileColors.push(colour.b);
-            this.compileColors.push(colour.a);
+            const colour = this.getColour(q.colour, false);
+            this.compileColours.push(colour.r);
+            this.compileColours.push(colour.g);
+            this.compileColours.push(colour.b);
+            this.compileColours.push(colour.a);
+            this.compileColours.push(colour.r);
+            this.compileColours.push(colour.g);
+            this.compileColours.push(colour.b);
+            this.compileColours.push(colour.a);
+            this.compileColours.push(colour.r);
+            this.compileColours.push(colour.g);
+            this.compileColours.push(colour.b);
+            this.compileColours.push(colour.a);
             let v = m4.transformVector(this.compileMatrix, [q.p1.x, q.p1.y, q.p1.z, 1]);
             this.compileVertices.push(v[0]);
             this.compileVertices.push(v[1]);
@@ -379,18 +400,18 @@ export class WebGL {
             this.compileVertices.push(v[3]);
             this.compiledTriangles++;
 
-            this.compileColors.push(colour.r);
-            this.compileColors.push(colour.g);
-            this.compileColors.push(colour.b);
-            this.compileColors.push(colour.a);
-            this.compileColors.push(colour.r);
-            this.compileColors.push(colour.g);
-            this.compileColors.push(colour.b);
-            this.compileColors.push(colour.a);
-            this.compileColors.push(colour.r);
-            this.compileColors.push(colour.g);
-            this.compileColors.push(colour.b);
-            this.compileColors.push(colour.a);
+            this.compileColours.push(colour.r);
+            this.compileColours.push(colour.g);
+            this.compileColours.push(colour.b);
+            this.compileColours.push(colour.a);
+            this.compileColours.push(colour.r);
+            this.compileColours.push(colour.g);
+            this.compileColours.push(colour.b);
+            this.compileColours.push(colour.a);
+            this.compileColours.push(colour.r);
+            this.compileColours.push(colour.g);
+            this.compileColours.push(colour.b);
+            this.compileColours.push(colour.a);
             v = m4.transformVector(this.compileMatrix, [q.p4.x, q.p4.y, q.p4.z, 1]);
             this.compileVertices.push(v[0]);
             this.compileVertices.push(v[1]);
@@ -412,19 +433,19 @@ export class WebGL {
 
     compileTriangles(triangles: Triangle[]) {
         for (const t of triangles) {
-            const colour = this.getColour(t.colour);
-            this.compileColors.push(colour.r);
-            this.compileColors.push(colour.g);
-            this.compileColors.push(colour.b);
-            this.compileColors.push(colour.a);
-            this.compileColors.push(colour.r);
-            this.compileColors.push(colour.g);
-            this.compileColors.push(colour.b);
-            this.compileColors.push(colour.a);
-            this.compileColors.push(colour.r);
-            this.compileColors.push(colour.g);
-            this.compileColors.push(colour.b);
-            this.compileColors.push(colour.a);
+            const colour = this.getColour(t.colour, false);
+            this.compileColours.push(colour.r);
+            this.compileColours.push(colour.g);
+            this.compileColours.push(colour.b);
+            this.compileColours.push(colour.a);
+            this.compileColours.push(colour.r);
+            this.compileColours.push(colour.g);
+            this.compileColours.push(colour.b);
+            this.compileColours.push(colour.a);
+            this.compileColours.push(colour.r);
+            this.compileColours.push(colour.g);
+            this.compileColours.push(colour.b);
+            this.compileColours.push(colour.a);
             let v = m4.transformVector(this.compileMatrix, [t.p1.x, t.p1.y, t.p1.z, 1]);
             this.compileVertices.push(v[0]);
             this.compileVertices.push(v[1]);
@@ -446,15 +467,15 @@ export class WebGL {
 
     compileLines(lines: Line[]) {
         for (const l of lines) {
-            const colour = this.getColour(l.colour);
-            this.compileColors.push(colour.r);
-            this.compileColors.push(colour.g);
-            this.compileColors.push(colour.b);
-            this.compileColors.push(colour.a);
-            this.compileColors.push(colour.r);
-            this.compileColors.push(colour.g);
-            this.compileColors.push(colour.b);
-            this.compileColors.push(colour.a);
+            const colour = this.getColour(l.colour, true);
+            this.compileColours.push(colour.r);
+            this.compileColours.push(colour.g);
+            this.compileColours.push(colour.b);
+            this.compileColours.push(colour.a);
+            this.compileColours.push(colour.r);
+            this.compileColours.push(colour.g);
+            this.compileColours.push(colour.b);
+            this.compileColours.push(colour.a);
             let v = m4.transformVector(this.compileMatrix, [l.p1.x, l.p1.y, l.p1.z, 1]);
             this.compileVertices.push(v[0]);
             this.compileVertices.push(v[1]);
@@ -471,106 +492,75 @@ export class WebGL {
 
     compileSubModelQuads(model: Model) {
         this.compileQuads(model.quads);
-        const oldParent = this.parentColor;
+        const oldParent = this.parentColour;
         for (const subpart of model.subparts) {
-            this.parentColor = this.getColour(subpart.colour);
+            this.parentColour = this.getParentColour(subpart.colour);
             if (subpart.model) {
                 const oldMatrix = this.compileMatrix;
                 this.compileMatrix = m4.multiply(this.compileMatrix, subpart.matrix);
                 this.compileSubModelQuads(subpart.model);
                 this.compileMatrix = oldMatrix;
             }
-            this.parentColor = oldParent;
+            this.parentColour = oldParent;
         }
     }
 
     compileSubModelTriangles(model: Model) {
         this.compileTriangles(model.triangles);
-        const oldParent = this.parentColor;
+        const oldParent = this.parentColour;
         for (const subpart of model.subparts) {
-            this.parentColor = this.getColour(subpart.colour);
+            this.parentColour = this.getParentColour(subpart.colour);
             if (subpart.model) {
                 const oldMatrix = this.compileMatrix;
                 this.compileMatrix = m4.multiply(this.compileMatrix, subpart.matrix);
                 this.compileSubModelTriangles(subpart.model);
                 this.compileMatrix = oldMatrix;
             }
-            this.parentColor = oldParent;
+            this.parentColour = oldParent;
         }
     }
 
     compileSubModelLines(model: Model) {
         this.compileLines(model.lines);
-        const oldParent = this.parentColor;
+        const oldParent = this.parentColour;
         for (const subpart of model.subparts) {
-            this.parentColor = this.getColour(subpart.colour);
+            this.parentColour = this.getParentColour(subpart.colour);
             if (subpart.model) {
                 const oldMatrix = this.compileMatrix;
                 this.compileMatrix = m4.multiply(this.compileMatrix, subpart.matrix);
                 this.compileSubModelLines(subpart.model);
                 this.compileMatrix = oldMatrix;
             }
-            this.parentColor = oldParent;
+            this.parentColour = oldParent;
         }
     }
 
     compileModel(model: Model): CompiledModel {
         this.compiledLines = 0;
         this.compiledTriangles = 0;
-        this.compileColors = [];
+        this.compileColours = [];
         this.compileVertices = [];
 
         this.compileMatrix = m4.identity();
-        this.compileLines(model.lines);
-        const oldParent = this.parentColor;
-        for (const subpart of model.subparts) {
-            this.parentColor = this.getColour(subpart.colour);
-            if (subpart.model) {
-                const oldMatrix = this.compileMatrix;
-                this.compileMatrix = m4.multiply(this.compileMatrix, subpart.matrix);
-                this.compileSubModelLines(subpart.model);
-                this.compileMatrix = oldMatrix;
-            }
-            this.parentColor = oldParent;
-        }
+        this.compileSubModelLines(model);
 
         const triangleOffset = this.compileVertices.length;
         this.compileMatrix = m4.identity();
-        this.compileTriangles(model.triangles);
-        for (const subpart of model.subparts) {
-            this.parentColor = this.getColour(subpart.colour);
-            if (subpart.model) {
-                const oldMatrix = this.compileMatrix;
-                this.compileMatrix = m4.multiply(this.compileMatrix, subpart.matrix);
-                this.compileSubModelTriangles(subpart.model);
-                this.compileMatrix = oldMatrix;
-            }
-            this.parentColor = oldParent;
-        }
+        this.compileSubModelTriangles(model);
 
         this.compileMatrix = m4.identity();
-        this.compileQuads(model.quads);
-        for (const subpart of model.subparts) {
-            this.parentColor = this.getColour(subpart.colour);
-            if (subpart.model) {
-                const oldMatrix = this.compileMatrix;
-                this.compileMatrix = m4.multiply(this.compileMatrix, subpart.matrix);
-                this.compileSubModelQuads(subpart.model);
-                this.compileMatrix = oldMatrix;
-            }
-            this.parentColor = oldParent;
-        }
+        this.compileSubModelQuads(model);
 
         const compiledModel = {
             vertices: new Float32Array(this.compileVertices),
-            colors: new Float32Array(this.compileColors),
+            colours: new Float32Array(this.compileColours),
             lineOffset: 0,
             lines: this.compiledLines,
             triangleOffset: triangleOffset / 4,
             triangles: this.compiledTriangles
         };
         this.compileMatrix = m4.identity();
-        this.compileColors = [];
+        this.compileColours = [];
         this.compileVertices = [];
         return compiledModel;
     }
@@ -579,15 +569,18 @@ export class WebGL {
         if (!this.vertexBuffer) {
             return;
         }
-        if (!this.colorBuffer) {
+        if (!this.colourBuffer) {
+            return;
+        }
+        if (model.lines + model.triangles == 0) {
             return;
         }
         this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.vertexBuffer);
         this.gl.bufferData(this.gl.ARRAY_BUFFER, model.vertices, this.gl.STATIC_DRAW);
         this.gl.vertexAttribPointer(this.vertexAttribute, 4, this.gl.FLOAT, false, 0, 0);
-        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.colorBuffer);
-        this.gl.bufferData(this.gl.ARRAY_BUFFER, model.colors, this.gl.STATIC_DRAW);
-        this.gl.vertexAttribPointer(this.colorAttribute, 4, this.gl.FLOAT, false, 0, 0);
+        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.colourBuffer);
+        this.gl.bufferData(this.gl.ARRAY_BUFFER, model.colours, this.gl.STATIC_DRAW);
+        this.gl.vertexAttribPointer(this.colourAttribute, 4, this.gl.FLOAT, false, 0, 0);
         this.gl.drawArrays(this.gl.LINES, model.lineOffset, model.lines * 2);
         this.gl.drawArrays(this.gl.TRIANGLES, model.triangleOffset, model.triangles * 3);
     }
@@ -607,7 +600,7 @@ export class WebGL {
             this.pipeline = this.createProgram(vertexShader, fragmentShader);
             if (this.pipeline) {
                 this.gl.useProgram(this.pipeline);
-                this.colorAttribute = this.gl.getAttribLocation(this.pipeline, 'a_color');
+                this.colourAttribute = this.gl.getAttribLocation(this.pipeline, 'a_colour');
                 this.vertexAttribute = this.gl.getAttribLocation(this.pipeline, 'a_vertex');
                 this.modelMatrixUniform = this.gl.getUniformLocation(this.pipeline, 'model_matrix');
                 this.projectionMatrixUniform = this.gl.getUniformLocation(
@@ -627,13 +620,13 @@ export class WebGL {
                 if (this.vertexAttribute >= 0) {
                     this.gl.enableVertexAttribArray(this.vertexAttribute);
                 }
-                if (this.colorAttribute >= 0) {
-                    this.gl.enableVertexAttribArray(this.colorAttribute);
+                if (this.colourAttribute >= 0) {
+                    this.gl.enableVertexAttribArray(this.colourAttribute);
                 }
             }
         }
         this.vertexBuffer = this.gl.createBuffer();
-        this.colorBuffer = this.gl.createBuffer();
+        this.colourBuffer = this.gl.createBuffer();
         this.gl.enable(this.gl.DEPTH_TEST);
         this.gl.depthFunc(this.gl.LESS);
     }

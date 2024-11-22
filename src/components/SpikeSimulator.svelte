@@ -1,19 +1,15 @@
 <script lang="ts">
-    import { onMount } from 'svelte';
+    import { onDestroy, onMount } from 'svelte';
     import { Button } from 'flowbite-svelte';
-    import {
-        type LDrawStore,
-        componentStore,
-        resolveFromZip,
-        setRobotFromFile
-    } from '$lib/ldraw/components';
+    import { componentStore, resolveFromZip, setRobotFromFile } from '$lib/ldraw/components';
     import { WebGL, type CompiledModel } from '$lib/ldraw/gl';
     import { type Model } from '$lib/ldraw/components';
 
     export let modalOpen = false;
     let numberOfLoads = 0;
     let gl: WebGL | undefined;
-    let compiledRobot: CompiledModel | undefined = doCompile($componentStore.robotModel);
+    let compiledRobot: CompiledModel | undefined;
+    let interval: intervalID | undefined;
 
     function loadRobot() {
         const element = document.getElementById('load_robot');
@@ -64,7 +60,7 @@
             return;
         }
         gl.setModelIdentity();
-        gl.clearColor(0.0, 0.0, 0.0);
+        gl.clearColour(0.0, 0.0, 0.0);
         gl.clear();
         gl.translate(0, 0, -20);
         gl.rotate(angle, 1.0, 1.0, 0.0);
@@ -97,11 +93,21 @@
         const canvas = document.getElementById('robot_preview');
         if (canvas) {
             gl = WebGL.create(canvas as HTMLCanvasElement);
-            setInterval(() => {
+            if (gl) {
+                compiledRobot = doCompile($componentStore.robotModel);
+            }
+            interval = setInterval(() => {
                 renderRobot();
             }, 33);
         } else {
             console.log('No WebGL available');
+        }
+    });
+
+    onDestroy(() => {
+        if (interval) {
+            clearInterval(interval);
+            interval = undefined;
         }
     });
 

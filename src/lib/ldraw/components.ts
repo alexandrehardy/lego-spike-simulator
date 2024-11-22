@@ -4,11 +4,6 @@ import JSZip from 'jszip';
 
 export type Matrix = number[];
 
-export interface InheritColour {
-    edge?: boolean;
-    surface?: boolean;
-}
-
 export interface Colour {
     r: number;
     g: number;
@@ -16,6 +11,12 @@ export interface Colour {
     a: number;
 }
 
+export interface BrickColour {
+    inheritSurface: boolean;
+    inheritEdge: boolean;
+    edge: Colour;
+    surface: Colour;
+}
 export interface Vertex {
     x: number;
     y: number;
@@ -23,20 +24,20 @@ export interface Vertex {
 }
 
 export interface Line {
-    colour: Colour | InheritColour;
+    colour: BrickColour;
     p1: Vertex;
     p2: Vertex;
 }
 
 export interface Triangle {
-    colour: Colour | InheritColour;
+    colour: BrickColour;
     p1: Vertex;
     p2: Vertex;
     p3: Vertex;
 }
 
 export interface Quad {
-    colour: Colour | InheritColour;
+    colour: BrickColour;
     p1: Vertex;
     p2: Vertex;
     p3: Vertex;
@@ -44,7 +45,7 @@ export interface Quad {
 }
 
 export interface OptionalLine {
-    colour: Colour | InheritColour;
+    colour: BrickColour;
     p1: Vertex;
     p2: Vertex;
     c1: Vertex;
@@ -52,7 +53,7 @@ export interface OptionalLine {
 }
 
 export interface Subpart {
-    colour: Colour | InheritColour;
+    colour: BrickColour;
     matrix: Matrix;
     model: Model | undefined;
     modelNumber: string;
@@ -82,23 +83,46 @@ export let robotModel: Model | undefined;
 export const components = new Map<string, Model>();
 export const unresolved = new Map<string, ResolverCallback[]>();
 
-export function brickColour(id: string, edge: boolean): Colour | InheritColour {
+function hexColor(hex: string) {
+    const bigint = parseInt(hex.substring(1), 16);
+    const r = (bigint >> 16) & 255;
+    const g = (bigint >> 8) & 255;
+    const b = bigint & 255;
+    return { r: r / 255.0, g: g / 255.0, b: b / 255.0, a: 1.0 };
+}
+
+export function brickColour(id: string): BrickColour {
     const record = ldrawColourMap.get(id);
     if (id == '16') {
-        return { surface: true };
+        return {
+            inheritSurface: true,
+            inheritEdge: false,
+            edge: { r: 0.0, g: 0.0, b: 0.0, a: 1.0 },
+            surface: { r: 0.0, g: 0.0, b: 0.0, a: 1.0 }
+        };
     }
     if (id == '24') {
-        return { edge: true };
+        return {
+            inheritSurface: false,
+            inheritEdge: true,
+            edge: { r: 0.0, g: 0.0, b: 0.0, a: 1.0 },
+            surface: { r: 0.0, g: 0.0, b: 0.0, a: 1.0 }
+        };
     }
     if (record) {
-        const hex = edge ? record.EDGE : record.VALUE;
-        const bigint = parseInt(hex.substring(1), 16);
-        const r = (bigint >> 16) & 255;
-        const g = (bigint >> 8) & 255;
-        const b = bigint & 255;
-        return { r: r / 255.0, g: g / 255.0, b: b / 255.0, a: 1.0 };
+        return {
+            inheritSurface: false,
+            inheritEdge: false,
+            edge: hexColor(record.EDGE),
+            surface: hexColor(record.VALUE)
+        };
     } else {
-        return { r: 1.0, g: 1.0, b: 1.0, a: 1.0 };
+        return {
+            inheritSurface: false,
+            inheritEdge: false,
+            edge: { r: 0.0, g: 0.0, b: 0.0, a: 1.0 },
+            surface: { r: 0.0, g: 0.0, b: 0.0, a: 1.0 }
+        };
     }
 }
 
@@ -108,7 +132,6 @@ export function getUnresolvedParts() {
 
 export async function setRobotFromFile(file: File) {
     robotModel = loadModel(await file.text());
-    console.log(robotModel);
     componentStore.set({ robotModel: robotModel, unresolved: getUnresolvedParts() });
     return robotModel;
 }
@@ -161,7 +184,7 @@ export function loadModel(content: string): Model {
             const i = parts[13];
             const subpart = parts[14];
             const entry: Subpart = {
-                colour: brickColour(colour, false),
+                colour: brickColour(colour),
                 matrix: [+a, +d, +g, 0, +b, +e, +h, 0, +c, +f, +i, 0, +x, +y, +z, 1],
                 model: undefined,
                 modelNumber: subpart
@@ -178,7 +201,7 @@ export function loadModel(content: string): Model {
             const y2 = parts[6];
             const z2 = parts[7];
             model.lines.push({
-                colour: brickColour(colour, true),
+                colour: brickColour(colour),
                 p1: { x: +x1, y: +y1, z: +z1 },
                 p2: { x: +x2, y: +y2, z: +z2 }
             });
@@ -195,7 +218,7 @@ export function loadModel(content: string): Model {
             const y3 = parts[9];
             const z3 = parts[10];
             model.triangles.push({
-                colour: brickColour(colour, false),
+                colour: brickColour(colour),
                 p1: { x: +x1, y: +y1, z: +z1 },
                 p2: { x: +x2, y: +y2, z: +z2 },
                 p3: { x: +x3, y: +y3, z: +z3 }
@@ -216,7 +239,7 @@ export function loadModel(content: string): Model {
             const y4 = parts[12];
             const z4 = parts[13];
             model.quads.push({
-                colour: brickColour(colour, false),
+                colour: brickColour(colour),
                 p1: { x: +x1, y: +y1, z: +z1 },
                 p2: { x: +x2, y: +y2, z: +z2 },
                 p3: { x: +x3, y: +y3, z: +z3 },
@@ -238,7 +261,7 @@ export function loadModel(content: string): Model {
             const y4 = parts[12];
             const z4 = parts[13];
             model.optionalLines.push({
-                colour: brickColour(colour, true),
+                colour: brickColour(colour),
                 p1: { x: +x1, y: +y1, z: +z1 },
                 p2: { x: +x2, y: +y2, z: +z2 },
                 c1: { x: +x3, y: +y3, z: +z3 },
@@ -257,7 +280,6 @@ export async function resolveFromZip(f: File) {
     while (unresolvedParts.length > 0) {
         for (const part of unresolvedParts) {
             const unixPart = part.replace('\\', '/');
-            console.log(part);
             let file = zipFile.file(`ldraw/parts/${unixPart}`);
             if (!file) {
                 file = zipFile.file(`ldraw/p/${unixPart}`);
