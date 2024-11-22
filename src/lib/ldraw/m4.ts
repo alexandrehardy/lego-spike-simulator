@@ -347,7 +347,7 @@ export function lookAt(
     cameraPosition: Vector3,
     target: Vector3,
     up: Vector3,
-    dst: Matrix4 | undefined | null
+    dst: Matrix4 | undefined | null = undefined
 ): Matrix4 {
     dst = dst || new MatType(16);
     const zAxis = normalize(subtractVectors(cameraPosition, target));
@@ -398,7 +398,7 @@ export function perspective(
     aspect: number,
     near: number,
     far: number,
-    dst: Matrix4 | undefined | null
+    dst: Matrix4 | undefined | null = undefined
 ) {
     dst = dst || new MatType(16);
     const f = Math.tan(Math.PI * 0.5 - 0.5 * fieldOfViewInRadians);
@@ -449,7 +449,7 @@ export function orthographic(
     top: number,
     near: number,
     far: number,
-    dst: Matrix4 | undefined | null
+    dst: Matrix4 | undefined | null = undefined
 ) {
     dst = dst || new MatType(16);
 
@@ -499,7 +499,7 @@ export function frustum(
     top: number,
     near: number,
     far: number,
-    dst: Matrix4 | undefined | null
+    dst: Matrix4 | undefined | null = undefined
 ): Matrix4 {
     dst = dst || new MatType(16);
 
@@ -540,7 +540,7 @@ export function translation(
     tx: number,
     ty: number,
     tz: number,
-    dst: Matrix4 | undefined | null
+    dst: Matrix4 | undefined | null = undefined
 ): Matrix4 {
     dst = dst || new MatType(16);
 
@@ -579,7 +579,7 @@ export function translate(
     tx: number,
     ty: number,
     tz: number,
-    dst: Matrix4 | undefined | null
+    dst: Matrix4 | undefined | null = undefined
 ): Matrix4 {
     // This is the optimized version of
     // return multiply(m, translation(tx, ty, tz), dst);
@@ -671,7 +671,7 @@ export function xRotation(
 export function xRotate(
     m: Matrix4,
     angleInRadians: number,
-    dst: Matrix4 | undefined | null
+    dst: Matrix4 | undefined | null = undefined
 ): Matrix4 {
     // this is the optimized version of
     // return multiply(m, xRotation(angleInRadians), dst);
@@ -757,7 +757,7 @@ export function yRotation(
 export function yRotate(
     m: Matrix4,
     angleInRadians: number,
-    dst: Matrix4 | undefined | null
+    dst: Matrix4 | undefined | null = undefined
 ): Matrix4 {
     // this is the optimized version of
     // return multiply(m, yRotation(angleInRadians), dst);
@@ -843,7 +843,7 @@ export function zRotation(
 export function zRotate(
     m: Matrix4,
     angleInRadians: number,
-    dst: Matrix4 | undefined | null
+    dst: Matrix4 | undefined | null = undefined
 ): Matrix4 {
     // This is the optimized version of
     // return multiply(m, zRotation(angleInRadians), dst);
@@ -894,7 +894,7 @@ export function zRotate(
 export function axisRotation(
     axis: Vector3,
     angleInRadians: number,
-    dst: Matrix4 | undefined | null
+    dst: Matrix4 | undefined | null = undefined
 ): Matrix4 {
     dst = dst || new MatType(16);
 
@@ -945,7 +945,7 @@ export function axisRotate(
     m: Matrix4,
     axis: Vector4,
     angleInRadians: number,
-    dst: Matrix4 | undefined | null
+    dst: Matrix4 | undefined | null = undefined
 ): Matrix4 {
     // This is the optimized version of
     // return multiply(m, axisRotation(axis, angleInRadians), dst);
@@ -1024,7 +1024,7 @@ export function scaling(
     sx: number,
     sy: number,
     sz: number,
-    dst: Matrix4 | undefined | null
+    dst: Matrix4 | undefined | null = undefined
 ): Matrix4 {
     dst = dst || new MatType(16);
 
@@ -1063,7 +1063,7 @@ export function scale(
     sx: number,
     sy: number,
     sz: number,
-    dst: Matrix4 | undefined | null
+    dst: Matrix4 | undefined | null = undefined
 ): Matrix4 {
     // This is the optimized version of
     // return multiply(m, scaling(sx, sy, sz), dst);
@@ -1104,7 +1104,7 @@ export function compose(
     translation: Vector3,
     quaternion: Quaternion,
     scale: Vector3,
-    dst: Matrix4 | undefined | null
+    dst: Matrix4 | undefined | null = undefined
 ): Matrix4 {
     dst = dst || new MatType(16);
 
@@ -1452,7 +1452,7 @@ export function transformPoint(
 export function transformDirection(
     m: Matrix4,
     v: Vector3,
-    dst: Vector3 | undefined | null
+    dst: Vector3 | undefined | null = undefined
 ): Vector3 {
     dst = dst || new MatType(3);
 

@@ -1,4 +1,13 @@
-import { vertex_shader_2d, fragment_shader_2d } from '$lib/ldraw/shaders';
+import { vertex_shader, fragment_shader } from '$lib/ldraw/shaders';
+import {
+    type Model,
+    type Line,
+    type Triangle,
+    type Quad,
+    type Colour,
+    type InheritColour
+} from '$lib/ldraw/components';
+
 import * as m4 from '$lib/ldraw/m4';
 
 export class WebGL {
@@ -7,8 +16,14 @@ export class WebGL {
     canvas: HTMLCanvasElement;
     projectionMatrix: m4.Matrix4;
     modelMatrix: m4.Matrix4;
-    modelInverseMatrix: m4.Matrix4;
     matrixStack: m4.Matrix4[];
+    vertexAttribute: GLint;
+    colorAttribute: GLint;
+    projectionMatrixUniform: WebGLUniformLocation | null;
+    modelMatrixUniform: WebGLUniformLocation | null;
+    vertexBuffer: WebGLBuffer | null;
+    colorBuffer: WebGLBuffer | null;
+    parentColor: Colour;
 
     static create(canvas: HTMLCanvasElement): WebGL | undefined {
         const gl = canvas.getContext('webgl');
@@ -24,8 +39,16 @@ export class WebGL {
         this.gl = gl;
         this.matrixStack = [];
         this.modelMatrix = m4.identity();
-        this.modelInverseMatrix = m4.identity();
         this.projectionMatrix = m4.identity();
+        this.vertexAttribute = -1;
+        this.colorAttribute = -1;
+        this.projectionMatrixUniform = -1;
+        this.modelMatrixUniform = -1;
+        this.projectionMatrixUniform = null;
+        this.modelMatrixUniform = null;
+        this.vertexBuffer = null;
+        this.colorBuffer = null;
+        this.parentColor = { r: 1.0, g: 1.0, b: 1.0, a: 1.0 };
         this.setupPipeline();
     }
 
@@ -36,6 +59,9 @@ export class WebGL {
             near,
             far
         );
+        if (this.projectionMatrixUniform) {
+            this.gl.uniformMatrix4fv(this.projectionMatrixUniform, false, this.projectionMatrix);
+        }
     }
 
     setFrustum(
@@ -47,68 +73,304 @@ export class WebGL {
         far: number
     ) {
         this.projectionMatrix = m4.frustum(left, right, bottom, top, near, far);
+        if (this.projectionMatrixUniform) {
+            this.gl.uniformMatrix4fv(this.projectionMatrixUniform, false, this.projectionMatrix);
+        }
     }
 
     setOrtho(left: number, right: number, bottom: number, top: number, near: number, far: number) {
         this.projectionMatrix = m4.orthographic(left, right, bottom, top, near, far);
+        if (this.projectionMatrixUniform) {
+            this.gl.uniformMatrix4fv(this.projectionMatrixUniform, false, this.projectionMatrix);
+        }
     }
 
     setProjectionIdentity() {
         this.projectionMatrix = m4.identity();
+        if (this.projectionMatrixUniform) {
+            this.gl.uniformMatrix4fv(this.projectionMatrixUniform, false, this.projectionMatrix);
+        }
     }
 
     setModelIdentity() {
         this.modelMatrix = m4.identity();
-        this.modelInverseMatrix = m4.identity();
+        if (this.modelMatrixUniform) {
+            this.gl.uniformMatrix4fv(this.modelMatrixUniform, false, this.modelMatrix);
+        }
     }
 
     pushMatrix() {
-        this.matrixStack.push(copy(this.modelMatrix));
-        this.matrixStack.push(copy(this.modelInverseMatrix));
+        this.matrixStack.push(m4.copy(this.modelMatrix));
     }
 
     popMatrix() {
-        this.modelInverseMatrix = this.matrixStack.pop();
-        this.modelMatrix = this.matrixStack.pop();
+        this.modelMatrix = this.matrixStack.pop()!;
+        if (this.modelMatrixUniform) {
+            this.gl.uniformMatrix4fv(this.modelMatrixUniform, false, this.modelMatrix);
+        }
     }
 
     translate(x: number, y: number, z: number) {
         this.modelMatrix = m4.translate(this.modelMatrix, x, y, z);
-        this.modelInverseMatrix = m4.multiply(m4.translation(-x, -y, -z), this.modelInverseMatrix);
+        if (this.modelMatrixUniform) {
+            this.gl.uniformMatrix4fv(this.modelMatrixUniform, false, this.modelMatrix);
+        }
     }
 
     rotate(angle: number, x: number, y: number, z: number) {
         const radians = (angle * Math.PI) / 180.0;
         this.modelMatrix = m4.axisRotate(this.modelMatrix, [x, y, z], radians);
-        this.modelInverseMatrix = m4.multiply(
-            m4.axisRotation([x, y, z], -radians),
-            this.modelInverseMatrix
-        );
+        if (this.modelMatrixUniform) {
+            this.gl.uniformMatrix4fv(this.modelMatrixUniform, false, this.modelMatrix);
+        }
     }
 
     scale(s: number) {
         // The inverse is incorrect for non-unifor scaling
         this.modelMatrix = m4.scale(this.modelMatrix, s, s, s);
-        this.modelInverseMatrix = m4.multiply(
-            m4.scaling(1.0 / s, 1.0 / s, 1.0 / s),
-            this.modelInverseMatrix
-        );
+        if (this.modelMatrixUniform) {
+            this.gl.uniformMatrix4fv(this.modelMatrixUniform, false, this.modelMatrix);
+        }
+    }
+
+    multMatrix(m: m4.Matrix4) {
+        this.modelMatrix = m4.multiply(this.modelMatrix, m);
+        if (this.modelMatrixUniform) {
+            this.gl.uniformMatrix4fv(this.modelMatrixUniform, false, this.modelMatrix);
+        }
+    }
+
+    clearColor(r: number, g: number, b: number) {
+        this.gl.clearColor(r, g, b, 1.0);
+    }
+
+    clear() {
+        this.gl.clear(this.gl.COLOR_BUFFER_BIT);
+    }
+
+    flush() {
+        this.gl.flush();
+    }
+
+    getColour(colour: Colour | InheritColour): Colour {
+        const inherit = colour as InheritColour;
+        if (inherit.edge || inherit.surface) {
+            return this.parentColor;
+        }
+        return colour as Colour;
+    }
+    drawTriangles(triangles: Triangle[]) {
+        if (!this.vertexBuffer) {
+            return;
+        }
+        if (!this.colorBuffer) {
+            return;
+        }
+        const vertices: number[] = [];
+        const colors: number[] = [];
+        for (const t of triangles) {
+            const colour = this.getColour(t.colour);
+            colors.push(colour.r);
+            colors.push(colour.g);
+            colors.push(colour.b);
+            colors.push(colour.a);
+            vertices.push(t.p1.x);
+            vertices.push(t.p1.y);
+            vertices.push(t.p1.z);
+            vertices.push(1.0);
+            colors.push(colour.r);
+            colors.push(colour.g);
+            colors.push(colour.b);
+            colors.push(colour.a);
+            vertices.push(t.p2.x);
+            vertices.push(t.p2.y);
+            vertices.push(t.p2.z);
+            vertices.push(1.0);
+            colors.push(colour.r);
+            colors.push(colour.g);
+            colors.push(colour.b);
+            colors.push(colour.a);
+            vertices.push(t.p3.x);
+            vertices.push(t.p3.y);
+            vertices.push(t.p3.z);
+            vertices.push(1.0);
+        }
+        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.vertexBuffer);
+        this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(vertices), this.gl.STATIC_DRAW);
+        this.gl.vertexAttribPointer(this.vertexAttribute, 4, this.gl.FLOAT, false, 0, 0);
+        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.colorBuffer);
+        this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(colors), this.gl.STATIC_DRAW);
+        this.gl.vertexAttribPointer(this.colorAttribute, 4, this.gl.FLOAT, false, 0, 0);
+        this.gl.drawArrays(this.gl.TRIANGLES, 0, triangles.length * 3);
+    }
+
+    drawLines(lines: Line[]) {
+        if (!this.vertexBuffer) {
+            return;
+        }
+        if (!this.colorBuffer) {
+            return;
+        }
+        const vertices: number[] = [];
+        const colors: number[] = [];
+        for (const l of lines) {
+            const colour = this.getColour(l.colour);
+            colors.push(colour.r);
+            colors.push(colour.g);
+            colors.push(colour.b);
+            colors.push(colour.a);
+            vertices.push(l.p1.x);
+            vertices.push(l.p1.y);
+            vertices.push(l.p1.z);
+            vertices.push(1.0);
+            colors.push(colour.r);
+            colors.push(colour.g);
+            colors.push(colour.b);
+            colors.push(colour.a);
+            vertices.push(l.p2.x);
+            vertices.push(l.p2.y);
+            vertices.push(l.p2.z);
+            vertices.push(1.0);
+        }
+        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.vertexBuffer);
+        this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(vertices), this.gl.STATIC_DRAW);
+        this.gl.vertexAttribPointer(this.vertexAttribute, 4, this.gl.FLOAT, false, 0, 0);
+        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.colorBuffer);
+        this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(colors), this.gl.STATIC_DRAW);
+        this.gl.vertexAttribPointer(this.colorAttribute, 4, this.gl.FLOAT, false, 0, 0);
+        this.gl.drawArrays(this.gl.LINES, 0, lines.length * 2);
+    }
+
+    drawQuads(quads: Quad[]) {
+        if (!this.vertexBuffer) {
+            return;
+        }
+        if (!this.colorBuffer) {
+            return;
+        }
+        const vertices: number[] = [];
+        const colors: number[] = [];
+        for (const q of quads) {
+            const colour = this.getColour(q.colour);
+            colors.push(colour.r);
+            colors.push(colour.g);
+            colors.push(colour.b);
+            colors.push(colour.a);
+            vertices.push(q.p1.x);
+            vertices.push(q.p1.y);
+            vertices.push(q.p1.z);
+            vertices.push(1.0);
+            colors.push(colour.r);
+            colors.push(colour.g);
+            colors.push(colour.b);
+            colors.push(colour.a);
+            vertices.push(q.p2.x);
+            vertices.push(q.p2.y);
+            vertices.push(q.p2.z);
+            vertices.push(1.0);
+            colors.push(colour.r);
+            colors.push(colour.g);
+            colors.push(colour.b);
+            colors.push(colour.a);
+            vertices.push(q.p4.x);
+            vertices.push(q.p4.y);
+            vertices.push(q.p4.z);
+            vertices.push(1.0);
+            colors.push(colour.r);
+            colors.push(colour.g);
+            colors.push(colour.b);
+            colors.push(colour.a);
+            vertices.push(q.p4.x);
+            vertices.push(q.p4.y);
+            vertices.push(q.p4.z);
+            vertices.push(1.0);
+            colors.push(colour.r);
+            colors.push(colour.g);
+            colors.push(colour.b);
+            colors.push(colour.a);
+            vertices.push(q.p2.x);
+            vertices.push(q.p2.y);
+            vertices.push(q.p2.z);
+            vertices.push(1.0);
+            colors.push(colour.r);
+            colors.push(colour.g);
+            colors.push(colour.b);
+            colors.push(colour.a);
+            vertices.push(q.p3.x);
+            vertices.push(q.p3.y);
+            vertices.push(q.p3.z);
+            vertices.push(1.0);
+        }
+        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.vertexBuffer);
+        this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(vertices), this.gl.STATIC_DRAW);
+        this.gl.vertexAttribPointer(this.vertexAttribute, 4, this.gl.FLOAT, false, 0, 0);
+        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.colorBuffer);
+        this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(colors), this.gl.STATIC_DRAW);
+        this.gl.vertexAttribPointer(this.colorAttribute, 4, this.gl.FLOAT, false, 0, 0);
+        this.gl.drawArrays(this.gl.TRIANGLES, 0, quads.length * 6);
+    }
+
+    drawModel(model: Model) {
+        this.drawLines(model.lines);
+        this.drawTriangles(model.triangles);
+        this.drawQuads(model.quads);
+        const oldParent = this.parentColor;
+        for (const subpart of model.subparts) {
+            this.parentColor = this.getColour(subpart.colour);
+            if (subpart.model) {
+                this.pushMatrix();
+                this.multMatrix(subpart.matrix);
+                this.drawModel(subpart.model);
+                this.popMatrix();
+            }
+            this.parentColor = oldParent;
+        }
     }
 
     setupPipeline() {
         this.resizeCanvasToDisplaySize();
         this.gl.viewport(0, 0, this.canvas.width, this.canvas.height);
         const aspect = this.canvas.width / this.canvas.height;
-        this.setPerspective(45.0, aspect, -0.1, -1000.0);
-        const vertexShaderSource = vertex_shader_2d;
-        const fragmentShaderSource = fragment_shader_2d;
+        this.setPerspective(45.0, aspect, 0.1, 1000.0);
+        const vertexShaderSource = vertex_shader;
+        const fragmentShaderSource = fragment_shader;
 
         const vertexShader = this.createShader(this.gl.VERTEX_SHADER, vertexShaderSource);
         const fragmentShader = this.createShader(this.gl.FRAGMENT_SHADER, fragmentShaderSource);
 
         if (vertexShader && fragmentShader) {
             this.pipeline = this.createProgram(vertexShader, fragmentShader);
+            if (this.pipeline) {
+                this.gl.useProgram(this.pipeline);
+                this.colorAttribute = this.gl.getAttribLocation(this.pipeline, 'a_color');
+                this.vertexAttribute = this.gl.getAttribLocation(this.pipeline, 'a_vertex');
+                this.modelMatrixUniform = this.gl.getUniformLocation(this.pipeline, 'model_matrix');
+                this.projectionMatrixUniform = this.gl.getUniformLocation(
+                    this.pipeline,
+                    'projection_matrix'
+                );
+                if (this.modelMatrixUniform) {
+                    this.gl.uniformMatrix4fv(this.modelMatrixUniform, false, this.modelMatrix);
+                }
+                if (this.projectionMatrixUniform) {
+                    this.gl.uniformMatrix4fv(
+                        this.projectionMatrixUniform,
+                        false,
+                        this.projectionMatrix
+                    );
+                }
+                if (this.vertexAttribute >= 0) {
+                    this.gl.enableVertexAttribArray(this.vertexAttribute);
+                }
+                if (this.colorAttribute >= 0) {
+                    this.gl.enableVertexAttribArray(this.colorAttribute);
+                }
+            }
         }
+        this.vertexBuffer = this.gl.createBuffer();
+        this.colorBuffer = this.gl.createBuffer();
+        this.gl.enable(this.gl.DEPTH_TEST);
+        this.gl.depthFunc(this.gl.LESS);
     }
 
     createShader(type: GLenum, source: string): WebGLShader | undefined {

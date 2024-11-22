@@ -1,7 +1,12 @@
 <script lang="ts">
     import { onMount } from 'svelte';
     import { Button } from 'flowbite-svelte';
-    import { componentStore, resolveFromZip, setRobotFromFile } from '$lib/ldraw/components';
+    import {
+        type LDrawStore,
+        componentStore,
+        resolveFromZip,
+        setRobotFromFile
+    } from '$lib/ldraw/components';
     import { WebGL } from '$lib/ldraw/gl';
 
     export let modalOpen = false;
@@ -50,50 +55,47 @@
         }
     }
 
-    function renderSetup() {
-        const positionAttributeLocation = gl.gl.getAttribLocation(gl.pipeline, 'a_position');
-        const positionBuffer = gl.gl.createBuffer();
-        gl.gl.bindBuffer(gl.gl.ARRAY_BUFFER, positionBuffer);
-
-        // three 2d points
-        const positions = [0, 0, 0, 0.5, 0.7, 0];
-
-        gl.gl.bufferData(gl.gl.ARRAY_BUFFER, new Float32Array(positions), gl.gl.STATIC_DRAW);
-
-        // Clear the canvas
-        gl.gl.clearColor(0, 0, 0, 255);
-        gl.gl.clear(gl.gl.COLOR_BUFFER_BIT);
-        // Tell it to use our program (pair of shaders)
-        gl.gl.useProgram(gl.pipeline);
-        gl.gl.enableVertexAttribArray(positionAttributeLocation);
-
-        // Bind the position buffer.
-        gl.gl.bindBuffer(gl.gl.ARRAY_BUFFER, positionBuffer);
-
-        // Tell the attribute how to get data out of positionBuffer (ARRAY_BUFFER)
-        const size = 2; // 2 components per iteration
-        const type = gl.gl.FLOAT; // the data is 32bit floats
-        const normalize = false; // don't normalize the data
-        const stride = 0; // 0 = move forward size * sizeof(type) each iteration to get the next position
-        const offset = 0; // start at the beginning of the buffer
-        gl.gl.vertexAttribPointer(positionAttributeLocation, size, type, normalize, stride, offset);
-        var primitiveType = gl.gl.TRIANGLES;
-
-        const count = 3;
-        gl.gl.drawArrays(primitiveType, offset, count);
+    let angle = 0;
+    function renderRobot(robot: LDrawStore) {
+        if (!gl) {
+            return;
+        }
+        //if (!robot.robotModel) {
+        //    return;
+        //}
+        //gl.setProjectionIdentity();
+        gl.setModelIdentity();
+        gl.clearColor(0.0, 0.0, 0.0);
+        gl.clear();
+        //gl.scale(10.0);
+        gl.translate(0, 0, -10);
+        gl.rotate(angle, 1.0, 1.0, 0.0);
+        gl.rotate(angle * 1.337, 1.0, 0.0, 0.0);
+        //gl.drawTriangles([{colour: 0, p1: {x: 10.0, y: 10.0, z: 10.0}, p2: {x: 10.0, y: -10.0, z: 10.0}, p3: {x: -10.0, y: -10.0, z: 10.0}}]);
+        if (robot.robotModel) {
+            gl.scale(0.05);
+            gl.drawModel(robot.robotModel);
+        }
+        gl.flush();
+        angle = angle + 5;
+        if (angle > 360) {
+            angle = angle - 360;
+        }
     }
 
     onMount(() => {
         const canvas = document.getElementById('robot_preview');
         if (canvas) {
             gl = WebGL.create(canvas as HTMLCanvasElement);
-            if (gl) {
-                renderSetup();
-            }
+            setInterval(() => {
+                renderRobot($componentStore);
+            }, 33);
         } else {
             console.log('No WebGL available');
         }
     });
+
+    //$: renderRobot($componentStore);
 </script>
 
 {#key numberOfLoads}
@@ -134,4 +136,4 @@
     {/each}
 </div>
 
-<canvas id="robot_preview" class="w-96 h-96"></canvas>
+<canvas id="robot_preview" class="w-full h-96"></canvas>

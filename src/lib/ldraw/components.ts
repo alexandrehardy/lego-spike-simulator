@@ -1,7 +1,20 @@
+import { ldrawColourMap } from '$lib/ldraw/colours';
 import { writable } from 'svelte/store';
 import JSZip from 'jszip';
 
 export type Matrix = number[];
+
+export interface InheritColour {
+    edge?: boolean;
+    surface?: boolean;
+}
+
+export interface Colour {
+    r: number;
+    g: number;
+    b: number;
+    a: number;
+}
 
 export interface Vertex {
     x: number;
@@ -10,20 +23,20 @@ export interface Vertex {
 }
 
 export interface Line {
-    colour: number;
+    colour: Colour | InheritColour;
     p1: Vertex;
     p2: Vertex;
 }
 
 export interface Triangle {
-    colour: number;
+    colour: Colour | InheritColour;
     p1: Vertex;
     p2: Vertex;
     p3: Vertex;
 }
 
 export interface Quad {
-    colour: number;
+    colour: Colour | InheritColour;
     p1: Vertex;
     p2: Vertex;
     p3: Vertex;
@@ -31,7 +44,7 @@ export interface Quad {
 }
 
 export interface OptionalLine {
-    colour: number;
+    colour: Colour | InheritColour;
     p1: Vertex;
     p2: Vertex;
     c1: Vertex;
@@ -39,7 +52,7 @@ export interface OptionalLine {
 }
 
 export interface Subpart {
-    colour: number;
+    colour: Colour | InheritColour;
     matrix: Matrix;
     model: Model | undefined;
     modelNumber: string;
@@ -68,6 +81,26 @@ type ResolverCallback = (part: PartDetail) => void;
 export let robotModel: Model | undefined;
 export const components = new Map<string, Model>();
 export const unresolved = new Map<string, ResolverCallback[]>();
+
+export function brickColour(id: string): Colour | InheritColour {
+    const record = ldrawColourMap.get(id);
+    if (id == '16') {
+        return { surface: true };
+    }
+    if (id == '24') {
+        return { edge: true };
+    }
+    if (record) {
+        const hex = record.VALUE;
+        const bigint = parseInt(hex.substring(1), 16);
+        const r = (bigint >> 16) & 255;
+        const g = (bigint >> 8) & 255;
+        const b = bigint & 255;
+        return { r: r / 255.0, g: g / 255.0, b: b / 255.0, a: 1.0 };
+    } else {
+        return { r: 1.0, g: 1.0, b: 1.0, a: 1.0 };
+    }
+}
 
 export function getUnresolvedParts() {
     return Array.from(unresolved.keys());
@@ -128,8 +161,8 @@ export function loadModel(content: string): Model {
             const i = parts[13];
             const subpart = parts[14];
             const entry: Subpart = {
-                colour: +colour,
-                matrix: [+a, +b, +c, +x, +d, +e, +f, +y, +g, +h, +i, +z, 0, 0, 0, 1],
+                colour: brickColour(colour),
+                matrix: [+a, +d, +g, 0, +b, +e, +h, 0, +c, +f, +i, 0, +x, +y, +z, 1],
                 model: undefined,
                 modelNumber: subpart
             };
@@ -145,7 +178,7 @@ export function loadModel(content: string): Model {
             const y2 = parts[6];
             const z2 = parts[7];
             model.lines.push({
-                colour: +colour,
+                colour: brickColour(colour),
                 p1: { x: +x1, y: +y1, z: +z1 },
                 p2: { x: +x2, y: +y2, z: +z2 }
             });
@@ -162,7 +195,7 @@ export function loadModel(content: string): Model {
             const y3 = parts[9];
             const z3 = parts[10];
             model.triangles.push({
-                colour: +colour,
+                colour: brickColour(colour),
                 p1: { x: +x1, y: +y1, z: +z1 },
                 p2: { x: +x2, y: +y2, z: +z2 },
                 p3: { x: +x3, y: +y3, z: +z3 }
@@ -183,7 +216,7 @@ export function loadModel(content: string): Model {
             const y4 = parts[12];
             const z4 = parts[13];
             model.quads.push({
-                colour: +colour,
+                colour: brickColour(colour),
                 p1: { x: +x1, y: +y1, z: +z1 },
                 p2: { x: +x2, y: +y2, z: +z2 },
                 p3: { x: +x3, y: +y3, z: +z3 },
@@ -205,7 +238,7 @@ export function loadModel(content: string): Model {
             const y4 = parts[12];
             const z4 = parts[13];
             model.optionalLines.push({
-                colour: +colour,
+                colour: brickColour(colour),
                 p1: { x: +x1, y: +y1, z: +z1 },
                 p2: { x: +x2, y: +y2, z: +z2 },
                 c1: { x: +x3, y: +y3, z: +z3 },
