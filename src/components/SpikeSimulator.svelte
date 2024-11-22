@@ -9,7 +9,7 @@
     let numberOfLoads = 0;
     let gl: WebGL | undefined;
     let compiledRobot: CompiledModel | undefined;
-    let interval: intervalID | undefined;
+    let interval: number | undefined;
 
     function loadRobot() {
         const element = document.getElementById('load_robot');

@@ -535,7 +535,7 @@ export class WebGL {
         }
     }
 
-    compileModel(model: Model): CompiledModel {
+    compileModel(model: Model, recenter: boolean = true): CompiledModel {
         this.compiledLines = 0;
         this.compiledTriangles = 0;
         this.compileColours = [];
@@ -550,6 +550,34 @@ export class WebGL {
 
         this.compileMatrix = m4.identity();
         this.compileSubModelQuads(model);
+
+        if (recenter && this.compileVertices.length > 0) {
+            let minx = this.compileVertices[0];
+            let maxx = this.compileVertices[0];
+            let miny = this.compileVertices[1];
+            let maxy = this.compileVertices[1];
+            let minz = this.compileVertices[2];
+            let maxz = this.compileVertices[2];
+            for (let i = 0; i < this.compileVertices.length; i += 4) {
+                const x = this.compileVertices[i + 0];
+                const y = this.compileVertices[i + 1];
+                const z = this.compileVertices[i + 2];
+                if (x < minx) minx = x;
+                if (y < miny) miny = y;
+                if (z < minz) minz = z;
+                if (x > maxx) maxx = x;
+                if (y > maxy) maxy = y;
+                if (z > maxz) maxz = z;
+            }
+            const midx = (minx + maxx) / 2.0;
+            const midy = (miny + maxy) / 2.0;
+            const midz = (minz + maxz) / 2.0;
+            for (let i = 0; i < this.compileVertices.length; i += 4) {
+                this.compileVertices[i + 0] -= midx;
+                this.compileVertices[i + 1] -= midy;
+                this.compileVertices[i + 2] -= midz;
+            }
+        }
 
         const compiledModel = {
             vertices: new Float32Array(this.compileVertices),
