@@ -7,11 +7,13 @@
         resolveFromZip,
         setRobotFromFile
     } from '$lib/ldraw/components';
-    import { WebGL } from '$lib/ldraw/gl';
+    import { WebGL, type CompiledModel } from '$lib/ldraw/gl';
+    import { type Model } from '$lib/ldraw/components';
 
     export let modalOpen = false;
     let numberOfLoads = 0;
     let gl: WebGL | undefined;
+    let compiledRobot: CompiledModel | undefined = doCompile($componentStore.robotModel);
 
     function loadRobot() {
         const element = document.getElementById('load_robot');
@@ -56,30 +58,38 @@
     }
 
     let angle = 0;
-    function renderRobot(robot: LDrawStore) {
+    let angle2 = 0;
+    function renderRobot() {
         if (!gl) {
             return;
         }
-        //if (!robot.robotModel) {
-        //    return;
-        //}
-        //gl.setProjectionIdentity();
         gl.setModelIdentity();
         gl.clearColor(0.0, 0.0, 0.0);
         gl.clear();
-        //gl.scale(10.0);
-        gl.translate(0, 0, -10);
+        gl.translate(0, 0, -20);
         gl.rotate(angle, 1.0, 1.0, 0.0);
-        gl.rotate(angle * 1.337, 1.0, 0.0, 0.0);
-        //gl.drawTriangles([{colour: 0, p1: {x: 10.0, y: 10.0, z: 10.0}, p2: {x: 10.0, y: -10.0, z: 10.0}, p3: {x: -10.0, y: -10.0, z: 10.0}}]);
-        if (robot.robotModel) {
+        gl.rotate(angle2, 1.0, 0.0, 0.0);
+        if (compiledRobot) {
             gl.scale(0.05);
-            gl.drawModel(robot.robotModel);
+            gl.drawCompiled(compiledRobot);
         }
         gl.flush();
-        angle = angle + 5;
+        angle = angle + 5 * 0.1;
+        angle2 = angle2 + 5 * 1.37 * 0.1;
         if (angle > 360) {
             angle = angle - 360;
+        }
+        if (angle2 > 360) {
+            angle2 = angle2 - 360;
+        }
+    }
+
+    function doCompile(robot: Model | undefined) {
+        if (!robot) {
+            return undefined;
+        }
+        if (gl) {
+            return gl.compileModel(robot);
         }
     }
 
@@ -88,14 +98,14 @@
         if (canvas) {
             gl = WebGL.create(canvas as HTMLCanvasElement);
             setInterval(() => {
-                renderRobot($componentStore);
+                renderRobot();
             }, 33);
         } else {
             console.log('No WebGL available');
         }
     });
 
-    //$: renderRobot($componentStore);
+    $: compiledRobot = doCompile($componentStore.robotModel);
 </script>
 
 {#key numberOfLoads}

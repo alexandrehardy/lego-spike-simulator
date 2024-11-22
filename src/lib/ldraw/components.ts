@@ -82,7 +82,7 @@ export let robotModel: Model | undefined;
 export const components = new Map<string, Model>();
 export const unresolved = new Map<string, ResolverCallback[]>();
 
-export function brickColour(id: string): Colour | InheritColour {
+export function brickColour(id: string, edge: boolean): Colour | InheritColour {
     const record = ldrawColourMap.get(id);
     if (id == '16') {
         return { surface: true };
@@ -91,7 +91,7 @@ export function brickColour(id: string): Colour | InheritColour {
         return { edge: true };
     }
     if (record) {
-        const hex = record.VALUE;
+        const hex = edge ? record.EDGE : record.VALUE;
         const bigint = parseInt(hex.substring(1), 16);
         const r = (bigint >> 16) & 255;
         const g = (bigint >> 8) & 255;
@@ -161,7 +161,7 @@ export function loadModel(content: string): Model {
             const i = parts[13];
             const subpart = parts[14];
             const entry: Subpart = {
-                colour: brickColour(colour),
+                colour: brickColour(colour, false),
                 matrix: [+a, +d, +g, 0, +b, +e, +h, 0, +c, +f, +i, 0, +x, +y, +z, 1],
                 model: undefined,
                 modelNumber: subpart
@@ -178,7 +178,7 @@ export function loadModel(content: string): Model {
             const y2 = parts[6];
             const z2 = parts[7];
             model.lines.push({
-                colour: brickColour(colour),
+                colour: brickColour(colour, true),
                 p1: { x: +x1, y: +y1, z: +z1 },
                 p2: { x: +x2, y: +y2, z: +z2 }
             });
@@ -195,7 +195,7 @@ export function loadModel(content: string): Model {
             const y3 = parts[9];
             const z3 = parts[10];
             model.triangles.push({
-                colour: brickColour(colour),
+                colour: brickColour(colour, false),
                 p1: { x: +x1, y: +y1, z: +z1 },
                 p2: { x: +x2, y: +y2, z: +z2 },
                 p3: { x: +x3, y: +y3, z: +z3 }
@@ -216,7 +216,7 @@ export function loadModel(content: string): Model {
             const y4 = parts[12];
             const z4 = parts[13];
             model.quads.push({
-                colour: brickColour(colour),
+                colour: brickColour(colour, false),
                 p1: { x: +x1, y: +y1, z: +z1 },
                 p2: { x: +x2, y: +y2, z: +z2 },
                 p3: { x: +x3, y: +y3, z: +z3 },
@@ -238,7 +238,7 @@ export function loadModel(content: string): Model {
             const y4 = parts[12];
             const z4 = parts[13];
             model.optionalLines.push({
-                colour: brickColour(colour),
+                colour: brickColour(colour, true),
                 p1: { x: +x1, y: +y1, z: +z1 },
                 p2: { x: +x2, y: +y2, z: +z2 },
                 c1: { x: +x3, y: +y3, z: +z3 },

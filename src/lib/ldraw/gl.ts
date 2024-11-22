@@ -10,6 +10,15 @@ import {
 
 import * as m4 from '$lib/ldraw/m4';
 
+export interface CompiledModel {
+    vertices: Float32Array;
+    colors: Float32Array;
+    lineOffset: number;
+    lines: number;
+    triangleOffset: number;
+    triangles: number;
+}
+
 export class WebGL {
     gl: WebGLRenderingContext;
     pipeline: WebGLProgram | undefined;
@@ -24,6 +33,11 @@ export class WebGL {
     vertexBuffer: WebGLBuffer | null;
     colorBuffer: WebGLBuffer | null;
     parentColor: Colour;
+    compileVertices: number[];
+    compileColors: number[];
+    compileMatrix: m4.Matrix4;
+    compiledLines: number;
+    compiledTriangles: number;
 
     static create(canvas: HTMLCanvasElement): WebGL | undefined {
         const gl = canvas.getContext('webgl');
@@ -49,6 +63,11 @@ export class WebGL {
         this.vertexBuffer = null;
         this.colorBuffer = null;
         this.parentColor = { r: 1.0, g: 1.0, b: 1.0, a: 1.0 };
+        this.compileMatrix = m4.identity();
+        this.compileColors = [];
+        this.compileVertices = [];
+        this.compiledLines = 0;
+        this.compiledTriangles = 0;
         this.setupPipeline();
     }
 
@@ -159,6 +178,7 @@ export class WebGL {
         }
         return colour as Colour;
     }
+
     drawTriangles(triangles: Triangle[]) {
         if (!this.vertexBuffer) {
             return;
@@ -325,6 +345,251 @@ export class WebGL {
             }
             this.parentColor = oldParent;
         }
+    }
+
+    compileQuads(quads: Quad[]) {
+        for (const q of quads) {
+            const colour = this.getColour(q.colour);
+            this.compileColors.push(colour.r);
+            this.compileColors.push(colour.g);
+            this.compileColors.push(colour.b);
+            this.compileColors.push(colour.a);
+            this.compileColors.push(colour.r);
+            this.compileColors.push(colour.g);
+            this.compileColors.push(colour.b);
+            this.compileColors.push(colour.a);
+            this.compileColors.push(colour.r);
+            this.compileColors.push(colour.g);
+            this.compileColors.push(colour.b);
+            this.compileColors.push(colour.a);
+            let v = m4.transformVector(this.compileMatrix, [q.p1.x, q.p1.y, q.p1.z, 1]);
+            this.compileVertices.push(v[0]);
+            this.compileVertices.push(v[1]);
+            this.compileVertices.push(v[2]);
+            this.compileVertices.push(v[3]);
+            v = m4.transformVector(this.compileMatrix, [q.p2.x, q.p2.y, q.p2.z, 1]);
+            this.compileVertices.push(v[0]);
+            this.compileVertices.push(v[1]);
+            this.compileVertices.push(v[2]);
+            this.compileVertices.push(v[3]);
+            v = m4.transformVector(this.compileMatrix, [q.p4.x, q.p4.y, q.p4.z, 1]);
+            this.compileVertices.push(v[0]);
+            this.compileVertices.push(v[1]);
+            this.compileVertices.push(v[2]);
+            this.compileVertices.push(v[3]);
+            this.compiledTriangles++;
+
+            this.compileColors.push(colour.r);
+            this.compileColors.push(colour.g);
+            this.compileColors.push(colour.b);
+            this.compileColors.push(colour.a);
+            this.compileColors.push(colour.r);
+            this.compileColors.push(colour.g);
+            this.compileColors.push(colour.b);
+            this.compileColors.push(colour.a);
+            this.compileColors.push(colour.r);
+            this.compileColors.push(colour.g);
+            this.compileColors.push(colour.b);
+            this.compileColors.push(colour.a);
+            v = m4.transformVector(this.compileMatrix, [q.p4.x, q.p4.y, q.p4.z, 1]);
+            this.compileVertices.push(v[0]);
+            this.compileVertices.push(v[1]);
+            this.compileVertices.push(v[2]);
+            this.compileVertices.push(v[3]);
+            v = m4.transformVector(this.compileMatrix, [q.p2.x, q.p2.y, q.p2.z, 1]);
+            this.compileVertices.push(v[0]);
+            this.compileVertices.push(v[1]);
+            this.compileVertices.push(v[2]);
+            this.compileVertices.push(v[3]);
+            v = m4.transformVector(this.compileMatrix, [q.p3.x, q.p3.y, q.p3.z, 1]);
+            this.compileVertices.push(v[0]);
+            this.compileVertices.push(v[1]);
+            this.compileVertices.push(v[2]);
+            this.compileVertices.push(v[3]);
+            this.compiledTriangles++;
+        }
+    }
+
+    compileTriangles(triangles: Triangle[]) {
+        for (const t of triangles) {
+            const colour = this.getColour(t.colour);
+            this.compileColors.push(colour.r);
+            this.compileColors.push(colour.g);
+            this.compileColors.push(colour.b);
+            this.compileColors.push(colour.a);
+            this.compileColors.push(colour.r);
+            this.compileColors.push(colour.g);
+            this.compileColors.push(colour.b);
+            this.compileColors.push(colour.a);
+            this.compileColors.push(colour.r);
+            this.compileColors.push(colour.g);
+            this.compileColors.push(colour.b);
+            this.compileColors.push(colour.a);
+            let v = m4.transformVector(this.compileMatrix, [t.p1.x, t.p1.y, t.p1.z, 1]);
+            this.compileVertices.push(v[0]);
+            this.compileVertices.push(v[1]);
+            this.compileVertices.push(v[2]);
+            this.compileVertices.push(v[3]);
+            v = m4.transformVector(this.compileMatrix, [t.p2.x, t.p2.y, t.p2.z, 1]);
+            this.compileVertices.push(v[0]);
+            this.compileVertices.push(v[1]);
+            this.compileVertices.push(v[2]);
+            this.compileVertices.push(v[3]);
+            v = m4.transformVector(this.compileMatrix, [t.p3.x, t.p3.y, t.p3.z, 1]);
+            this.compileVertices.push(v[0]);
+            this.compileVertices.push(v[1]);
+            this.compileVertices.push(v[2]);
+            this.compileVertices.push(v[3]);
+            this.compiledTriangles++;
+        }
+    }
+
+    compileLines(lines: Line[]) {
+        for (const l of lines) {
+            const colour = this.getColour(l.colour);
+            this.compileColors.push(colour.r);
+            this.compileColors.push(colour.g);
+            this.compileColors.push(colour.b);
+            this.compileColors.push(colour.a);
+            this.compileColors.push(colour.r);
+            this.compileColors.push(colour.g);
+            this.compileColors.push(colour.b);
+            this.compileColors.push(colour.a);
+            let v = m4.transformVector(this.compileMatrix, [l.p1.x, l.p1.y, l.p1.z, 1]);
+            this.compileVertices.push(v[0]);
+            this.compileVertices.push(v[1]);
+            this.compileVertices.push(v[2]);
+            this.compileVertices.push(v[3]);
+            v = m4.transformVector(this.compileMatrix, [l.p2.x, l.p2.y, l.p2.z, 1]);
+            this.compileVertices.push(v[0]);
+            this.compileVertices.push(v[1]);
+            this.compileVertices.push(v[2]);
+            this.compileVertices.push(v[3]);
+            this.compiledLines++;
+        }
+    }
+
+    compileSubModelQuads(model: Model) {
+        this.compileQuads(model.quads);
+        const oldParent = this.parentColor;
+        for (const subpart of model.subparts) {
+            this.parentColor = this.getColour(subpart.colour);
+            if (subpart.model) {
+                const oldMatrix = this.compileMatrix;
+                this.compileMatrix = m4.multiply(this.compileMatrix, subpart.matrix);
+                this.compileSubModelQuads(subpart.model);
+                this.compileMatrix = oldMatrix;
+            }
+            this.parentColor = oldParent;
+        }
+    }
+
+    compileSubModelTriangles(model: Model) {
+        this.compileTriangles(model.triangles);
+        const oldParent = this.parentColor;
+        for (const subpart of model.subparts) {
+            this.parentColor = this.getColour(subpart.colour);
+            if (subpart.model) {
+                const oldMatrix = this.compileMatrix;
+                this.compileMatrix = m4.multiply(this.compileMatrix, subpart.matrix);
+                this.compileSubModelTriangles(subpart.model);
+                this.compileMatrix = oldMatrix;
+            }
+            this.parentColor = oldParent;
+        }
+    }
+
+    compileSubModelLines(model: Model) {
+        this.compileLines(model.lines);
+        const oldParent = this.parentColor;
+        for (const subpart of model.subparts) {
+            this.parentColor = this.getColour(subpart.colour);
+            if (subpart.model) {
+                const oldMatrix = this.compileMatrix;
+                this.compileMatrix = m4.multiply(this.compileMatrix, subpart.matrix);
+                this.compileSubModelLines(subpart.model);
+                this.compileMatrix = oldMatrix;
+            }
+            this.parentColor = oldParent;
+        }
+    }
+
+    compileModel(model: Model): CompiledModel {
+        this.compiledLines = 0;
+        this.compiledTriangles = 0;
+        this.compileColors = [];
+        this.compileVertices = [];
+
+        this.compileMatrix = m4.identity();
+        this.compileLines(model.lines);
+        const oldParent = this.parentColor;
+        for (const subpart of model.subparts) {
+            this.parentColor = this.getColour(subpart.colour);
+            if (subpart.model) {
+                const oldMatrix = this.compileMatrix;
+                this.compileMatrix = m4.multiply(this.compileMatrix, subpart.matrix);
+                this.compileSubModelLines(subpart.model);
+                this.compileMatrix = oldMatrix;
+            }
+            this.parentColor = oldParent;
+        }
+
+        const triangleOffset = this.compileVertices.length;
+        this.compileMatrix = m4.identity();
+        this.compileTriangles(model.triangles);
+        for (const subpart of model.subparts) {
+            this.parentColor = this.getColour(subpart.colour);
+            if (subpart.model) {
+                const oldMatrix = this.compileMatrix;
+                this.compileMatrix = m4.multiply(this.compileMatrix, subpart.matrix);
+                this.compileSubModelTriangles(subpart.model);
+                this.compileMatrix = oldMatrix;
+            }
+            this.parentColor = oldParent;
+        }
+
+        this.compileMatrix = m4.identity();
+        this.compileQuads(model.quads);
+        for (const subpart of model.subparts) {
+            this.parentColor = this.getColour(subpart.colour);
+            if (subpart.model) {
+                const oldMatrix = this.compileMatrix;
+                this.compileMatrix = m4.multiply(this.compileMatrix, subpart.matrix);
+                this.compileSubModelQuads(subpart.model);
+                this.compileMatrix = oldMatrix;
+            }
+            this.parentColor = oldParent;
+        }
+
+        const compiledModel = {
+            vertices: new Float32Array(this.compileVertices),
+            colors: new Float32Array(this.compileColors),
+            lineOffset: 0,
+            lines: this.compiledLines,
+            triangleOffset: triangleOffset / 4,
+            triangles: this.compiledTriangles
+        };
+        this.compileMatrix = m4.identity();
+        this.compileColors = [];
+        this.compileVertices = [];
+        return compiledModel;
+    }
+
+    drawCompiled(model: CompiledModel) {
+        if (!this.vertexBuffer) {
+            return;
+        }
+        if (!this.colorBuffer) {
+            return;
+        }
+        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.vertexBuffer);
+        this.gl.bufferData(this.gl.ARRAY_BUFFER, model.vertices, this.gl.STATIC_DRAW);
+        this.gl.vertexAttribPointer(this.vertexAttribute, 4, this.gl.FLOAT, false, 0, 0);
+        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.colorBuffer);
+        this.gl.bufferData(this.gl.ARRAY_BUFFER, model.colors, this.gl.STATIC_DRAW);
+        this.gl.vertexAttribPointer(this.colorAttribute, 4, this.gl.FLOAT, false, 0, 0);
+        this.gl.drawArrays(this.gl.LINES, model.lineOffset, model.lines * 2);
+        this.gl.drawArrays(this.gl.TRIANGLES, model.triangleOffset, model.triangles * 3);
     }
 
     setupPipeline() {
