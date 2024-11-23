@@ -156,9 +156,67 @@ export function resolveSubpart(subpart: Subpart) {
     }
 }
 
+interface MPDFile {
+    name: string;
+    content: string;
+}
+
+export function loadMPD(content: string): Model {
+    const files: MPDFile[] = [];
+    const lines = content.split('\n');
+    let lastFile: string = '';
+    let lastContents: string[] = [];
+
+    for (let line of lines) {
+        line = line.trim();
+        let parts = line.split(' ');
+        parts = parts.map((x) => x.trim()).filter((x) => x.length > 0);
+        if (parts.length > 1 && parts[0] == '0' && parts[1].toUpperCase() == 'FILE') {
+            if (lastFile.length > 0) {
+                files.push({ name: lastFile, content: lastContents.join('\n') });
+            }
+            lastFile = parts.slice(2).join(' ');
+            lastContents = [];
+        } else {
+            lastContents.push(line);
+        }
+    }
+    if (lastFile.length > 0) {
+        files.push({ name: lastFile, content: lastContents.join('\n') });
+    }
+    lastContents = [];
+    const models: Model[] = [];
+    for (const mpdPart of files) {
+        const part = mpdPart.name;
+        console.log(part);
+        const content = mpdPart.content;
+        const model = loadModel(content);
+        models.push(model);
+        components.set(part, model);
+        const callbacks = unresolved.get(part);
+        if (callbacks) {
+            for (const callback of callbacks) {
+                callback({ partNumber: part, model: model });
+            }
+        }
+        unresolved.delete(part);
+    }
+    return models[0];
+}
+
 export function loadModel(content: string): Model {
     const model: Model = { subparts: [], lines: [], triangles: [], quads: [], optionalLines: [] };
     const lines = content.split('\n');
+    for (let line of lines) {
+        line = line.trim();
+        let parts = line.split(' ');
+        parts = parts.map((x) => x.trim()).filter((x) => x.length > 0);
+        if (parts.length > 1) {
+            if (parts[0] == '0' && parts[1].toUpperCase() == 'FILE') {
+                return loadMPD(content);
+            }
+        }
+    }
     for (let line of lines) {
         line = line.trim();
         let parts = line.split(' ');
@@ -182,7 +240,7 @@ export function loadModel(content: string): Model {
             const g = parts[11];
             const h = parts[12];
             const i = parts[13];
-            const subpart = parts[14];
+            const subpart = parts.slice(14).join(' ');
             const entry: Subpart = {
                 colour: brickColour(colour),
                 matrix: [+a, +d, +g, 0, +b, +e, +h, 0, +c, +f, +i, 0, +x, +y, +z, 1],

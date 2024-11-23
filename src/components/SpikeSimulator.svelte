@@ -115,7 +115,7 @@
 </script>
 
 {#key numberOfLoads}
-    <input type="file" id="load_robot" class="hidden" accept=".ldr" on:change={loadRobot} />
+    <input type="file" id="load_robot" class="hidden" accept=".ldr,.mpd" on:change={loadRobot} />
     <input type="file" id="load_library" class="hidden" accept=".zip" on:change={loadLibrary} />
 {/key}
 <div class="flex flex-col">
