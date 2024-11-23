@@ -188,7 +188,6 @@ export function loadMPD(content: string): Model {
     const models: Model[] = [];
     for (const mpdPart of files) {
         const part = mpdPart.name;
-        console.log(part);
         const content = mpdPart.content;
         const model = loadModel(content);
         models.push(model);
