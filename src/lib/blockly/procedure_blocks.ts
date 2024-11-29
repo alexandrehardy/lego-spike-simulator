@@ -1,6 +1,5 @@
 export const procedureBlocks = [
     {
-        //top: 1,
         type: 'procedures_definition',
         message0: 'define %1',
         args0: [

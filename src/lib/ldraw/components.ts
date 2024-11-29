@@ -75,6 +75,7 @@ export interface PartDetail {
 export interface LDrawStore {
     robotModel: Model | undefined;
     unresolved: string[];
+    canFetchComponents: boolean;
 }
 
 type ResolverCallback = (part: PartDetail) => void;
@@ -82,6 +83,7 @@ type ResolverCallback = (part: PartDetail) => void;
 export let robotModel: Model | undefined;
 export const components = new Map<string, Model>();
 export const unresolved = new Map<string, ResolverCallback[]>();
+let canFetchComponents = (window?.location?.href ?? 'file://').startsWith('http');
 
 function hexColor(hex: string) {
     const bigint = parseInt(hex.substring(1), 16);
@@ -132,8 +134,45 @@ export function getUnresolvedParts() {
 
 export async function setRobotFromFile(file: File) {
     robotModel = loadModel(await file.text());
-    componentStore.set({ robotModel: robotModel, unresolved: getUnresolvedParts() });
+    componentStore.set({
+        robotModel: robotModel,
+        unresolved: getUnresolvedParts(),
+        canFetchComponents: canFetchComponents
+    });
+    if (canFetchComponents) {
+        fetchAndResolveParts();
+    }
     return robotModel;
+}
+
+export async function fetchAndResolveParts() {
+    try {
+        // Try for individual parts first
+        let response = await fetch('ldraw/parts.lst');
+        if (response.ok) {
+            const content = await response.text();
+            if (content.startsWith('<!doctype html>')) {
+                // This is served by npm run dev.
+                // It isn't a list of files
+            } else {
+                await resolveFromHttp(content);
+                return;
+            }
+        }
+
+        // Try the zip file
+        response = await fetch('complete.zip');
+        if (response.ok) {
+            const blob = await response.blob();
+            await resolveFromZip(blob);
+        } else {
+            canFetchComponents = false;
+            componentStore.update((old) => ({ ...old, canFetchComponents: false }));
+        }
+    } catch {
+        canFetchComponents = false;
+        componentStore.update((old) => ({ ...old, canFetchComponents: false }));
+    }
 }
 
 export function getRobotModel() {
@@ -329,7 +368,7 @@ export function loadModel(content: string): Model {
     return model;
 }
 
-export async function resolveFromZip(f: File) {
+export async function resolveFromZip(f: Blob) {
     let unresolvedParts = getUnresolvedParts();
     const failedParts: string[] = [];
     const zip = new JSZip();
@@ -358,9 +397,66 @@ export async function resolveFromZip(f: File) {
             unresolved.delete(part);
         }
         unresolvedParts = getUnresolvedParts();
-        componentStore.set({ robotModel: robotModel, unresolved: unresolvedParts });
+        componentStore.set({
+            robotModel: robotModel,
+            unresolved: unresolvedParts,
+            canFetchComponents: canFetchComponents
+        });
         unresolvedParts = unresolvedParts.filter((p) => failedParts.findIndex((v) => v == p) < 0);
     }
 }
 
-export const componentStore = writable<LDrawStore>({ robotModel: undefined, unresolved: [] });
+export async function resolveFromHttp(partList: string) {
+    const partsArray = partList.split('\n').map((x) => x.trim());
+    const availableParts = new Set(partsArray);
+    let unresolvedParts = getUnresolvedParts();
+    const failedParts: string[] = [];
+    while (unresolvedParts.length > 0) {
+        for (const part of unresolvedParts) {
+            const unixPart = part.replace('\\', '/');
+            let response: Response;
+            if (availableParts.has(`parts/${unixPart}`)) {
+                response = await fetch(`ldraw/parts/${unixPart}`);
+                if (!response.ok) {
+                    console.log(`Missing ldraw/parts/${unixPart} from HTTP`);
+                    failedParts.push(part);
+                    continue;
+                }
+            } else if (availableParts.has(`p/${unixPart}`)) {
+                response = await fetch(`ldraw/p/${unixPart}`);
+                if (!response.ok) {
+                    console.log(`Missing ldraw/p/${unixPart} from HTTP`);
+                    failedParts.push(part);
+                    continue;
+                }
+            } else {
+                console.log(`Missing ldraw/parts/${unixPart} from HTTP`);
+                failedParts.push(part);
+                continue;
+            }
+            const content = await response.text();
+            const model = loadModel(content);
+            components.set(part, model);
+            const callbacks = unresolved.get(part);
+            if (callbacks) {
+                for (const callback of callbacks) {
+                    callback({ partNumber: part, model: model });
+                }
+            }
+            unresolved.delete(part);
+        }
+        unresolvedParts = getUnresolvedParts();
+        componentStore.set({
+            robotModel: robotModel,
+            unresolved: unresolvedParts,
+            canFetchComponents: canFetchComponents
+        });
+        unresolvedParts = unresolvedParts.filter((p) => failedParts.findIndex((v) => v == p) < 0);
+    }
+}
+
+export const componentStore = writable<LDrawStore>({
+    robotModel: undefined,
+    unresolved: [],
+    canFetchComponents: canFetchComponents
+});

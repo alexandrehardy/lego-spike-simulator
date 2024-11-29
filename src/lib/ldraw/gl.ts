@@ -992,11 +992,15 @@ export class WebGL {
         this.gl.drawArrays(this.gl.TRIANGLES, model.triangleOffset, model.triangles * 3);
     }
 
-    setupPipeline() {
+    resizeToFit() {
         this.resizeCanvasToDisplaySize();
         this.gl.viewport(0, 0, this.canvas.width, this.canvas.height);
         const aspect = this.canvas.width / this.canvas.height;
         this.setPerspective(45.0, aspect, 0.1, 1000.0);
+    }
+
+    setupPipeline() {
+        this.resizeToFit();
         const vertexShaderSource = vertex_shader;
         const fragmentShaderSource = fragment_shader;
 

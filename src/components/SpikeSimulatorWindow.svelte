@@ -1,16 +1,77 @@
 <script lang="ts">
-    import { Button, Input, Modal } from 'flowbite-svelte';
+    import { Button, CloseButton } from 'flowbite-svelte';
     import SpikeSimulator from '$components/SpikeSimulator.svelte';
+    import { type LDrawStore, componentStore } from '$lib/ldraw/components';
 
     export let modalOpen = false;
+    export let blocklyOpen: boolean;
+    let robotButtonColour: 'light' | 'red' | 'green' = 'light';
+
+    function closeWindow() {
+        modalOpen = false;
+    }
+
+    function openBlockly() {
+        blocklyOpen = true;
+    }
+
+    function askForRobot() {
+        const element = document.getElementById('load_robot');
+        if (element) {
+            element.click();
+        }
+    }
+
+    function askForLibrary() {
+        const element = document.getElementById('load_library');
+        if (element) {
+            element.click();
+        }
+    }
+
+    function updateButtons(store: LDrawStore) {
+        if (!store.robotModel) {
+            robotButtonColour = 'light';
+        } else {
+            if (store.unresolved.length > 0) {
+                robotButtonColour = 'red';
+            } else {
+                robotButtonColour = 'green';
+            }
+        }
+    }
+    $: updateButtons($componentStore);
 </script>
 
-<Modal
-    size="xl"
-    backdropClass="fixed inset-0 z-[80] bg-gray-900 bg-opacity-50 dark:bg-opacity-80"
-    dialogClass="fixed top-0 start-0 end-0 h-modal md:inset-0 md:h-full z-[90] w-full p-4 flex"
-    title="Simulator"
-    bind:open={modalOpen}
->
-    <SpikeSimulator />
-</Modal>
+{#if modalOpen}
+    <div class="flex-1 h-full">
+        <div class="relative flex-1 h-full flex flex-col overflow-hidden">
+            <div
+                class="flex flex-row bg-gray-100 gap-2 p-2 items-center border-b border-b-gray-300"
+            >
+                <img alt="code" width="32" height="32" src="icons/Brick.svg" />
+                <Button color={robotButtonColour} class="!p-2" on:click={askForRobot}>
+                    <img alt="robot" width="32" height="32" src="icons/Robot.svg" />
+                </Button>
+                <Button color="light" class="!p-2">
+                    <img alt="scene" width="32" height="32" src="icons/Scene.svg" />
+                </Button>
+                <Button color="light" class="!p-2">
+                    <img alt="play" width="32" height="32" src="icons/GenericPlayIcon.svg" />
+                </Button>
+                {#if !blocklyOpen}
+                    <Button color="light" class="!p-2" on:click={openBlockly}>
+                        <img alt="blockly" width="32" height="32" src="icons/BlocklyIcon.svg" />
+                    </Button>
+                {/if}
+                <div class="flex-1" />
+                {#if blocklyOpen}
+                    <CloseButton on:click={closeWindow} />
+                {/if}
+            </div>
+            <div class="flex-1 w-full overflow-hidden">
+                <SpikeSimulator />
+            </div>
+        </div>
+    </div>
+{/if}

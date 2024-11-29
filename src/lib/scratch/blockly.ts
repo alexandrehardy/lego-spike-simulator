@@ -485,7 +485,7 @@ export function convertToScratch(state: BlocklyState): Sb3Project {
         topLevel: boolean,
         parent: BlocklyStateBlock | null,
         shadow: boolean
-    ) {
+    ): Sb3Block {
         const sb3Block: Sb3Block = {
             opcode: block.type,
             next: block.next?.block?.id,
@@ -511,9 +511,10 @@ export function convertToScratch(state: BlocklyState): Sb3Project {
                     recurseBlock(value.block, false, block, false);
                     sb3Block.inputs[key] = [1, value.block.id];
                 } else if (value.shadow) {
-                    recurseBlock(
+                    const shadowId = value.shadow.id!;
+                    const shadowBlock = recurseBlock(
                         {
-                            id: value.shadow.id,
+                            id: shadowId,
                             type: value.shadow.type,
                             fields: value.shadow.fields,
                             inputs: {}
@@ -522,7 +523,24 @@ export function convertToScratch(state: BlocklyState): Sb3Project {
                         block,
                         true
                     );
-                    sb3Block.inputs[key] = [1, value.shadow.id];
+                    if (shadowBlock.opcode == 'math_number') {
+                        sb3Block.inputs[key] = [1, [4, shadowBlock.fields.NUM[0].toString()]];
+                        delete linearBlocks[shadowId];
+                    } else if (shadowBlock.opcode == 'math_whole_number') {
+                        sb3Block.inputs[key] = [1, [4, shadowBlock.fields.NUM[0].toString()]];
+                        delete linearBlocks[shadowId];
+                    } else if (shadowBlock.opcode == 'math_integer') {
+                        sb3Block.inputs[key] = [1, [7, shadowBlock.fields.NUM[0].toString()]];
+                        delete linearBlocks[shadowId];
+                    } else if (shadowBlock.opcode == 'math_positive_number') {
+                        sb3Block.inputs[key] = [1, [5, shadowBlock.fields.NUM[0].toString()]];
+                        delete linearBlocks[shadowId];
+                    } else if (shadowBlock.opcode == 'text') {
+                        sb3Block.inputs[key] = [1, [10, shadowBlock.fields.TEXT[0]]];
+                        delete linearBlocks[shadowId];
+                    } else {
+                        sb3Block.inputs[key] = [1, value.shadow.id];
+                    }
                 }
             }
         }
@@ -582,6 +600,7 @@ export function convertToScratch(state: BlocklyState): Sb3Project {
         }
         console.log(sb3Block);
         linearBlocks[block.id!] = sb3Block;
+        return sb3Block;
     }
 
     if (state.blocks) {
@@ -681,7 +700,7 @@ export function convertToScratch(state: BlocklyState): Sb3Project {
         draggable: false,
         isStage: false,
         lists: lists,
-        name: 'SpikeWorkspace',
+        name: 'u4SmFFIrPo7OMzBF9aJQ',
         rotationStyle: 'all around',
         size: 100,
         sounds: [

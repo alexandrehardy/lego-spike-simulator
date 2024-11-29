@@ -476,7 +476,7 @@ export const blocks = [
                 name: 'field_flippermove_custom-icon-direction',
                 options: [
                     ['forward', 'forward'],
-                    ['backward', 'backward']
+                    ['backward', 'back']
                 ]
             }
         ],
@@ -3577,7 +3577,7 @@ export const blocks = [
             }
         ],
         inputsInline: true,
-        output: 'String',
+        output: 'Number',
         colour: '#00b94d',
         extensions: ['shadow_input']
     },

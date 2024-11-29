@@ -1,15 +1,21 @@
 <script lang="ts">
     import { onDestroy, onMount } from 'svelte';
     import { Button } from 'flowbite-svelte';
-    import { componentStore, resolveFromZip, setRobotFromFile } from '$lib/ldraw/components';
+    import {
+        componentStore,
+        resolveFromZip,
+        setRobotFromFile,
+        type LDrawStore
+    } from '$lib/ldraw/components';
     import { WebGL, type CompiledModel } from '$lib/ldraw/gl';
     import { type Model } from '$lib/ldraw/components';
 
-    export let modalOpen = false;
     let numberOfLoads = 0;
     let gl: WebGL | undefined;
     let compiledRobot: CompiledModel | undefined;
     let interval: number | undefined;
+    let inRender = false;
+    let droppedFrames = 0;
 
     function loadRobot() {
         const element = document.getElementById('load_robot');
@@ -59,12 +65,18 @@
         if (!gl) {
             return;
         }
+        if (!compiledRobot) {
+            gl.clearColour(1.0, 1.0, 1.0);
+            gl.clear();
+            return;
+        }
         gl.setModelIdentity();
         gl.clearColour(0.0, 0.0, 0.0);
         gl.clear();
         gl.translate(0, 0, -20);
-        gl.rotate(angle, 1.0, 1.0, 0.0);
-        gl.rotate(angle2, 1.0, 0.0, 0.0);
+        gl.rotate(180, 1.0, 0.0, 0.0);
+        gl.rotate(angle, 0.0, 1.0, 0.0);
+        //gl.rotate(angle2, 1.0, 0.0, 0.0);
         if (compiledRobot) {
             gl.scale(0.05);
             gl.drawCompiled(compiledRobot);
@@ -89,19 +101,47 @@
         }
     }
 
+    function doRender() {
+        renderRobot();
+        inRender = false;
+    }
+
+    function queueRender() {
+        if (inRender) {
+            droppedFrames++;
+            console.log(droppedFrames);
+            return;
+        }
+        droppedFrames = 0;
+        inRender = true;
+        setTimeout(doRender, 0);
+    }
+
+    function resizeGL(data: LDrawStore) {
+        if (!gl) {
+            return;
+        }
+        const gl2use = gl;
+        setTimeout(() => gl2use.resizeToFit(), 100);
+    }
+
+    function handleResize() {
+        resizeGL($componentStore);
+    }
+
     onMount(() => {
         const canvas = document.getElementById('robot_preview');
         if (canvas) {
             gl = WebGL.create(canvas as HTMLCanvasElement);
             if (gl) {
+                resizeGL($componentStore);
                 compiledRobot = doCompile($componentStore.robotModel);
             }
-            interval = setInterval(() => {
-                renderRobot();
-            }, 33);
+            interval = setInterval(queueRender, 33);
         } else {
             console.log('No WebGL available');
         }
+        addEventListener('resize', handleResize);
     });
 
     onDestroy(() => {
@@ -109,47 +149,77 @@
             clearInterval(interval);
             interval = undefined;
         }
+        removeEventListener('resize', handleResize);
     });
 
     $: compiledRobot = doCompile($componentStore.robotModel);
+    $: resizeGL($componentStore);
 </script>
 
-{#key numberOfLoads}
-    <input type="file" id="load_robot" class="hidden" accept=".ldr,.mpd" on:change={loadRobot} />
-    <input type="file" id="load_library" class="hidden" accept=".zip" on:change={loadLibrary} />
-{/key}
-<div class="flex flex-col">
-    <div>
-        Use LeoCad to create a model (<a href="https://www.leocad.org/" target="_blank"
-            >https://www.leocad.org/</a
-        >).
-    </div>
-    <div>
-        You may need to upload the component library (complete.zip) to load your model (<a
-            href="https://library.ldraw.org/updates?latest"
-            target="_blank">https://library.ldraw.org/updates?latest</a
-        >).
-    </div>
-    <div>
-        Always load the robot before the library, only missing bricks are loaded from the library.
-    </div>
-    <div class="flex flex-row">
-        <Button color="light" class="!p-2" on:click={askForRobot}>Robot</Button>
-        <Button color="light" class="!p-2" on:click={askForLibrary}>Library</Button>
+<div class="flex flex-col h-full p-2 overflow-y-scroll relative">
+    {#key numberOfLoads}
+        <input
+            type="file"
+            id="load_robot"
+            class="hidden"
+            accept=".ldr,.mpd"
+            on:change={loadRobot}
+        />
+        <input type="file" id="load_library" class="hidden" accept=".zip" on:change={loadLibrary} />
+    {/key}
+    {#if !compiledRobot}
+        <div class="m-2">
+            Use LeoCad to create a model for your robot (<a
+                href="https://www.leocad.org/"
+                target="_blank">https://www.leocad.org/</a
+            >). Then upload the robot.
+        </div>
+        <div class="m-2">
+            <span
+                >Load the robot by clicking the
+                <img class="inline mx-2" alt="robot" width="32" height="32" src="icons/Robot.svg" />
+                icon. Then load the scene to run the robot in by clicking on the
+                <img class="inline mx-2" alt="scene" width="32" height="32" src="icons/Scene.svg" />
+                icon.</span
+            >
+        </div>
+        <div class="m-2">
+            You may need to upload the component library (complete.zip) to load your model (<a
+                href="https://library.ldraw.org/updates?latest"
+                target="_blank">https://library.ldraw.org/updates?latest</a
+            >). Check to see if there are any missing parts to see if the library needs to be
+            loaded.
+        </div>
+        <div class="m-2">
+            Always load the robot before the library, only missing bricks are loaded from the
+            library.
+        </div>
+    {/if}
+    <div class="flex flex-row gap-2">
+        <Button color="light" class="py-1 px-2" on:click={askForRobot}>Load Robot</Button>
+        {#if !$componentStore.canFetchComponents}
+            <Button color="light" class="py-1 px-2" on:click={askForLibrary}>Load Library</Button>
+        {/if}
     </div>
 
-    <div>
-        {#if $componentStore.robotModel}
+    <div class="m-2">
+        {#if $componentStore.unresolved.length > 0}
+            {#if $componentStore.canFetchComponents}
+                Loading {$componentStore.unresolved.length} parts
+            {:else}
+                <span class="text-red-700">
+                    Missing {$componentStore.unresolved.length} parts
+                </span>
+            {/if}
+        {:else if $componentStore.robotModel}
             Robot loaded
         {:else}
             Robot not loaded
         {/if}
     </div>
-    {#each $componentStore.unresolved as part}
-        <div class="text-red-700">
-            Missing {part}
-        </div>
-    {/each}
+    <!--div class="w-full flex-1 bg-red-300"></div-->
+    <div class="w-full flex-1 relative">
+        <canvas id="robot_preview" class="w-full h-full"></canvas>
+    </div>
+    <!--div class="w-full flex-1 bg-red-300"></div-->
 </div>
-
-<canvas id="robot_preview" class="w-full h-96"></canvas>
