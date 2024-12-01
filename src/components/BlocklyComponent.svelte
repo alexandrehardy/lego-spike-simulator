@@ -112,6 +112,8 @@
             console.log('Missing scratch.sb3');
             return;
         }
+        // TODO: Load the manifest and apply workspace
+        // zoom and scroll
         const content = await file.async('arraybuffer');
         const project = await loadScratchSb3(content);
         if (project) {
@@ -119,6 +121,7 @@
             if (state) {
                 if (workspace) {
                     Blockly.serialization.workspaces.load(state, workspace);
+                    workspace.setScale();
                 }
             } else {
                 // TODO: Display an error
@@ -196,7 +199,9 @@
     function toggleRobot() {
         resetCode();
         const code = spikeGenerator.workspaceToCode(workspace);
+        console.log('=======');
         console.log(code);
+        console.log('=======');
         console.log(getCodeEvents());
         simulatorOpen = !simulatorOpen;
     }

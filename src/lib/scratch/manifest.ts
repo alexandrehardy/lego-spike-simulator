@@ -19,7 +19,7 @@ export function createManifest(
     const now = new Date();
     const created = now.toISOString();
     if (!name) {
-        name=`Project-${now.toLocaleDateString("en-US")}`;
+        name = `Project-${now.toLocaleDateString('en-US')}`;
     }
     extensions.sort();
     return {

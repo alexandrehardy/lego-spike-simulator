@@ -309,8 +309,13 @@ export const blocks = [
         message0: '%1',
         args0: [
             {
-                type: 'flippermoremotor_menu_acceleration',
-                name: 'field_flippermoremotor_menu_acceleration'
+                type: 'field_dropdown',
+                name: 'field_flippermoremotor_menu_acceleration',
+                options: [
+                    ['slow', '1'],
+                    ['medium', '2'],
+                    ['fast', '3']
+                ]
             }
         ],
         output: 'String'
@@ -365,8 +370,13 @@ export const blocks = [
         message0: '%1',
         args0: [
             {
-                type: 'flippermoremove_menu_acceleration',
-                name: 'field_flippermoremove_menu_acceleration'
+                type: 'field_dropdown',
+                name: 'field_flippermoremove_menu_acceleration',
+                options: [
+                    ['slow', '1'],
+                    ['medium', '2'],
+                    ['fast', '3']
+                ]
             }
         ],
         output: 'String'
