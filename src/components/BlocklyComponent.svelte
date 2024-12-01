@@ -121,7 +121,6 @@
             if (state) {
                 if (workspace) {
                     Blockly.serialization.workspaces.load(state, workspace);
-                    workspace.setScale();
                 }
             } else {
                 // TODO: Display an error
