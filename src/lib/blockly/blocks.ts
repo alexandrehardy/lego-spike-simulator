@@ -161,32 +161,21 @@ export const blocks = [
         message0: '%1',
         args0: [
             {
-                type: 'field_colour',
+                type: 'field_dropdown',
                 name: 'field_flipperlight_color-selector-vertical',
-                colour: '#e700a7',
-                colourOptions: [
-                    '#e700a7',
-                    '#0090f5',
-                    '#77e8ff',
-                    '#00a845',
-                    '#ffe360',
-                    '#ff000c',
-                    '#ffffff',
-                    '#000000',
-                    '#000000ff'
-                ],
-                colourTitles: [
-                    'magenta',
-                    'blue',
-                    'turquoise',
-                    'green',
-                    'yellow',
-                    'red',
-                    'white',
-                    'black',
-                    'none'
-                ],
-                columns: 3
+                options: [
+                    [{"src": "colours/CenterLight0.svg", "width": 25, "height": 10, "alt": "Colour0"}, '1'],
+                    [{"src": "colours/CenterLight1.svg", "width": 25, "height": 10, "alt": "Colour1"}, '2'],
+                    [{"src": "colours/CenterLight2.svg", "width": 25, "height": 10, "alt": "Colour2"}, '3'],
+                    [{"src": "colours/CenterLight3.svg", "width": 25, "height": 10, "alt": "Colour3"}, '4'],
+                    [{"src": "colours/CenterLight4.svg", "width": 25, "height": 10, "alt": "Colour4"}, '5'],
+                    [{"src": "colours/CenterLight5.svg", "width": 25, "height": 10, "alt": "Colour5"}, '6'],
+                    [{"src": "colours/CenterLight6.svg", "width": 25, "height": 10, "alt": "Colour6"}, '7'],
+                    [{"src": "colours/CenterLight7.svg", "width": 25, "height": 10, "alt": "Colour7"}, '8'],
+                    [{"src": "colours/CenterLight8.svg", "width": 25, "height": 10, "alt": "Colour8"}, '9'],
+                    [{"src": "colours/CenterLight9.svg", "width": 25, "height": 10, "alt": "Colour9"}, '10'],
+                    [{"src": "colours/CenterLight10.svg", "width": 25, "height": 10, "alt": "Colour10"}, '0'],
+                ]
             }
         ],
         output: 'String'
@@ -2548,7 +2537,7 @@ export const blocks = [
                     ['degrees', 'degrees'],
                     ['seconds', 'seconds'],
                     ['cm', 'cm'],
-                    ['in', 'in']
+                    ['in', 'inches']
                 ]
             },
             {
