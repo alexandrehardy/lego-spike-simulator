@@ -112,8 +112,6 @@
             console.log('Missing scratch.sb3');
             return;
         }
-        // TODO: Load the manifest and apply workspace
-        // zoom and scroll
         const content = await file.async('arraybuffer');
         const project = await loadScratchSb3(content);
         if (project) {
@@ -121,6 +119,18 @@
             if (state) {
                 if (workspace) {
                     Blockly.serialization.workspaces.load(state, workspace);
+                    try {
+                        const manifestFile = zipFile.file('manifest.json');
+                        const manifest = JSON.parse(await manifestFile.async('string'));
+                        if (manifest.zoomLevel) {
+                            workspace.setScale(manifest.zoomLevel);
+                        }
+                        if ((manifest.workspaceX) && (manifest.workspaceY)) {
+                            workspace.scroll(manifest.workspaceX, manifest.workspaceY);
+                        }
+                    } catch {
+                        // ignore failures
+                    }
                 }
             } else {
                 // TODO: Display an error
