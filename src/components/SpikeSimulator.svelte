@@ -195,31 +195,8 @@
             library.
         </div>
     {/if}
-    <div class="flex flex-row gap-2">
-        <Button color="light" class="py-1 px-2" on:click={askForRobot}>Load Robot</Button>
-        {#if !$componentStore.canFetchComponents}
-            <Button color="light" class="py-1 px-2" on:click={askForLibrary}>Load Library</Button>
-        {/if}
-    </div>
 
-    <div class="m-2">
-        {#if $componentStore.unresolved.length > 0}
-            {#if $componentStore.canFetchComponents}
-                Loading {$componentStore.unresolved.length} parts
-            {:else}
-                <span class="text-red-700">
-                    Missing {$componentStore.unresolved.length} parts
-                </span>
-            {/if}
-        {:else if $componentStore.robotModel}
-            Robot loaded
-        {:else}
-            Robot not loaded
-        {/if}
-    </div>
-    <!--div class="w-full flex-1 bg-red-300"></div-->
     <div class="w-full flex-1 relative">
         <canvas id="robot_preview" class="w-full h-full"></canvas>
     </div>
-    <!--div class="w-full flex-1 bg-red-300"></div-->
 </div>

@@ -6,6 +6,7 @@
     export let modalOpen = false;
     export let blocklyOpen: boolean;
     let robotButtonColour: 'light' | 'red' | 'green' = 'light';
+    let libraryClass = '!p-2';
 
     function closeWindow() {
         modalOpen = false;
@@ -32,11 +33,14 @@
     function updateButtons(store: LDrawStore) {
         if (!store.robotModel) {
             robotButtonColour = 'light';
+            libraryClass = "!p-2";
         } else {
             if (store.unresolved.length > 0) {
                 robotButtonColour = 'red';
+                libraryClass = "!p-2 animate-bounce";
             } else {
                 robotButtonColour = 'green';
+                libraryClass = "!p-2";
             }
         }
     }
@@ -55,6 +59,9 @@
                 </Button>
                 <Button color="light" class="!p-2">
                     <img alt="scene" width="32" height="32" src="icons/Scene.svg" />
+                </Button>
+                <Button color="light" class={libraryClass} on:click={askForLibrary}>
+                    <img alt="scene" width="32" height="32" src="icons/Library.svg" />
                 </Button>
                 <Button color="light" class="!p-2">
                     <img alt="play" width="32" height="32" src="icons/GenericPlayIcon.svg" />
