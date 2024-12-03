@@ -31,6 +31,7 @@ export interface FieldGridDropdownConfig extends Blockly.FieldDropdownConfig {
     minItems?: number;
     sorted?: boolean;
     separator?: string;
+    contentSize?: string;
 }
 
 /**
@@ -65,6 +66,8 @@ export class FieldGridDropdown extends Blockly.FieldDropdown {
     protected sorted = true;
 
     protected separator = ',';
+
+    protected contentSize = 'min-content';
 
     /**
      * Class for an grid dropdown field.
@@ -119,6 +122,10 @@ export class FieldGridDropdown extends Blockly.FieldDropdown {
 
         if (config && config.separator !== undefined) {
             this.separator = config.separator;
+        }
+
+        if (config && config.contentSize !== undefined) {
+            this.contentSize = config.contentSize;
         }
 
         this.selected = this.getOptions(false)
@@ -211,7 +218,7 @@ export class FieldGridDropdown extends Blockly.FieldDropdown {
     protected updateColumnsStyling_() {
         const menuElement = this.menu_ ? this.menu_.getElement() : null;
         if (menuElement) {
-            menuElement.style.gridTemplateColumns = `repeat(${this.columns}, min-content)`;
+            menuElement.style.gridTemplateColumns = `repeat(${this.columns}, ${this.contentSize})`;
         }
     }
 

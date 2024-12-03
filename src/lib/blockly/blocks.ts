@@ -32,32 +32,21 @@ export const blocks = [
         message0: '%1',
         args0: [
             {
-                type: 'field_colour',
+                type: 'field_grid_dropdown',
+                columns: 3,
+                contentSize: 'max-content',
                 name: 'field_flipperevents_color-selector',
-                colour: '#e700a7',
-                colourOptions: [
-                    '#e700a7',
-                    '#0090f5',
-                    '#77e8ff',
-                    '#00a845',
-                    '#ffe360',
-                    '#ff000c',
-                    '#ffffff',
-                    '#000000',
-                    '#000000ff'
-                ],
-                colourTitles: [
-                    'magenta',
-                    'blue',
-                    'turquoise',
-                    'green',
-                    'yellow',
-                    'red',
-                    'white',
-                    'black',
-                    'none'
-                ],
-                columns: 3
+                options: [
+                    [{"src": "colours/Circle0.svg", "width": 25, "height": 25, "alt": "Colour0"}, '1'],
+                    [{"src": "colours/Circle2.svg", "width": 25, "height": 25, "alt": "Colour3"}, '3'],
+                    [{"src": "colours/Circle3.svg", "width": 25, "height": 25, "alt": "Colour4"}, '4'],
+                    [{"src": "colours/Circle5.svg", "width": 25, "height": 25, "alt": "Colour6"}, '6'],
+                    [{"src": "colours/Circle6.svg", "width": 25, "height": 25, "alt": "Colour7"}, '7'],
+                    [{"src": "colours/Circle8.svg", "width": 25, "height": 25, "alt": "Colour9"}, '9'],
+                    [{"src": "colours/Circle9.svg", "width": 25, "height": 25, "alt": "Colour10"}, '10'],
+                    [{"src": "colours/Circle10.svg", "width": 25, "height": 25, "alt": "Colour0"}, '0'],
+                    [{"src": "colours/CircleNone.svg", "width": 25, "height": 25, "alt": "Colour None"}, '-1'],
+                ]
             }
         ],
         output: 'String'
@@ -185,11 +174,13 @@ export const blocks = [
         message0: '%1',
         args0: [
             {
-                type: 'field_dropdown',
+                type: 'field_grid_dropdown',
                 name: 'field_flipperlight_custom-icon-direction',
+                columns: 2,
+                contentSize: 'max-content',
                 options: [
-                    ['clockwise', 'clockwise'],
-                    ['counterclockwise', 'counterclockwise']
+                    [{"src": "icons/FieldAcw.svg", "width": "25", "height": "25", "alt": "anticlockwise"}, 'counterclockwise'],
+                    [{"src": "icons/FieldCw.svg", "width": "25", "height": "25", "alt": "clockwise"}, 'clockwise'],
                 ]
             }
         ],
@@ -411,11 +402,13 @@ export const blocks = [
         message0: '%1',
         args0: [
             {
-                type: 'field_dropdown',
+                type: 'field_grid_dropdown',
                 name: 'field_flippermotor_custom-icon-direction',
+                columns: 2,
+                contentSize: 'max-content',
                 options: [
-                    ['clockwise', 'clockwise'],
-                    ['counterclockwise', 'counterclockwise']
+                    [{"src": "icons/FieldAcw.svg", "width": "25", "height": "25", "alt": "anticlockwise"}, 'counterclockwise'],
+                    [{"src": "icons/FieldCw.svg", "width": "25", "height": "25", "alt": "clockwise"}, 'clockwise'],
                 ]
             }
         ],
@@ -471,11 +464,13 @@ export const blocks = [
         message0: '%1',
         args0: [
             {
-                type: 'field_dropdown',
+                type: 'field_grid_dropdown',
                 name: 'field_flippermove_custom-icon-direction',
+                columns: 2,
+                contentSize: 'max-content',
                 options: [
-                    ['forward', 'forward'],
-                    ['backward', 'back']
+                    [{"src": "icons/FieldFw.svg", "width": "25", "height": "25", "alt": "forward"}, 'forward'],
+                    [{"src": "icons/FieldBw.svg", "width": "25", "height": "25", "alt": "backward"}, 'back'],
                 ]
             }
         ],
@@ -546,32 +541,21 @@ export const blocks = [
         message0: '%1',
         args0: [
             {
-                type: 'field_colour',
+                type: 'field_grid_dropdown',
+                columns: 3,
+                contentSize: 'max-content',
                 name: 'field_flippersensors_color-selector',
-                colour: '#e700a7',
-                colourOptions: [
-                    '#e700a7',
-                    '#0090f5',
-                    '#77e8ff',
-                    '#00a845',
-                    '#ffe360',
-                    '#ff000c',
-                    '#ffffff',
-                    '#000000',
-                    '#000000ff'
-                ],
-                colourTitles: [
-                    'magenta',
-                    'blue',
-                    'turquoise',
-                    'green',
-                    'yellow',
-                    'red',
-                    'white',
-                    'black',
-                    'none'
-                ],
-                columns: 3
+                options: [
+                    [{"src": "colours/Circle0.svg", "width": 25, "height": 25, "alt": "Colour0"}, '1'],
+                    [{"src": "colours/Circle2.svg", "width": 25, "height": 25, "alt": "Colour3"}, '3'],
+                    [{"src": "colours/Circle3.svg", "width": 25, "height": 25, "alt": "Colour4"}, '4'],
+                    [{"src": "colours/Circle5.svg", "width": 25, "height": 25, "alt": "Colour6"}, '6'],
+                    [{"src": "colours/Circle6.svg", "width": 25, "height": 25, "alt": "Colour7"}, '7'],
+                    [{"src": "colours/Circle8.svg", "width": 25, "height": 25, "alt": "Colour9"}, '9'],
+                    [{"src": "colours/Circle9.svg", "width": 25, "height": 25, "alt": "Colour10"}, '10'],
+                    [{"src": "colours/Circle10.svg", "width": 25, "height": 25, "alt": "Colour0"}, '0'],
+                    [{"src": "colours/CircleNone.svg", "width": 25, "height": 25, "alt": "Colour None"}, '-1'],
+                ]
             }
         ],
         output: 'String'
@@ -1343,7 +1327,6 @@ export const blocks = [
                 name: 'STOP_OPTION',
                 options: [
                     ['all', 'all'],
-                    ['other stacks', 'other'],
                     ['and exit program', 'program'],
                     ['this stack', 'this']
                 ]
@@ -2212,32 +2195,13 @@ export const blocks = [
                 }
             },
             {
-                type: 'field_colour',
+                type: 'field_dropdown',
                 name: 'COLOR',
-                colour: '#e700a7',
-                colourOptions: [
-                    '#e700a7',
-                    '#0090f5',
-                    '#77e8ff',
-                    '#00a845',
-                    '#ffe360',
-                    '#ff000c',
-                    '#ffffff',
-                    '#000000',
-                    '#000000ff'
+                options: [
+                    ['red', 'red'],
+                    ['green', 'green'],
+                    ['blue', 'blue'],
                 ],
-                colourTitles: [
-                    'magenta',
-                    'blue',
-                    'turquoise',
-                    'green',
-                    'yellow',
-                    'red',
-                    'white',
-                    'black',
-                    'none'
-                ],
-                columns: 3
             },
             {
                 type: 'field_image',
