@@ -1,5 +1,20 @@
 import * as Blockly from 'blockly/core';
-import { Node, Statement, ActionStatement, EventStatement, CallStatement, Expression, UnaryExpression, BinaryExpression, Value, Variable, StatementBlock, ProcedureBlock, ControlStatement, RepeatStatement} from '$lib/spike/vm';
+import {
+    Node,
+    Statement,
+    ActionStatement,
+    EventStatement,
+    CallStatement,
+    Expression,
+    UnaryExpression,
+    BinaryExpression,
+    Value,
+    Variable,
+    StatementBlock,
+    ProcedureBlock,
+    ControlStatement,
+    RepeatStatement
+} from '$lib/spike/vm';
 
 let nodes = new Map<string, Node>();
 let procedures = new Map<string, ProcedureBlock>();

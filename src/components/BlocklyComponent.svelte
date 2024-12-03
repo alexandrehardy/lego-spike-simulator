@@ -76,11 +76,13 @@
         if (element == null) {
             return;
         }
+        Blockly.ContextMenuItems.registerCommentOptions();
         workspace = Blockly.inject(element, {
             renderer: 'spike_renderer',
             grid: { spacing: 20, length: 3, colour: '#ccc', snap: true },
             theme: 'spike',
             media: 'blockly/media/',
+            comments: true,
             zoom: {
                 controls: true,
                 wheel: false,
@@ -121,12 +123,14 @@
                     Blockly.serialization.workspaces.load(state, workspace);
                     try {
                         const manifestFile = zipFile.file('manifest.json');
-                        const manifest = JSON.parse(await manifestFile.async('string'));
-                        if (manifest.zoomLevel) {
-                            workspace.setScale(manifest.zoomLevel);
-                        }
-                        if ((manifest.workspaceX) && (manifest.workspaceY)) {
-                            workspace.scroll(manifest.workspaceX, manifest.workspaceY);
+                        if (manifestFile) {
+                            const manifest = JSON.parse(await manifestFile.async('string'));
+                            if (manifest.zoomLevel) {
+                                workspace.setScale(manifest.zoomLevel);
+                            }
+                            if (manifest.workspaceX && manifest.workspaceY) {
+                                workspace.scroll(manifest.workspaceX, manifest.workspaceY);
+                            }
                         }
                     } catch {
                         // ignore failures

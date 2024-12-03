@@ -1,9 +1,16 @@
-import { type Sb3Project, type Sb3Block, type Sb3Stage, type Sb3Sprite } from '$lib/scratch/sb3';
+import {
+    type Sb3Project,
+    type Sb3Block,
+    type Sb3Comment,
+    type Sb3Stage,
+    type Sb3Sprite
+} from '$lib/scratch/sb3';
 import { blocks as blockDefinitions } from '$lib/blockly/blocks';
 
 import {
     type BlocklyState,
     type BlocklyStateBlock,
+    type BlocklyStateComment,
     type BlocklyStateVariable
 } from '$lib/blockly/state';
 
@@ -111,6 +118,7 @@ export function convertToBlockly(project: Sb3Project): BlocklyState | undefined 
     const variables: BlocklyStateVariable[] = [];
     const blocks: BlocklyStateBlock[] = [];
     const definitions = new Map<string, BlocklyInterface>();
+    const comments: BlocklyStateComment[] = [];
 
     if (!project.targets) {
         return undefined;
@@ -177,6 +185,21 @@ export function convertToBlockly(project: Sb3Project): BlocklyState | undefined 
                 const id = key;
                 const type = 'broadcast';
                 variables.push({ id: id, name: variable, type: type });
+            }
+        }
+        if (target.comments) {
+            for (const key of Object.keys(target.comments)) {
+                const comment = target.comments[key];
+                const id = key;
+                comments.push({
+                    id: id,
+                    x: comment.x,
+                    y: comment.y,
+                    width: comment.width,
+                    height: comment.height,
+                    text: comment.text,
+                    collapsed: comment.minimized
+                });
             }
         }
 
@@ -440,8 +463,11 @@ export function convertToBlockly(project: Sb3Project): BlocklyState | undefined 
         value = iter.next();
     }
 
-    const state = { variables: variables, blocks: { languageVersion: 0, blocks: blocks } };
-    console.log(state);
+    const state = {
+        variables: variables,
+        blocks: { languageVersion: 0, blocks: blocks },
+        workspaceComments: comments
+    };
     return state;
 }
 
@@ -473,12 +499,27 @@ function encodeConst(value: any, variables: BlocklyStateVariable[]) {
             return ['', null];
         }
     }
+    return ['', null];
 }
 
 export function convertToScratch(state: BlocklyState): Sb3Project {
-    console.log(state);
     const linearBlocks: Record<string, Sb3Block> = {};
+    const comments: Record<string, Sb3Comment> = {};
     const extensions: string[] = [];
+
+    if (state.workspaceComments) {
+        for (const comment of state.workspaceComments) {
+            comments[comment.id] = {
+                blockId: undefined,
+                x: comment.x,
+                y: comment.y,
+                width: comment.width,
+                height: comment.height,
+                minimized: comment.collapsed ?? false,
+                text: comment.text
+            };
+        }
+    }
 
     function recurseBlock(
         block: BlocklyStateBlock,
@@ -501,7 +542,7 @@ export function convertToScratch(state: BlocklyState): Sb3Project {
         if (block.fields) {
             for (const key of Object.keys(block.fields)) {
                 const value = block.fields[key];
-                sb3Block.fields[key] = encodeConst(value, state.variables);
+                sb3Block.fields[key] = encodeConst(value, state.variables ?? []);
             }
         }
         if (block.inputs) {
@@ -598,7 +639,6 @@ export function convertToScratch(state: BlocklyState): Sb3Project {
                 warp: 'false'
             };
         }
-        console.log(sb3Block);
         linearBlocks[block.id!] = sb3Block;
         return sb3Block;
     }
@@ -683,7 +723,7 @@ export function convertToScratch(state: BlocklyState): Sb3Project {
     const program: Sb3Sprite = {
         blocks: linearBlocks,
         broadcasts: {},
-        comments: {},
+        comments: comments,
         costumes: [
             {
                 assetId: 'deadc057000000000000000000000000',
@@ -721,6 +761,5 @@ export function convertToScratch(state: BlocklyState): Sb3Project {
     };
     project.targets.push(stage);
     project.targets.push(program);
-    console.log(project);
     return project;
 }

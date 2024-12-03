@@ -45,20 +45,6 @@
         }
     }
 
-    function askForRobot() {
-        const element = document.getElementById('load_robot');
-        if (element) {
-            element.click();
-        }
-    }
-
-    function askForLibrary() {
-        const element = document.getElementById('load_library');
-        if (element) {
-            element.click();
-        }
-    }
-
     let angle = 0;
     let angle2 = 0;
     function renderRobot() {

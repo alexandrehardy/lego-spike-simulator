@@ -45,7 +45,7 @@ export interface Sb3Sound extends Sb3Asset {
 }
 
 export interface Sb3Comment {
-    blockId: string;
+    blockId?: string;
     x: number;
     y: number;
     width: number;

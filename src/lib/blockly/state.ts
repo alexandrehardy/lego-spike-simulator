@@ -42,7 +42,18 @@ export interface BlocklyStateVersionedBlocks {
     languageVersion: number;
 }
 
+export interface BlocklyStateComment {
+    id: string;
+    collapsed?: boolean;
+    height: number;
+    width: number;
+    x: number;
+    y: number;
+    text: string;
+}
+
 export interface BlocklyState {
-    variables: BlocklyStateVariable[];
-    blocks: BlocklyStateVersionedBlocks;
+    variables?: BlocklyStateVariable[];
+    blocks?: BlocklyStateVersionedBlocks;
+    workspaceComments?: BlocklyStateComment[];
 }

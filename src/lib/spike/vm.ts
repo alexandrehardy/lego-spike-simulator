@@ -188,8 +188,7 @@ export class Thread {
     stack: Namespace[];
     currentState: ThreadState;
 
-    executeStep() {
-    }
+    executeStep() {}
 }
 
 export class VM {

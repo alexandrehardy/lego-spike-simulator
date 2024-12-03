@@ -33,14 +33,14 @@
     function updateButtons(store: LDrawStore) {
         if (!store.robotModel) {
             robotButtonColour = 'light';
-            libraryClass = "!p-2";
+            libraryClass = '!p-2';
         } else {
             if (store.unresolved.length > 0) {
                 robotButtonColour = 'red';
-                libraryClass = "!p-2 animate-bounce";
+                libraryClass = '!p-2 animate-bounce';
             } else {
                 robotButtonColour = 'green';
-                libraryClass = "!p-2";
+                libraryClass = '!p-2';
             }
         }
     }
