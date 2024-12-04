@@ -248,6 +248,7 @@ export function convertToBlockly(project: Sb3Project): BlocklyState | undefined 
                 block.fields[key] = { id: value.varId };
             }
         } else {
+            console.log('Unsupported field');
             console.log(field);
         }
     }
@@ -328,6 +329,7 @@ export function convertToBlockly(project: Sb3Project): BlocklyState | undefined 
                 };
             }
         } else {
+            console.log('Unsupported input');
             console.log(input);
         }
     }
@@ -346,7 +348,6 @@ export function convertToBlockly(project: Sb3Project): BlocklyState | undefined 
                 if (definition) {
                     if (definition.fields.indexOf(key) < 0) {
                         console.log(`BLOCK: ${block.type}, ${key} is not a field`);
-                        console.log(scratchBlock);
                     }
                 }
                 addField(block, key, field);

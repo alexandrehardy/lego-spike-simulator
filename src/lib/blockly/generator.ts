@@ -1466,7 +1466,7 @@ spikeGenerator.forBlock['operator_round'] = function (block, generator) {
     const argId = generator.statementToCode(block, 'NUM');
     const arg = getExpression(argId);
     const id = newId();
-    nodes.set(id, new UnaryExpression('not', block.id, arg));
+    nodes.set(id, new UnaryExpression('round', block.id, arg));
     return id;
 };
 spikeGenerator.forBlock['operator_subtract'] = function (block, generator) {

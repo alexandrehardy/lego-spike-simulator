@@ -1,12 +1,15 @@
 <script lang="ts">
+    import * as Blockly from 'blockly/core';
     import { Button, CloseButton } from 'flowbite-svelte';
     import SpikeSimulator from '$components/SpikeSimulator.svelte';
     import { type LDrawStore, componentStore } from '$lib/ldraw/components';
 
     export let modalOpen = false;
     export let blocklyOpen: boolean;
+    export let workspace: Blockly.WorkspaceSvg | undefined;
     let robotButtonColour: 'light' | 'red' | 'green' = 'light';
     let libraryClass = '!p-2';
+    let runSimulation = false;
 
     function closeWindow() {
         modalOpen = false;
@@ -44,6 +47,10 @@
             }
         }
     }
+
+    function startRobot() {
+        runSimulation = true;
+    }
     $: updateButtons($componentStore);
 </script>
 
@@ -63,7 +70,7 @@
                 <Button color="light" class={libraryClass} on:click={askForLibrary}>
                     <img alt="scene" width="32" height="32" src="icons/Library.svg" />
                 </Button>
-                <Button color="light" class="!p-2">
+                <Button color="light" class="!p-2" on:click={startRobot}>
                     <img alt="play" width="32" height="32" src="icons/GenericPlayIcon.svg" />
                 </Button>
                 {#if !blocklyOpen}
@@ -77,7 +84,7 @@
                 {/if}
             </div>
             <div class="flex-1 w-full overflow-hidden">
-                <SpikeSimulator />
+                <SpikeSimulator bind:runSimulation {workspace} />
             </div>
         </div>
     </div>

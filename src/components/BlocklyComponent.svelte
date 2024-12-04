@@ -34,6 +34,7 @@
     import { convertToBlockly, convertToScratch } from '$lib/scratch/blockly';
     import { spikeGenerator, resetCode, getCodeEvents } from '$lib/blockly/generator';
     import { cat } from '$lib/blockly/audio';
+    import { codeStore } from '$lib/spike/vm';
     import JSZip from 'jszip';
     import FileSaver from 'file-saver';
 
@@ -215,7 +216,7 @@
         console.log('=======');
         console.log(code);
         console.log('=======');
-        console.log(getCodeEvents());
+        codeStore.set({ events: getCodeEvents() });
         simulatorOpen = !simulatorOpen;
     }
 
@@ -272,7 +273,7 @@
             <div id="blocklyDiv" />
         </div>
     </div>
-    <SpikeSimulatorWindow bind:modalOpen={simulatorOpen} bind:blocklyOpen />
+    <SpikeSimulatorWindow bind:modalOpen={simulatorOpen} bind:blocklyOpen {workspace} />
 </div>
 
 <style scoped>

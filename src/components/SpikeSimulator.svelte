@@ -1,4 +1,5 @@
 <script lang="ts">
+    import * as Blockly from 'blockly/core';
     import { onDestroy, onMount } from 'svelte';
     import { Button } from 'flowbite-svelte';
     import {
@@ -9,6 +10,10 @@
     } from '$lib/ldraw/components';
     import { WebGL, type CompiledModel } from '$lib/ldraw/gl';
     import { type Model } from '$lib/ldraw/components';
+    import { VM, Hub, type Namespace, StringValue, ListValue, codeStore } from '$lib/spike/vm';
+
+    export let runSimulation: boolean = false;
+    export let workspace: Blockly.WorkspaceSvg | undefined;
 
     let numberOfLoads = 0;
     let gl: WebGL | undefined;
@@ -115,6 +120,31 @@
         resizeGL($componentStore);
     }
 
+    function startOrPauseSimulation(start: boolean) {
+        console.log('Start pause');
+        console.log(start);
+        if (start) {
+            const selected = Blockly.common.getSelected();
+            if (selected) {
+                selected.unselect();
+            }
+            const hub = new Hub();
+            const globals: Namespace = {};
+            if (workspace) {
+                let variables = workspace.getVariablesOfType('Number');
+                for (let i = 0; i < variables.length; i++) {
+                    globals[variables[i].name] = new StringValue('');
+                }
+                variables = workspace.getVariablesOfType('list');
+                for (let i = 0; i < variables.length; i++) {
+                    globals[variables[i].name] = new ListValue([]);
+                }
+            }
+            const vm = new VM(hub, globals, $codeStore.events, workspace);
+            vm.runThreads();
+        }
+    }
+
     onMount(() => {
         const canvas = document.getElementById('robot_preview');
         if (canvas) {
@@ -140,6 +170,7 @@
 
     $: compiledRobot = doCompile($componentStore.robotModel);
     $: resizeGL($componentStore);
+    $: startOrPauseSimulation(runSimulation);
 </script>
 
 <div class="flex flex-col h-full p-2 overflow-y-scroll relative">
