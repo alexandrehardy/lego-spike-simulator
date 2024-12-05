@@ -6,6 +6,7 @@ import {
     EventStatement,
     CallStatement,
     Expression,
+    FunctionExpression,
     UnaryExpression,
     BinaryExpression,
     Value,
@@ -73,18 +74,29 @@ spikeGenerator.forBlock['procedures_prototype'] = function (block, generator) {
     const name = block.getFieldValue('NAME')!;
     const args: Variable[] = [];
     for (const input of block.inputList) {
+        if (!input.connection) {
+            continue;
+        }
         const statementId = generator.statementToCode(block, input.name);
+        console.log(input);
+        console.log('STAT');
+        console.log(statementId);
         const arg = getNode(statementId) as Variable;
         args.push(arg);
     }
     const id = newId();
-    nodes.set(id, new ProcedureBlock(block.id, name, args, new StatementBlock([])));
+    const proc = new ProcedureBlock(block.id, name, args, new StatementBlock([]));
+    nodes.set(id, proc);
+    procedures.set(name, proc);
     return id;
 };
 spikeGenerator.forBlock['procedures_call'] = function (block, generator) {
     const name = block.getFieldValue('NAME')!;
     const args: Expression[] = [];
     for (const input of block.inputList) {
+        if (!input.connection) {
+            continue;
+        }
         const statementId = generator.statementToCode(block, input.name);
         const arg = getNode(statementId) as Expression;
         args.push(arg);
@@ -111,9 +123,13 @@ spikeGenerator.forBlock['argument_reporter_string_number'] = function (block) {
 //spikeGenerator.forBlock['displaymonitor_custom-image'] = function (block, generator) {
 //    return 'displaymonitor_custom-image';
 //};
-//spikeGenerator.forBlock['event_broadcast_menu'] = function (block, generator) {
-//    return 'event_broadcast_menu';
-//};
+spikeGenerator.forBlock['event_broadcast_menu'] = function (block) {
+    const selected = block.getFieldValue('BROADCAST_OPTION')!;
+    const id = newId();
+    // Returns the text used for broadcast
+    nodes.set(id, new Value('broadcast', block.id, selected));
+    return id;
+};
 spikeGenerator.forBlock['flipperevents_color-selector'] = function (block) {
     const colour = block.getFieldValue('field_flipperevents_color-selector')!;
     const id = newId();
@@ -312,12 +328,20 @@ spikeGenerator.forBlock['flippersensors_force-sensor-selector'] = function (bloc
     nodes.set(id, new Value('port', block.id, selected));
     return id;
 };
-//spikeGenerator.forBlock['flippersound_custom-piano'] = function (block, generator) {
-//    return 'flippersound_custom-piano';
-//};
-//spikeGenerator.forBlock['flippersound_sound-selector'] = function (block, generator) {
-//    return 'flippersound_sound-selector';
-//};
+spikeGenerator.forBlock['flippersound_custom-piano'] = function (block) {
+    const selected = block.getFieldValue('field_flippersound_custom-piano')!;
+    const id = newId();
+    // Returns the note number to play
+    nodes.set(id, new Value('note', block.id, selected));
+    return id;
+};
+spikeGenerator.forBlock['flippersound_sound-selector'] = function (block) {
+    const selected = block.getFieldValue('field_flippersound_sound-selector')!;
+    const id = newId();
+    // Returns JSON with the sound to use
+    nodes.set(id, new Value('sound', block.id, selected));
+    return id;
+};
 //spikeGenerator.forBlock['linegraphmonitor_custom-color'] = function (block, generator) {
 //    return 'linegraphmonitor_custom-color';
 //};
@@ -510,7 +534,7 @@ spikeGenerator.forBlock['data_listcontents'] = function (block) {
     const list = block.getFieldValue('LIST')!;
     const variable = new Variable('var', block.id, list, false);
     const id = newId();
-    nodes.set(id, new ActionStatement('list', block.id, [variable]));
+    nodes.set(id, new FunctionExpression('list', block.id, [variable]));
     return id;
 };
 spikeGenerator.forBlock['data_replaceitemoflist'] = function (block, generator) {
@@ -919,7 +943,7 @@ spikeGenerator.forBlock['flippermoresensors_acceleration'] = function (block) {
     const axisValue = block.getFieldValue('AXIS')!;
     const axis = new Value('str', block.id, axisValue);
     const args: Expression[] = [axis];
-    const newNode = new ActionStatement(block.type, block.id, args);
+    const newNode = new FunctionExpression(block.type, block.id, args);
     nodes.set(id, newNode);
     return id;
 };
@@ -928,14 +952,14 @@ spikeGenerator.forBlock['flippermoresensors_angularVelocity'] = function (block)
     const axisValue = block.getFieldValue('AXIS')!;
     const axis = new Value('str', block.id, axisValue);
     const args: Expression[] = [axis];
-    const newNode = new ActionStatement(block.type, block.id, args);
+    const newNode = new FunctionExpression(block.type, block.id, args);
     nodes.set(id, newNode);
     return id;
 };
 spikeGenerator.forBlock['flippermoresensors_orientation'] = function (block) {
     const id = newId();
     const args: Expression[] = [];
-    const newNode = new ActionStatement(block.type, block.id, args);
+    const newNode = new FunctionExpression(block.type, block.id, args);
     nodes.set(id, newNode);
     return id;
 };
@@ -946,7 +970,7 @@ spikeGenerator.forBlock['flippermoresensors_rawColor'] = function (block, genera
     const colorValue = block.getFieldValue('COLOR')!;
     const color = new Value('str', block.id, colorValue);
     const args: Expression[] = [port, color];
-    const newNode = new ActionStatement(block.type, block.id, args);
+    const newNode = new FunctionExpression(block.type, block.id, args);
     nodes.set(id, newNode);
     return id;
 };
@@ -955,7 +979,7 @@ spikeGenerator.forBlock['flippermotor_absolutePosition'] = function (block, gene
     const portId = generator.statementToCode(block, 'PORT');
     const port = getExpression(portId);
     const args: Expression[] = [port];
-    const newNode = new ActionStatement(block.type, block.id, args);
+    const newNode = new FunctionExpression(block.type, block.id, args);
     nodes.set(id, newNode);
     return id;
 };
@@ -1023,7 +1047,7 @@ spikeGenerator.forBlock['flippermotor_speed'] = function (block, generator) {
     const portId = generator.statementToCode(block, 'PORT');
     const port = getExpression(portId);
     const args: Expression[] = [port];
-    const newNode = new ActionStatement(block.type, block.id, args);
+    const newNode = new FunctionExpression(block.type, block.id, args);
     nodes.set(id, newNode);
     return id;
 };
@@ -1116,7 +1140,7 @@ spikeGenerator.forBlock['flipperoperator_isInBetween'] = function (block, genera
     const highId = generator.statementToCode(block, 'HIGH');
     const high = getExpression(highId);
     const args: Expression[] = [value, low, high];
-    const newNode = new ActionStatement(block.type, block.id, args);
+    const newNode = new FunctionExpression(block.type, block.id, args);
     nodes.set(id, newNode);
     return id;
 };
@@ -1127,7 +1151,7 @@ spikeGenerator.forBlock['flippersensors_buttonIsPressed'] = function (block) {
     const eventValue = block.getFieldValue('EVENT')!;
     const event = new Value('str', block.id, eventValue);
     const args: Expression[] = [button, event];
-    const newNode = new ActionStatement(block.type, block.id, args);
+    const newNode = new FunctionExpression(block.type, block.id, args);
     nodes.set(id, newNode);
     return id;
 };
@@ -1136,7 +1160,7 @@ spikeGenerator.forBlock['flippersensors_color'] = function (block, generator) {
     const portId = generator.statementToCode(block, 'PORT');
     const port = getExpression(portId);
     const args: Expression[] = [port];
-    const newNode = new ActionStatement(block.type, block.id, args);
+    const newNode = new FunctionExpression(block.type, block.id, args);
     nodes.set(id, newNode);
     return id;
 };
@@ -1147,7 +1171,7 @@ spikeGenerator.forBlock['flippersensors_distance'] = function (block, generator)
     const unitValue = block.getFieldValue('UNIT')!;
     const unit = new Value('str', block.id, unitValue);
     const args: Expression[] = [port, unit];
-    const newNode = new ActionStatement(block.type, block.id, args);
+    const newNode = new FunctionExpression(block.type, block.id, args);
     nodes.set(id, newNode);
     return id;
 };
@@ -1158,7 +1182,7 @@ spikeGenerator.forBlock['flippersensors_force'] = function (block, generator) {
     const unitValue = block.getFieldValue('UNIT')!;
     const unit = new Value('str', block.id, unitValue);
     const args: Expression[] = [port, unit];
-    const newNode = new ActionStatement(block.type, block.id, args);
+    const newNode = new FunctionExpression(block.type, block.id, args);
     nodes.set(id, newNode);
     return id;
 };
@@ -1169,7 +1193,7 @@ spikeGenerator.forBlock['flippersensors_isColor'] = function (block, generator) 
     const valueId = generator.statementToCode(block, 'VALUE');
     const value = getExpression(valueId);
     const args: Expression[] = [port, value];
-    const newNode = new ActionStatement(block.type, block.id, args);
+    const newNode = new FunctionExpression(block.type, block.id, args);
     nodes.set(id, newNode);
     return id;
 };
@@ -1184,7 +1208,7 @@ spikeGenerator.forBlock['flippersensors_isDistance'] = function (block, generato
     const unitValue = block.getFieldValue('UNIT')!;
     const unit = new Value('str', block.id, unitValue);
     const args: Expression[] = [port, comparator, value, unit];
-    const newNode = new ActionStatement(block.type, block.id, args);
+    const newNode = new FunctionExpression(block.type, block.id, args);
     nodes.set(id, newNode);
     return id;
 };
@@ -1195,7 +1219,7 @@ spikeGenerator.forBlock['flippersensors_isPressed'] = function (block, generator
     const optionValue = block.getFieldValue('OPTION')!;
     const option = new Value('str', block.id, optionValue);
     const args: Expression[] = [port, option];
-    const newNode = new ActionStatement(block.type, block.id, args);
+    const newNode = new FunctionExpression(block.type, block.id, args);
     nodes.set(id, newNode);
     return id;
 };
@@ -1208,7 +1232,7 @@ spikeGenerator.forBlock['flippersensors_isReflectivity'] = function (block, gene
     const valueId = generator.statementToCode(block, 'VALUE');
     const value = getExpression(valueId);
     const args: Expression[] = [port, comparator, value];
-    const newNode = new ActionStatement(block.type, block.id, args);
+    const newNode = new FunctionExpression(block.type, block.id, args);
     nodes.set(id, newNode);
     return id;
 };
@@ -1217,7 +1241,7 @@ spikeGenerator.forBlock['flippersensors_isTilted'] = function (block, generator)
     const valueId = generator.statementToCode(block, 'VALUE');
     const value = getExpression(valueId);
     const args: Expression[] = [value];
-    const newNode = new ActionStatement(block.type, block.id, args);
+    const newNode = new FunctionExpression(block.type, block.id, args);
     nodes.set(id, newNode);
     return id;
 };
@@ -1226,7 +1250,7 @@ spikeGenerator.forBlock['flippersensors_ismotion'] = function (block) {
     const motionValue = block.getFieldValue('MOTION')!;
     const motion = new Value('str', block.id, motionValue);
     const args: Expression[] = [motion];
-    const newNode = new ActionStatement(block.type, block.id, args);
+    const newNode = new FunctionExpression(block.type, block.id, args);
     nodes.set(id, newNode);
     return id;
 };
@@ -1235,7 +1259,7 @@ spikeGenerator.forBlock['flippersensors_isorientation'] = function (block) {
     const orientationValue = block.getFieldValue('ORIENTATION')!;
     const orientation = new Value('str', block.id, orientationValue);
     const args: Expression[] = [orientation];
-    const newNode = new ActionStatement(block.type, block.id, args);
+    const newNode = new FunctionExpression(block.type, block.id, args);
     nodes.set(id, newNode);
     return id;
 };
@@ -1244,7 +1268,7 @@ spikeGenerator.forBlock['flippersensors_orientationAxis'] = function (block) {
     const axisValue = block.getFieldValue('AXIS')!;
     const axis = new Value('str', block.id, axisValue);
     const args: Expression[] = [axis];
-    const newNode = new ActionStatement(block.type, block.id, args);
+    const newNode = new FunctionExpression(block.type, block.id, args);
     nodes.set(id, newNode);
     return id;
 };
@@ -1253,7 +1277,7 @@ spikeGenerator.forBlock['flippersensors_reflectivity'] = function (block, genera
     const portId = generator.statementToCode(block, 'PORT');
     const port = getExpression(portId);
     const args: Expression[] = [port];
-    const newNode = new ActionStatement(block.type, block.id, args);
+    const newNode = new FunctionExpression(block.type, block.id, args);
     nodes.set(id, newNode);
     return id;
 };
@@ -1274,7 +1298,7 @@ spikeGenerator.forBlock['flippersensors_resetYaw'] = function (block) {
 spikeGenerator.forBlock['flippersensors_timer'] = function (block) {
     const id = newId();
     const args: Expression[] = [];
-    const newNode = new ActionStatement(block.type, block.id, args);
+    const newNode = new FunctionExpression(block.type, block.id, args);
     nodes.set(id, newNode);
     return id;
 };
@@ -1528,7 +1552,7 @@ spikeGenerator.forBlock['sound_setvolumeto'] = function (block, generator) {
 spikeGenerator.forBlock['sound_volume'] = function (block) {
     const id = newId();
     const args: Expression[] = [];
-    const newNode = new ActionStatement(block.type, block.id, args);
+    const newNode = new FunctionExpression(block.type, block.id, args);
     nodes.set(id, newNode);
     return id;
 };

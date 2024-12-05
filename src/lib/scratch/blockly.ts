@@ -580,6 +580,9 @@ export function convertToScratch(state: BlocklyState): Sb3Project {
                     } else if (shadowBlock.opcode == 'text') {
                         sb3Block.inputs[key] = [1, [10, shadowBlock.fields.TEXT[0]]];
                         delete linearBlocks[shadowId];
+                    } else if (shadowBlock.opcode == 'event_broadcast_menu') {
+                        sb3Block.inputs[key] = [1, shadowBlock.fields.BROADCAST_OPTION[1]];
+                        delete linearBlocks[shadowId];
                     } else {
                         sb3Block.inputs[key] = [1, value.shadow.id];
                     }

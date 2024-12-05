@@ -18,7 +18,7 @@ export const blocks = [
         message0: '%1',
         args0: [
             {
-                type: 'field_variable',
+                type: 'field_variable_getter',
                 name: 'BROADCAST_OPTION',
                 variable: 'message1',
                 variableTypes: ['broadcast'],
@@ -1390,7 +1390,7 @@ export const blocks = [
         message0: 'when I receive %1',
         args0: [
             {
-                type: 'field_variable',
+                type: 'field_variable_getter',
                 name: 'BROADCAST_OPTION',
                 variable: 'message1'
             }
@@ -2876,7 +2876,7 @@ export const blocks = [
         inputsInline: true,
         colour: '#3fccf1',
         tooltip: 'flippersensors_buttonIsPressed',
-        output: 'Number',
+        output: 'Boolean',
         extensions: ['shadow_input']
     },
     {

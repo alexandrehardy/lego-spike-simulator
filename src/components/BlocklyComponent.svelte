@@ -32,9 +32,7 @@
     import { loadScratchSb3 } from '$lib/scratch/sb3';
     import { createManifest } from '$lib/scratch/manifest';
     import { convertToBlockly, convertToScratch } from '$lib/scratch/blockly';
-    import { spikeGenerator, resetCode, getCodeEvents } from '$lib/blockly/generator';
     import { cat } from '$lib/blockly/audio';
-    import { codeStore } from '$lib/spike/vm';
     import JSZip from 'jszip';
     import FileSaver from 'file-saver';
 
@@ -211,12 +209,6 @@
     }
 
     function toggleRobot() {
-        resetCode();
-        const code = spikeGenerator.workspaceToCode(workspace);
-        console.log('=======');
-        console.log(code);
-        console.log('=======');
-        codeStore.set({ events: getCodeEvents() });
         simulatorOpen = !simulatorOpen;
     }
 

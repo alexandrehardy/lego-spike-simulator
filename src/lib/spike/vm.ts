@@ -1,12 +1,15 @@
 import * as Blockly from 'blockly/core';
 import { writable } from 'svelte/store';
+import { font } from '$lib/spike/font';
 
 export interface CompiledCode {
     events: Map<string, EventStatement>;
+    procedures: Map<string, ProcedureBlock>;
 }
 
 export const codeStore = writable<CompiledCode>({
-    events: new Map<string, EventStatement>()
+    events: new Map<string, EventStatement>(),
+    procedures: new Map<string, ProcedureBlock>()
 });
 
 function sleep(ms: number): Promise<void> {
@@ -28,6 +31,11 @@ export class Statement extends Node {
     }
 
     async execute(thread: Thread) {
+        while (thread.paused) {
+            // We should do a callback, but this should be rare
+            // so we poll at 50ms interval
+            await sleep(50);
+        }
         try {
             this.highlight(thread);
             await sleep(1000);
@@ -37,6 +45,7 @@ export class Statement extends Node {
         }
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     async _execute(thread: Thread) {
         console.log('Execute not implemented on...');
         console.log(this);
@@ -72,6 +81,183 @@ export class ActionStatement extends Statement {
         super(opcode, blocklyId);
         this.arguments = args;
     }
+
+    async execute_bargraphmonitor(thread: Thread, op: string) {
+        return super._execute(thread);
+    }
+    async execute_data(thread: Thread, op: string) {
+        return super._execute(thread);
+    }
+    async execute_displaymonitor(thread: Thread, op: string) {
+        return super._execute(thread);
+    }
+    async execute_event(thread: Thread, op: string) {
+        return super._execute(thread);
+    }
+    async execute_flippercontrol(thread: Thread, op: string) {
+        return super._execute(thread);
+    }
+    async execute_flipperevents(thread: Thread, op: string) {
+        return super._execute(thread);
+    }
+    async execute_flipperlight(thread: Thread, op: string) {
+        if (op == 'lightDisplayImageOn') {
+            const value = this.arguments[0].evaluate(thread);
+            thread.vm.hub.setScreen(value.getString());
+        } else if (op == 'lightDisplayImageOnForTime') {
+            const screen = this.arguments[0].evaluate(thread);
+            const duration = this.arguments[1].evaluate(thread);
+            thread.vm.hub.setScreen(screen.getString());
+            const delay = duration.getNumber();
+            if (delay > 0) {
+                await thread.cancellable(sleep(delay * 1000));
+            }
+            thread.vm.hub.setScreen('0000000000000000000000000');
+        } else if (op == 'lightDisplayOff') {
+            thread.vm.hub.setScreen('0000000000000000000000000');
+        } else if (op == 'lightDisplayText') {
+            const textValue = this.arguments[0].evaluate(thread);
+            const text = textValue.getString().toUpperCase();
+            let row0 = '';
+            let row1 = '';
+            let row2 = '';
+            let row3 = '';
+            let row4 = '';
+            thread.vm.hub.setScreen('0000000000000000000000000');
+            for (let i=0; i<text.length; i++) {
+                let char = font[text.charAt(i)];
+                if (!char) {
+                    char = '0000000000000000000000000';
+                }
+                if (i != 0) {
+                    // Add a space between characters
+                    row0 += '0';
+                    row1 += '0';
+                    row2 += '0';
+                    row3 += '0';
+                    row4 += '0';
+                }
+                row0 += char.substring(0, 5);
+                row1 += char.substring(5, 10);
+                row2 += char.substring(10, 15);
+                row3 += char.substring(15, 20);
+                row4 += char.substring(20, 25);
+            }
+            // Add a screen of buffer, to let the text
+            // flow off the screen
+            row0 += '00000';
+            row1 += '00000';
+            row2 += '00000';
+            row3 += '00000';
+            row4 += '00000';
+            // iterate through rows to scroll text
+            // with a short delay between
+            let offset = 0;
+            while (offset < row0.length - 4) {
+                let screen = row0.substring(offset, offset+5) + 
+                             row1.substring(offset, offset+5) +
+                             row2.substring(offset, offset+5) +
+                             row3.substring(offset, offset+5) +
+                             row4.substring(offset, offset+5);
+                offset++;
+                thread.vm.hub.setScreen(screen);
+                await thread.cancellable(sleep(200));
+            }
+        } else if (op == 'lightDisplayRotate') {
+            return super._execute(thread);
+        } else if (op == 'centerButtonLight') {
+            return super._execute(thread);
+        } else {
+            return super._execute(thread);
+        }
+    }
+    async execute_flippermoremotor(thread: Thread, op: string) {
+        return super._execute(thread);
+    }
+    async execute_flippermoremove(thread: Thread, op: string) {
+        return super._execute(thread);
+    }
+    async execute_flippermoresensors(thread: Thread, op: string) {
+        return super._execute(thread);
+    }
+    async execute_flippermotor(thread: Thread, op: string) {
+        return super._execute(thread);
+    }
+    async execute_flippermove(thread: Thread, op: string) {
+        return super._execute(thread);
+    }
+    async execute_flippermusic(thread: Thread, op: string) {
+        return super._execute(thread);
+    }
+    async execute_flipperoperator(thread: Thread, op: string) {
+        return super._execute(thread);
+    }
+    async execute_flippersensors(thread: Thread, op: string) {
+        return super._execute(thread);
+    }
+    async execute_flippersound(thread: Thread, op: string) {
+        return super._execute(thread);
+    }
+    async execute_linegraphmonitor(thread: Thread, op: string) {
+        return super._execute(thread);
+    }
+    async execute_sound(thread: Thread, op: string) {
+        return super._execute(thread);
+    }
+    async execute_weather(thread: Thread, op: string) {
+        return super._execute(thread);
+    }
+
+    override async _execute(thread: Thread) {
+        const parts = this.opcode.split('_');
+        if (parts.length < 2) {
+            super._execute(thread);
+            return;
+        }
+        const module = parts[0];
+        const op = parts[1];
+        if (module == 'bargraphmonitor') {
+            await this.execute_bargraphmonitor(thread, op);
+        } else if (module == 'data') {
+            await this.execute_data(thread, op);
+        } else if (module == 'displaymonitor') {
+            await this.execute_displaymonitor(thread, op);
+        } else if (module == 'event') {
+            await this.execute_event(thread, op);
+        } else if (module == 'flippercontrol') {
+            await this.execute_flippercontrol(thread, op);
+        } else if (module == 'flipperevents') {
+            await this.execute_flipperevents(thread, op);
+        } else if (module == 'flipperlight') {
+            await this.execute_flipperlight(thread, op);
+        } else if (module == 'flippermoremotor') {
+            await this.execute_flippermoremotor(thread, op);
+        } else if (module == 'flippermoremove') {
+            await this.execute_flippermoremove(thread, op);
+        } else if (module == 'flippermoresensors') {
+            await this.execute_flippermoresensors(thread, op);
+        } else if (module == 'flippermotor') {
+            await this.execute_flippermotor(thread, op);
+        } else if (module == 'flippermove') {
+            await this.execute_flippermove(thread, op);
+        } else if (module == 'flippermusic') {
+            await this.execute_flippermusic(thread, op);
+        } else if (module == 'flipperoperator') {
+            await this.execute_flipperoperator(thread, op);
+        } else if (module == 'flippersensors') {
+            await this.execute_flippersensors(thread, op);
+        } else if (module == 'flippersound') {
+            await this.execute_flippersound(thread, op);
+        } else if (module == 'linegraphmonitor') {
+            await this.execute_linegraphmonitor(thread, op);
+        } else if (module == 'sound') {
+            await this.execute_sound(thread, op);
+        } else if (module == 'weather') {
+            await this.execute_weather(thread, op);
+        } else {
+            super._execute(thread);
+        }
+    }
 }
 
 export class EventStatement extends Statement {
@@ -92,7 +278,24 @@ export class EventStatement extends Statement {
         if (this.opcode == 'event_whenbroadcastreceived') {
             console.log(`Need code ${this.opcode}`);
         } else if (this.opcode == 'flipperevents_whenButton') {
-            console.log(`Need code ${this.opcode}`);
+            const buttonArg = this.arguments[0].evaluate(thread);
+            const eventArg = this.arguments[1].evaluate(thread);
+            const button = buttonArg.getString();
+            const event = eventArg.getString();
+            if (button == 'left') {
+                if (event == 'pressed') {
+                    return thread.vm.hub.leftPressed;
+                } else if (event == 'released') {
+                    return !thread.vm.hub.leftPressed;
+                }
+            } else if (button == 'right') {
+                if (event == 'pressed') {
+                    return thread.vm.hub.rightPressed;
+                } else if (event == 'released') {
+                    return !thread.vm.hub.rightPressed;
+                }
+            }
+            return false;
         } else if (this.opcode == 'flipperevents_whenColor') {
             console.log(`Need code ${this.opcode}`);
         } else if (this.opcode == 'flipperevents_whenCondition') {
@@ -124,7 +327,26 @@ export class CallStatement extends ActionStatement {
         this.name = name;
     }
 
-    override async _execute(thread: Thread) {}
+    override async _execute(thread: Thread) {
+        const procedureBlock = thread.vm.procedures.get(this.name)!;
+        if (procedureBlock.arguments.length != this.arguments.length) {
+            console.log('Argument mismatch');
+            console.log(procedureBlock);
+            console.log(this);
+            return;
+        }
+
+        const oldLocals = thread.locals;
+        thread.locals = {};
+        for (let i = 0; i < this.arguments.length; i++) {
+            const argName = procedureBlock.arguments[i].name;
+            console.log(this.arguments[i]);
+            const value = this.arguments[i].evaluate(thread);
+            thread.locals[argName] = value;
+        }
+        await procedureBlock.statements.execute(thread);
+        thread.locals = oldLocals;
+    }
 }
 
 export class Expression extends Node {
@@ -132,6 +354,7 @@ export class Expression extends Node {
         super(opcode, blocklyId);
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     evaluate(thread: Thread): TypedValue {
         console.log('Expression not implemented ...');
         console.log(this);
@@ -266,6 +489,40 @@ export class BinaryExpression extends Expression {
     }
 }
 
+export class FunctionExpression extends Expression {
+    arguments: Expression[];
+
+    constructor(opcode: string, blocklyId: string, args: Expression[]) {
+        super(opcode, blocklyId);
+        this.arguments = args;
+    }
+
+    override evaluate(thread: Thread): TypedValue {
+        if (this.opcode == 'flippersensors_buttonIsPressed') {
+            const buttonArg = this.arguments[0].evaluate(thread);
+            const eventArg = this.arguments[1].evaluate(thread);
+            const button = buttonArg.getString();
+            const event = eventArg.getString();
+            if (button == 'left') {
+                if (event == 'pressed') {
+                    return new BooleanValue(thread.vm.hub.leftPressed);
+                } else if (event == 'released') {
+                    return new BooleanValue(!thread.vm.hub.leftPressed);
+                }
+            } else if (button == 'right') {
+                if (event == 'pressed') {
+                    return new BooleanValue(thread.vm.hub.rightPressed);
+                } else if (event == 'released') {
+                    return new BooleanValue(!thread.vm.hub.rightPressed);
+                }
+            }
+            return new BooleanValue(false);
+        } else {
+            return super.evaluate(thread);
+        }
+    }
+}
+
 export class Value extends Expression {
     value: string;
 
@@ -274,6 +531,7 @@ export class Value extends Expression {
         this.value = value;
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     override evaluate(thread: Thread): TypedValue {
         // TODO: Make it the correct type based on block context
         return new StringValue(this.value);
@@ -341,7 +599,46 @@ export class ControlStatement extends Statement {
         this.alternative = alternative;
     }
 
-    override async _execute(thread: Thread) {}
+    override async _execute(thread: Thread) {
+        if (this.opcode == 'while') {
+            let condition = this.condition.evaluate(thread);
+            while (condition.getBoolean()) {
+                await this.statement.execute(thread);
+                // give things time to change
+                // and avoid a very tight loop
+                await sleep(50);
+                condition = this.condition.evaluate(thread);
+            }
+        } else if (this.opcode == 'if') {
+            const condition = this.condition.evaluate(thread);
+            if (condition.getBoolean()) {
+                await this.statement.execute(thread);
+            } else {
+                if (this.alternative) {
+                    await this.alternative.execute(thread);
+                }
+            }
+        } else if (this.opcode == 'wait') {
+            const duration = this.condition.evaluate(thread);
+            const delay = duration.getNumber();
+            if (delay > 0) {
+                await thread.cancellable(sleep(delay * 1000));
+            }
+        } else if (this.opcode == 'wait4') {
+            if (!this.condition) {
+                return;
+            }
+            let condition = this.condition.evaluate(thread);
+            while (condition.getBoolean()) {
+                // give things time to change
+                // and avoid a very tight loop
+                await sleep(50);
+                condition = this.condition.evaluate(thread);
+            }
+        } else {
+            super._execute(thread);
+        }
+    }
 }
 
 export class RepeatStatement extends Statement {
@@ -353,7 +650,16 @@ export class RepeatStatement extends Statement {
         this.statements = statements;
     }
 
-    override async _execute(thread: Thread) {}
+    override async _execute(thread: Thread) {
+        if (this.opcode == 'repeat') {
+            const times = this.times.evaluate(thread);
+            for (let i = 0; i < times.getNumber(); i++) {
+                await this.statements.execute(thread);
+            }
+        } else {
+            super._execute(thread);
+        }
+    }
 }
 
 export class Motor {
@@ -390,6 +696,8 @@ export class Port {
     }
 }
 
+export type HubEventHandler = (event: string, parameter: string) => void;
+
 export class Hub {
     //67718
     //45601
@@ -398,6 +706,7 @@ export class Hub {
     screen: string;
     screenBrightness: number;
     ports: Record<string, Port>;
+    eventHandler: HubEventHandler | undefined;
 
     constructor() {
         this.leftPressed = false;
@@ -412,6 +721,21 @@ export class Hub {
             E: new Port('none'),
             F: new Port('none')
         };
+    }
+
+    setEventHandler(eventHandler: HubEventHandler) {
+        this.eventHandler = eventHandler;
+    }
+
+    clearEventHandler() {
+        this.eventHandler = undefined;
+    }
+
+    setScreen(screen: string) {
+        this.screen = screen;
+        if (this.eventHandler) {
+            this.eventHandler('screen', screen);
+        }
     }
 }
 
@@ -549,6 +873,7 @@ export class Thread {
     cancels: Map<number, Canceller>;
     nextCancel: number;
     event: EventStatement;
+    paused: boolean;
 
     constructor(vm: VM, event: EventStatement, globals: Namespace) {
         this.vm = vm;
@@ -558,11 +883,13 @@ export class Thread {
         this.nextCancel = 0;
         this.cancels = new Map<number, Canceller>();
         this.event = event;
+        this.paused = false;
     }
 
     async _execute() {
         try {
             await this.event.execute(this);
+            this.state = 'stopped';
         } catch (e) {
             if (e instanceof ThreadStopped) {
                 // all good
@@ -653,29 +980,40 @@ export class Thread {
             value(new ThreadStopped());
         }
     }
+
+    pause() {
+        this.paused = true;
+    }
+
+    unpause() {
+        this.paused = false;
+    }
 }
 
 export class VM {
     hub: Hub;
     globals: Namespace;
     events: Map<string, EventStatement>;
+    procedures: Map<string, ProcedureBlock>;
     threads: Map<string, Thread>;
     workspace: Blockly.WorkspaceSvg | undefined;
-    state: 'running' | 'stopped';
+    state: 'running' | 'stopped' | 'paused';
     first: boolean;
 
     constructor(
         hub: Hub,
         globals: Namespace,
         events: Map<string, EventStatement>,
+        procedures: Map<string, ProcedureBlock>,
         workspace: Blockly.WorkspaceSvg | undefined
     ) {
         this.hub = hub;
         this.globals = globals;
         this.events = events;
+        this.procedures = procedures;
         this.threads = new Map<string, Thread>();
         this.workspace = workspace;
-        this.state = 'running';
+        this.state = 'stopped';
         this.first = true;
         for (const entry of Array.from(events.entries())) {
             const key = entry[0];
@@ -696,13 +1034,38 @@ export class VM {
         this.state = 'stopped';
         for (const entry of Array.from(this.threads.entries())) {
             const thread = entry[1];
+            thread.unpause();
             thread.stop();
         }
     }
 
+    pause() {
+        if (this.state == 'running') {
+            this.state = 'paused';
+            for (const entry of Array.from(this.threads.entries())) {
+                const thread = entry[1];
+                thread.pause();
+            }
+        }
+    }
+
+    unpause() {
+        if (this.state == 'paused') {
+            this.state = 'running';
+            for (const entry of Array.from(this.threads.entries())) {
+                const thread = entry[1];
+                thread.unpause();
+            }
+        }
+    }
+
     start() {
-        this.state = 'running';
-        this.first = true;
-        this.runThreads();
+        if (this.state == 'stopped') {
+            this.state = 'running';
+            this.first = true;
+            this.runThreads();
+        } else if (this.state == 'paused') {
+            this.unpause();
+        }
     }
 }
