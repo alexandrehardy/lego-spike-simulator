@@ -127,11 +127,6 @@ export const toolbox = {
             name: 'SOUND',
             contents: [
                 {
-                    kind: 'button',
-                    text: 'Add sound from Library',
-                    callbackkey: 'ADD_SPIKE_AUDIO'
-                },
-                {
                     kind: 'block',
                     type: 'flippersound_playSoundUntilDone'
                 },
