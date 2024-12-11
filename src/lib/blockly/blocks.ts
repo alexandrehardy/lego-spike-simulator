@@ -744,9 +744,8 @@ export const blocks = [
         message0: '%1',
         args0: [
             {
-                type: 'field_dropdown',
-                name: 'field_flippersound_sound-selector',
-                options: [['Cat Meow 1', '{"name":"Cat Meow 1","location":"device"}']]
+                type: 'field_sound',
+                name: 'field_flippersound_sound-selector'
             }
         ],
         output: 'String'

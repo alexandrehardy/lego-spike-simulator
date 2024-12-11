@@ -1,3 +1,5 @@
+import * as Blockly from 'blockly/core';
+
 export const cat =
     ' \
 //uQZAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWGluZwAAAA8AAAAxAAA5WAAJCRIS \
@@ -259,3 +261,257 @@ qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqr/+xBk3Y/wAABpAAAACAAA \
 DSAAAAEAAAGkAAAAIAAANIAAAASqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq \
 qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqg== \
 ';
+
+export interface LibraryItem {
+    name: string;
+    id: string;
+}
+
+export const SoundLibrary = new Map<string, string>();
+SoundLibrary.set('Alert', '226c1f75543742a2c8cfdc8cade1a44f');
+SoundLibrary.set('Applause 1', 'de3222537c62c9fcb4e83bca9b6a17f7');
+SoundLibrary.set('Applause 2', '8ad2a599b9b665da7fa076608e14f686');
+SoundLibrary.set('Applause 3', '1ee37cad70f4bfab4f6453bf0835f30c');
+SoundLibrary.set('Baa', 'ec539c61658a4fb5485828bac8ab6657');
+SoundLibrary.set('Bang 1', '15caabaea7aeb628ad8c4a53d52baddd');
+SoundLibrary.set('Bang 2', '4e8ef70b13120e455e2d1a5a92a61fe6');
+SoundLibrary.set('Basketball Bounce', 'a76a51b0ff69b94ffee61ffbe4d51a3d');
+SoundLibrary.set('Big Boing', '54961d6095cb1848ca39f02195e4e56a');
+SoundLibrary.set('Bird', 'aa2b9878f5bcd07f550f883d7242ee4a');
+SoundLibrary.set('Bite', 'd2f8ea39da1dc71d514cb48c64be21e8');
+SoundLibrary.set('Boat Horn 1', '5d2ad459724420ad8ac96ac4585f031e');
+SoundLibrary.set('Boat Horn 2', '6475e7b4d3459c15cf041e74a6c15288');
+SoundLibrary.set('Bonk', '1c95c92b3d7ff64a3fda063ccc25f19c');
+SoundLibrary.set('Boom Cloud', 'dbb83cf1a8cb987025a110ee52d362d0');
+SoundLibrary.set('Boop Bing Bop', '80e12f913b43224b3043493f9795ae4f');
+SoundLibrary.set('Bowling Strike', 'e11f42b11503515a1e20a6769a633404');
+SoundLibrary.set('Bricks 1', '040a3880640eea1db53ef19b3312fb5a');
+SoundLibrary.set('Bricks 2', 'bda50d6b82f2356dd5164d00da2dbe26');
+SoundLibrary.set('Bricks 3', 'ae52d02c155bbd1f042845db591652c7');
+SoundLibrary.set('Burp 1', 'f199755b832d9b66be2f5f71ba65c1ac');
+SoundLibrary.set('Burp 2', '5f54d705e30122549ef7a34bdeae5798');
+SoundLibrary.set('Burp 3', '65c5a143d6b74474b5f0dc3f20ffde67');
+SoundLibrary.set('Bus Door', 'c8488b99f82fd58d6542f147fae62a07');
+SoundLibrary.set('Cafe', '0cc877019670b140c436ba7b878c87a1');
+SoundLibrary.set('Campfire Music', '7eef0f63941e7b658e9fb478ef3bda2e');
+SoundLibrary.set('Car Accelerate 1', 'ce563ac1140b01672912029189de26a3');
+SoundLibrary.set('Car Accelerating 2', '0d0418939899c03cf689b2fae6266499');
+SoundLibrary.set('Car Horn', 'c29c2e60e09379fb08e7cc55b537c924');
+SoundLibrary.set('Car Idle', 'dca5b37f2206f3aa1c54634a8977259e');
+SoundLibrary.set('Car Reverse', '0f489c63c610a21ee79086e4e299a67b');
+SoundLibrary.set('Car Skid 1', 'ba5264f59368cd9dd676eb3bcbb40814');
+SoundLibrary.set('Car Skid 2', 'cb306b6bfd3f8aeec9b3b1d30142bc2d');
+SoundLibrary.set('Car Vroom', 'cee6efc6ebc17d8963df78060dab7151');
+SoundLibrary.set('Cat Angry', 'a14613f684332cbf2b544f2264228292');
+SoundLibrary.set('Cat Happy', 'db42921e5d2619ebcba1585a7f9e141e');
+SoundLibrary.set('Cat Hiss', '0bef0a1eb6beb6320c2430424eca149a');
+SoundLibrary.set('Cat Meow 1', '27de32233d1c6cf0fd17f6d048721541');
+SoundLibrary.set('Cat Meow 2', '39000408e68eb1a858c2e11ebe9bc62e');
+SoundLibrary.set('Cat Meow 3', '00d98ddf73fb7db1f3bcfbfc3a44f051');
+SoundLibrary.set('Cat Purring', '21944c455407e32cab569809d830d873');
+SoundLibrary.set('Cat Whining', '702c08a469ed48e5d3399d457c456bdc');
+SoundLibrary.set('Cave', '00f66ff2af0151096d60d919f8bb091f');
+SoundLibrary.set('Chatter', '9ef450bb7133058b2d941513851bee7e');
+SoundLibrary.set('Chirp', '5bbe911c04885b3e5923788d0a784153');
+SoundLibrary.set('Clang', '14f4b8cf1c99941e8ac9c0c06a41c7c3');
+SoundLibrary.set('Clock Ticking', 'e58cad83b3528ed53ff2e035c49c1532');
+SoundLibrary.set('Clown Honk 1', '410ee7ce46bd6817775d47b8b6587612');
+SoundLibrary.set('Clown Honk 2', '532f4f373c86faadfb3ac322a9b1eb38');
+SoundLibrary.set('Clown Honk 3', 'abc89db49c1b6964464414f17f2a8a3e');
+SoundLibrary.set('Coin', '7a7e3f8bd011abf2dd2a39f16e6810e8');
+SoundLibrary.set('Collect', 'd54c15a844173ad395c7f4c9cf704072');
+SoundLibrary.set('Connect', 'a9d843efba44891c07d3ec6799a30ca4');
+SoundLibrary.set('Crank', 'a84d2f78cec6b4ea0a9ae36cc5cf22eb');
+SoundLibrary.set('Crash', '2df4388a555bdc31a4ea23217e42acb7');
+SoundLibrary.set('Crazy Laugh', '90d14f634e8819f37fc9de2535701e42');
+SoundLibrary.set('Croak', '73fce8e8f1063f1c5606d1f51efa45ed');
+SoundLibrary.set('Crocodile', '1588fd382ac899e2713c27ec280785af');
+SoundLibrary.set('Crowd Gasp', '5bf8795f970cd78f0b5f48ef3a4fa4de');
+SoundLibrary.set('Crunch', 'ae1ecd768cd4862028b3fc1b4b324883');
+SoundLibrary.set('Cuckoo', 'db2e86ed6d23e4799400b35019fe669b');
+SoundLibrary.set('Cymbal Crash', '5f244278645b97bf7e732999bc2c9705');
+SoundLibrary.set('Dance Music', '35756f4d0623307826f5685d5b503029');
+SoundLibrary.set('Disconnect', '69ab06c2511c11bafb0cd65d58d4574e');
+SoundLibrary.set('Dog Bark 1', '06e05c539e03cde67d7d825975dafe59');
+SoundLibrary.set('Dog Bark 2', 'bc0a58d4ce4663a1b328a9ecebfb94a6');
+SoundLibrary.set('Dog Bark 3', '379608d8b5892da76177948bad003dcb');
+SoundLibrary.set('Dog Whining 1', '42999f5d324fcbed0b4221eedefcdbfb');
+SoundLibrary.set('Dog Whining 2', '52931a6f43b07a456b3b48643c9b18aa');
+SoundLibrary.set('Dolphin', '88023edbc74704ff912c8693c15e2c2b');
+SoundLibrary.set('Door Closing', '128724844802e352b8dbd17b8f877082');
+SoundLibrary.set('Door Creek 1', '45cb641b32df3359e73fbe80d9f842e1');
+SoundLibrary.set('Door Creek 2', '14aa94d4a57e07bbaafe6fc1ed3bcbae');
+SoundLibrary.set('Door Handle', '9f95a5ed0534bbc5419954fec46e8c6b');
+SoundLibrary.set('Door Knock', 'b4a23a5dbad71005e78aeafd908984f8');
+SoundLibrary.set('Door Slam 1', 'c881a350901c41723dff27d232d7dd78');
+SoundLibrary.set('Door Slam 2', '38df9690ba979151c83cf1c66bc4996f');
+SoundLibrary.set('Doorbell 1', '78a00c90119b30ac87bade728ada306a');
+SoundLibrary.set('Doorbell 2', 'a5b478b0aca7e93364a11d015f6a508f');
+SoundLibrary.set('Doorbell 3', 'ec43231552539647da88a8e82b77bb26');
+SoundLibrary.set('Dragon', '7145cb6f4b81f920c23c894fbd1cbeb0');
+SoundLibrary.set('Drum Music', '907cd6c9994815fab5a0233c57be5912');
+SoundLibrary.set('Drum Roll', '8fdcec1bd25fe7eeca97c60eca51f208');
+SoundLibrary.set('Dubstep Music', '6456ee3be275e901c3d9b4b69225638f');
+SoundLibrary.set('Dun Dun Dunnn', 'd1af4162d0f6989bf491fdd4ac1f72f1');
+SoundLibrary.set('Emotional Piano', '43087ee1cf886a491cc5a591161c9b40');
+SoundLibrary.set('Fart 1', '5a62eb8fc404cf00714d73a5f28265d2');
+SoundLibrary.set('Fart 2', '2015e1761afcbe78b050a734d7b62af0');
+SoundLibrary.set('Fart 3', 'fd4ca61076bc640660f418ee77ca10be');
+SoundLibrary.set('Fire', 'ca0d4f0e056f2da848a303897a885d58');
+SoundLibrary.set('Footsteps', 'dfd630de7393e097c0e68cf6f1a50011');
+SoundLibrary.set('Forest', 'db71d6e3a87308eb188cdb05f8012423');
+SoundLibrary.set('Funk Music', '8b237f64fd564a3f62063cbc1f77552a');
+SoundLibrary.set('Gallop', '22aa91cda02fbe2008a8247454dc0ab0');
+SoundLibrary.set('Glass Breaking', '03c955d7270ce7bfeb4c6f463aaf136c');
+SoundLibrary.set('Glug', '7f94bf5b94163f21963014fe2b46bd24');
+SoundLibrary.set('Goal Cheer', '0484cc04f218bad5a269b6f69b2051b3');
+SoundLibrary.set('Gong', '1488816800f646a32f01f8e5eef118c8');
+SoundLibrary.set('Growl', '4933787ac79018b56a00766ee943c280');
+SoundLibrary.set('Grunt', 'e58f021c6c319569aaa3e68700b58dd4');
+SoundLibrary.set('Hammer Hit', 'c34afa0f5f3652378053d9d2155fb2ea');
+SoundLibrary.set('Head Shake', 'dbc6e12177dbb3a18d9073f2aaa5abc7');
+SoundLibrary.set('Helicopter', 'c39a700c90ae5add699a6c81522e9695');
+SoundLibrary.set('High Whoosh', 'eceef64c11db082affe706e80bed778e');
+SoundLibrary.set('Horror Music', 'dbe3927e41b0bc58af29f20ebae15e20');
+SoundLibrary.set('Jump', '355cbb804d09ded4ef0d21949dbc2f47');
+SoundLibrary.set('Jungle Frogs', '7c36541623b6fb460d662d9e10b35545');
+SoundLibrary.set('Laser 1', 'f01268a73adfc471539fb8c35377b195');
+SoundLibrary.set('Laser 2', '9d4b266f843f489c79e32fea3f79439c');
+SoundLibrary.set('Laser 3', '5b9b3f56f9423364b8ae798db1772568');
+SoundLibrary.set('Laughing Baby 1', '3a505a581685963eb888de8500497d17');
+SoundLibrary.set('Laughing Baby 2', 'dfec6cf1cc520244ca30c04d6b6e9966');
+SoundLibrary.set('Laughing Boy', '9065bad88711aea6b0f08e209dfeb133');
+SoundLibrary.set('Laughing Crowd 1', '27921714de5b8bf252acb09590367d08');
+SoundLibrary.set('Laughing Crowd 2', 'd8989b090ecc4aaa0f7cdf3c19d6acaf');
+SoundLibrary.set('Laughing Girl', '834f30a36edf5d2558450e56c54d42ba');
+SoundLibrary.set('Laughing Male', '27614c75fff0fa16981aff302191d08d');
+SoundLibrary.set('Lose', '1cb5dc9de9a56ca5d48c700c39e7e719');
+SoundLibrary.set('Low Boing', 'cc172ad3110f62fca2284ec83a8a259b');
+SoundLibrary.set('Low Squeak', '628217becbc7099afcaef2d2d2d174ad');
+SoundLibrary.set('Low Whoosh', '5b561dc88dcd6d7c9270140ae03c24d8');
+SoundLibrary.set('Magic Spell', 'a0b0f7fe22a4c3571b972bf9307f8c3b');
+SoundLibrary.set('Male Jump 1', '7c8c2d64ac837cedbad02f627dd7ad3e');
+SoundLibrary.set('Male Jump 2', '3430c7763d9641edcbe6bb186ff8c752');
+SoundLibrary.set('Medieval Music', 'afe7d2beaf3adf56d09592f54d399b0e');
+SoundLibrary.set('Monster 1', 'ea69c068dc1157be9b6c24888628f7db');
+SoundLibrary.set('Monster 2', '88dd092689de406f1cc4baed4f0885cd');
+SoundLibrary.set('Moo', '2b6f8ac10bd103403f39b7de15eca9d6');
+SoundLibrary.set('Ocean Wave', 'e8e344de5a89b5e13ad955cbbd884a90');
+SoundLibrary.set('Oops', 'e4af6c18d3039288229cc63b77174272');
+SoundLibrary.set('Orchestra Tuning', 'bc28b1880498729cdac869e17155bc09');
+SoundLibrary.set('Owl', '75c6b4b6047ab8b3ee9dd8b85cda564f');
+SoundLibrary.set('Party Blower', 'a26c8a2fc5a0c1f2e4f53cfb8d4aba37');
+SoundLibrary.set('Pew', 'a36fc331e069e3d7819917eac593de1f');
+SoundLibrary.set('Ping Pong Hit', '9356b8ca0fb6a4f2b1d5d18ad786ff4b');
+SoundLibrary.set('Plane Flying By', '0895ddd035470985370843af5ee3d9e9');
+SoundLibrary.set('Plane Motor Running', '940ab922b86d6dee62d050787390f7b0');
+SoundLibrary.set('Plane Starting', '5590a4cd4d13d407c40cb6a956bd6175');
+SoundLibrary.set('Pluck', 'c7869da4c399568309bed1d0084a4e7b');
+SoundLibrary.set('Police Siren 1', '9deb91da6398c484df8a024ea6d72a67');
+SoundLibrary.set('Police Siren 2', '2a4c24012344760afc7d3e9ebb1d82ca');
+SoundLibrary.set('Police Siren 3', 'e28ef11acaaa2713d977ee4e0a9bcf94');
+SoundLibrary.set('Punch', '3f7b170e3d3cdd74c5b3c1d377f5ba0f');
+SoundLibrary.set('Rain', 'b8c0d5d2c78f697fa95e03bab13d2df2');
+SoundLibrary.set('Ricochet', 'cb9a5f3b3a5028bfe38b9dd0c9216541');
+SoundLibrary.set('Rimshot', '484bee22cf627b9c6d104a7afd3d58a2');
+SoundLibrary.set('Ring Tone', '2072a537ef5429420b64da1989429e48');
+SoundLibrary.set('Rip', '5c4b5ca298210bab6ce38f186aa563ed');
+SoundLibrary.set('Robot 1', 'bcbb1fa18836b69169535cd0c4383023');
+SoundLibrary.set('Robot 2', 'd3e01393f0bcba034c9e2215f15b06fd');
+SoundLibrary.set('Robot 3', '18b0112056db2d3366f38b09e543cbb4');
+SoundLibrary.set('Rocket Explosion Rumble', 'd672f69fe9222bbee291da333c79a28f');
+SoundLibrary.set('Rooster', '37a8a13ac13e7f0c53f1aabd2d7115d8');
+SoundLibrary.set('Scrambling Feet', 'b5903375b61fbb63029fccbf3047e49f');
+SoundLibrary.set('Screech', '9cd1de9ed2cd89ee71aee16a8953848c');
+SoundLibrary.set('Seagulls', '2a80ebb62817955e7a6837f46091e8e7');
+SoundLibrary.set('Service Announcement', '532270c604a99ef7d17d305a7330b1f3');
+SoundLibrary.set('Sewing Machine', '1ea0186f168aacce61a7d38abe5085fc');
+SoundLibrary.set('Ship Bell', '43b4c467058ab959579ea916e7fa4af8');
+SoundLibrary.set('Siren Whistle', '31905cbd007fb305548fe515225ae5c1');
+SoundLibrary.set('Sitar Music', '4a5d966565396be2101b672fdccf9920');
+SoundLibrary.set('Skid', 'aa14ee645ed2c21deb0e902c03e80036');
+SoundLibrary.set('Slide Whistle 1', '653d69df42dce8c031f3124b9f3311c6');
+SoundLibrary.set('Slide Whistle 2', '3c8f3b07aa823d6b64f4c1d2cb48f7d5');
+SoundLibrary.set('Sneaker Squeak', '3ce116ced690acb2cc4e17ed54906161');
+SoundLibrary.set('Snoring', '893e95a225ae5fa4e79fe2d12935d246');
+SoundLibrary.set('Snort', '25fe9edd4f0e21041baa218a8a3bf82e');
+SoundLibrary.set('Space Ambience', 'feaf78f095b3713fb5dde3a59cd51ec2');
+SoundLibrary.set('Space Flyby', 'ddf2bca929c809fd9d3185aa136684ac');
+SoundLibrary.set('Space Noise', 'e7bab9793551a51bbb62826a05587656');
+SoundLibrary.set('Splash', '7d43af769279897d5a97c618cacc63af');
+SoundLibrary.set('Sport Whistle 1', '3be8203710191437bc244c7d6bed01b7');
+SoundLibrary.set('Sport Whistle 2', 'f4bf44596ad04da69e89fba2794dfccd');
+SoundLibrary.set('Squeaky Toy', '6d054dbeb478cacfb95c2b84f64f49fd');
+SoundLibrary.set('Squish Pop', '9a8384541c4b04cc506cefb86c2e8e12');
+SoundLibrary.set('Stadium', '67f6666f06e6b43aaeb3dc819c0fde1b');
+SoundLibrary.set('Suction Cup', 'dd13e3779dd2ebba9a1163c666e16c73');
+SoundLibrary.set('Tada', '4c3e1095b20cea04f8e678cce11e71e2');
+SoundLibrary.set('Telephone Ring', 'd5e96ed6ac71e448979d8b2496864798');
+SoundLibrary.set('Telephone Ring 2', 'da9867e97f19021a9e3497eb40b2755c');
+SoundLibrary.set('Teleport', '2dc421d5937740266658ec9168699ca0');
+SoundLibrary.set('Teleport 2', '5e1a33715eda7d4e8f12b556599500ce');
+SoundLibrary.set('Teleport 3', '813d11f4994d752923ce49d938f9ce18');
+SoundLibrary.set('Tennis Hit', 'f8064f211020298c3d76c2c71a4c9e4f');
+SoundLibrary.set('Thunder Storm', 'ccb7d6d8fb17b4a0891e963da47170ab');
+SoundLibrary.set('Toliet Flush', '47bcb7a10e1ad81dd598d5fa7b5273fa');
+SoundLibrary.set('Toy Honk', '5c939020440df172f75051f930d68acc');
+SoundLibrary.set('Toy Zing', '41ba9587142a3222fcda985912a2b92f');
+SoundLibrary.set('Traffic', '44e36b700aaa842101874032bc5fdea7');
+SoundLibrary.set('Train Breaks', 'a4593f42bde265d3e7f0d8801608ad13');
+SoundLibrary.set('Train Horn 1', '4d767525357b64138d216a1b29d6b510');
+SoundLibrary.set('Train Horn 2', '830c5c9a8ae5f315a6c8cbde34e2d133');
+SoundLibrary.set('Train Horn 3', 'ebccca6f6ae3fc42ba3269af09078388');
+SoundLibrary.set('Train On Tracks', '9e89416e2169f942a80984fd869a0c28');
+SoundLibrary.set('Train Signal 1', 'f29bce09f84cd6a9e9592b16c3881a67');
+SoundLibrary.set('Train Signal 2', '49dedad79b25001f671714d1a9b85255');
+SoundLibrary.set('Train Start', '3eaeb925f09665c1e877c08dcb6e32c7');
+SoundLibrary.set('Train Whistle', '9201a56d251a72fb5756e87963785a37');
+SoundLibrary.set('Triumph', '01bf8e868fdefcc360c29cd40c4d6908');
+SoundLibrary.set('Tropical Birds', '623197ba6b9f6dea4fa0f305ab61ffc6');
+SoundLibrary.set('Wand', 'a0c9e79e288c798a62a40453abcdb3a2');
+SoundLibrary.set('Water Bubbles 1', 'b803b0429b5d99f2b310112b8db9a376');
+SoundLibrary.set('Water Bubbles 2', '583b72f3d3b3426dfc1eb421479a3d96');
+SoundLibrary.set('Water Stream', 'c44814bf1bad171596157fd2ac621879');
+SoundLibrary.set('Water Drop', '839d2fdcfb125d3ca3b4c2b44cbf7668');
+SoundLibrary.set('Whispers', '8da19ea22bbd2d49754203ea549ce289');
+SoundLibrary.set('Whistle Thump', '555e87c3ed9559b7a86b3b249745c3ea');
+SoundLibrary.set('Whiz 1', 'efe37257a2f98264316e18730b67223a');
+SoundLibrary.set('Whiz 2', 'ec2b87b0a7ddaaf227a530e2d5e9da30');
+SoundLibrary.set('Win', '9e4208dd5e29e39a1290b8f14d22c91c');
+SoundLibrary.set('Window Breaks', 'e093a08bb289261bc2486d0acf0a3660');
+SoundLibrary.set('Wobble', '07ff53e1912dd9645fcb0875326e7b3f');
+SoundLibrary.set('Wolf', '3e33b7f87910dac47859538293910b93');
+SoundLibrary.set('Wood Tap', '59657658bb5b3b0c4eff1d6c8fcfbf84');
+SoundLibrary.set('Zen Music', '3d565e6bcb1548334f47a80a55c14ac7');
+SoundLibrary.set('Zip', '648f2265233e359582fbb8745fcdddc7');
+
+export const selectedAudio: LibraryItem[] = [];
+
+export function clearSelectedAudio() {
+    selectedAudio.length = 0;
+}
+
+export function selectAudio(name: string) {
+    const sample = SoundLibrary.get(name);
+    if (selectedAudio.find((x) => x.name == name)) {
+        return;
+    }
+    if (sample) {
+        selectedAudio.push({ name: name, id: sample });
+    }
+    selectedAudio.sort((a, b) => a.name.localeCompare(b.name));
+}
+
+export function removeAudio(name: string) {
+    for (let i = selectedAudio.length - 1; i >= 0; i--) {
+        if (selectedAudio[i].name === name) {
+            selectedAudio.splice(i, 1);
+        }
+    }
+}
+
+export type AudioDialog = () => void;
+
+export function registerAudioDialog(workspace: Blockly.WorkspaceSvg, dialogCreator: AudioDialog) {
+    workspace.registerButtonCallback('ADD_SPIKE_AUDIO', dialogCreator);
+}

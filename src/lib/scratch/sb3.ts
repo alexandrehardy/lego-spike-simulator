@@ -40,6 +40,8 @@ export interface Sb3Costume extends Sb3Asset {
 }
 
 export interface Sb3Sound extends Sb3Asset {
+    assetId: string;
+    name: string;
     rate: number;
     sampleCount: number;
 }

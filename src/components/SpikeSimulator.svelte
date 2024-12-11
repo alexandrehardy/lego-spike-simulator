@@ -261,7 +261,13 @@
     <div class="w-full flex-1 relative">
         <div class="flex flex-row w-full h-full">
             <div class="m-3 h-min">
-                <HubWidget image={hubImage} on:leftPress={hubLeftPress} on:rightPress={hubRightPress} on:leftRelease={hubLeftRelease} on:rightRelease={hubRightRelease}/>
+                <HubWidget
+                    image={hubImage}
+                    on:leftPress={hubLeftPress}
+                    on:rightPress={hubRightPress}
+                    on:leftRelease={hubLeftRelease}
+                    on:rightRelease={hubRightRelease}
+                />
             </div>
             <canvas id="robot_preview" class="flex-1 w-full h-full"></canvas>
         </div>

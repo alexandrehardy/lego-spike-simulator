@@ -1,5 +1,6 @@
 <script lang="ts">
     import { onDestroy, onMount } from 'svelte';
+    import AudioDialog from '$components/AudioDialog.svelte';
     import VariableDialog from '$components/VariableDialog.svelte';
     import ProcedureDialog from '$components/ProcedureDialog.svelte';
     import SpikeSimulatorWindow from '$components/SpikeSimulatorWindow.svelte';
@@ -13,6 +14,7 @@
     import '$lib/blockly/field-bitmap';
     import '$lib/blockly/field-grid-dropdown';
     import '$lib/blockly/field-ultra-sound';
+    import '$lib/blockly/field-sound';
     import '$lib/blockly/field_metadata';
     import { procedureBlocks } from '$lib/blockly/procedure_blocks';
     import * as procedureFlyout from '$lib/blockly/procedure_flyout';
@@ -32,7 +34,7 @@
     import { loadScratchSb3 } from '$lib/scratch/sb3';
     import { createManifest } from '$lib/scratch/manifest';
     import { convertToBlockly, convertToScratch } from '$lib/scratch/blockly';
-    import { cat } from '$lib/blockly/audio';
+    import { cat, clearSelectedAudio, selectAudio, registerAudioDialog } from '$lib/blockly/audio';
     import JSZip from 'jszip';
     import FileSaver from 'file-saver';
 
@@ -40,12 +42,17 @@
     let zoomToFit: ZoomToFitControl | undefined;
     let numberOfLoads = 0;
     let variableType = '';
+    let audioDialogOpen = false;
     let variableDialogOpen = false;
     let variableCreateCallback: variableFlyout.VariableCreateCallback | undefined = undefined;
     let procedureDialogOpen = false;
     let procedureCreateCallback: procedureFlyout.ProcedureCreateCallback | undefined = undefined;
     let simulatorOpen = false;
     let blocklyOpen = true;
+
+    function createAudioDialog() {
+        audioDialogOpen = true;
+    }
 
     function createProcedureDialog(callback: procedureFlyout.ProcedureCreateCallback) {
         procedureCreateCallback = callback;
@@ -95,6 +102,8 @@
         });
         variableFlyout.registerVariableFlyout(workspace, createVariableDialog);
         procedureFlyout.registerProcedureFlyout(workspace, createProcedureDialog);
+        registerAudioDialog(workspace, createAudioDialog);
+        selectAudio('Cat Meow 1');
         const zoomToFit = new ZoomToFitControl(workspace);
         zoomToFit.init();
     });
@@ -118,6 +127,14 @@
         if (project) {
             const state = convertToBlockly(project);
             if (state) {
+                clearSelectedAudio();
+                selectAudio('Cat Meow 1');
+                for (const target of project.targets) {
+                    for (const sound of target.sounds) {
+                        selectAudio(sound.name);
+                    }
+                }
+                selectAudio('Cat Meow 1');
                 if (workspace) {
                     Blockly.serialization.workspaces.load(state, workspace);
                     try {
@@ -205,6 +222,7 @@
             llsp3Zip.file('icon.svg', robotSvg);
             const content = await llsp3Zip.generateAsync({ type: 'blob', compression: 'DEFLATE' });
             FileSaver.saveAs(content, 'project.llsp3');
+            // TODO: Save audio as well, we don't add new audio
         }
     }
 
@@ -233,6 +251,7 @@
 {#key numberOfLoads}
     <input type="file" id="load_project" class="hidden" accept=".llsp3" on:change={loadState} />
 {/key}
+<AudioDialog bind:modalOpen={audioDialogOpen} />
 <VariableDialog
     bind:modalOpen={variableDialogOpen}
     bind:callback={variableCreateCallback}

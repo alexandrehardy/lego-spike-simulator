@@ -1,6 +1,7 @@
 import * as Blockly from 'blockly/core';
 import { writable } from 'svelte/store';
 import { font } from '$lib/spike/font';
+import { SoundLibrary } from '$lib/blockly/audio';
 
 export interface CompiledCode {
     events: Map<string, EventStatement>;
@@ -124,7 +125,7 @@ export class ActionStatement extends Statement {
             let row3 = '';
             let row4 = '';
             thread.vm.hub.setScreen('0000000000000000000000000');
-            for (let i=0; i<text.length; i++) {
+            for (let i = 0; i < text.length; i++) {
                 let char = font[text.charAt(i)];
                 if (!char) {
                     char = '0000000000000000000000000';
@@ -154,11 +155,12 @@ export class ActionStatement extends Statement {
             // with a short delay between
             let offset = 0;
             while (offset < row0.length - 4) {
-                let screen = row0.substring(offset, offset+5) + 
-                             row1.substring(offset, offset+5) +
-                             row2.substring(offset, offset+5) +
-                             row3.substring(offset, offset+5) +
-                             row4.substring(offset, offset+5);
+                const screen =
+                    row0.substring(offset, offset + 5) +
+                    row1.substring(offset, offset + 5) +
+                    row2.substring(offset, offset + 5) +
+                    row3.substring(offset, offset + 5) +
+                    row4.substring(offset, offset + 5);
                 offset++;
                 thread.vm.hub.setScreen(screen);
                 await thread.cancellable(sleep(200));
@@ -196,7 +198,40 @@ export class ActionStatement extends Statement {
         return super._execute(thread);
     }
     async execute_flippersound(thread: Thread, op: string) {
-        return super._execute(thread);
+        if (op == 'playSound') {
+            const sourceString = this.arguments[0].evaluate(thread).getString();
+            if (!sourceString) {
+                return;
+            }
+            const source = JSON.parse(sourceString);
+            if (!source?.name) {
+                return;
+            }
+            // TODO: Support recordings and sound embedded in save files.
+            const id = SoundLibrary.get(source.name);
+            const audio = new Audio(`https://spike.legoeducation.com/sounds/${id}.mp3`);
+            audio.play();
+        } else if (op == 'playSoundUntilDone') {
+            const sourceString = this.arguments[0].evaluate(thread).getString();
+            if (!sourceString) {
+                return;
+            }
+            const source = JSON.parse(sourceString);
+            if (!source?.name) {
+                return;
+            }
+            // TODO: Support recordings and sound embedded in save files.
+            const id = SoundLibrary.get(source.name);
+            const audio = new Audio(`https://spike.legoeducation.com/sounds/${id}.mp3`);
+            audio.play();
+            while (!audio.ended) {
+                await thread.cancellable(sleep(100));
+            }
+        } else if (op == 'beepForTime') {
+        } else if (op == 'beep') {
+        } else {
+            return super._execute(thread);
+        }
     }
     async execute_linegraphmonitor(thread: Thread, op: string) {
         return super._execute(thread);
