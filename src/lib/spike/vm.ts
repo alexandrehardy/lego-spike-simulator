@@ -87,7 +87,70 @@ export class ActionStatement extends Statement {
         return super._execute(thread);
     }
     async execute_data(thread: Thread, op: string) {
-        return super._execute(thread);
+        if (op == 'setvariableto') {
+            const variable = this.arguments[0] as Variable;
+            const value = this.arguments[1].evaluate(thread);
+            thread.setVar(variable.name, value, variable.local);
+        } else if (op == 'changevariableby') {
+            const variable = this.arguments[0] as Variable;
+            const oldValue = variable.evaluate(thread);
+            const value = this.arguments[1].evaluate(thread);
+            thread.setVar(
+                variable.name,
+                new NumberValue(oldValue.getNumber() + value.getNumber()),
+                variable.local
+            );
+        } else if (op == 'addtolist') {
+            const variable = this.arguments[1] as Variable;
+            const oldValue = variable.evaluate(thread);
+            const value = this.arguments[0].evaluate(thread);
+            const list = oldValue.getList();
+            list.push(value.getString());
+            thread.setVar(variable.name, new ListValue(list), variable.local);
+        } else if (op == 'deleteoflist') {
+            const variable = this.arguments[1] as Variable;
+            const list = variable.evaluate(thread).getList();
+            const index = this.arguments[0].evaluate(thread).getNumber();
+            if (index < 1) {
+                return;
+            }
+            if (index > list.length) {
+                return;
+            }
+            const newList = list.toSpliced(index - 1, 1);
+            thread.setVar(variable.name, new ListValue(newList), variable.local);
+        } else if (op == 'deletealloflist') {
+            const variable = this.arguments[0] as Variable;
+            thread.setVar(variable.name, new ListValue([]), variable.local);
+        } else if (op == 'insertatlist') {
+            const variable = this.arguments[2] as Variable;
+            const list = variable.evaluate(thread).getList();
+            const index = this.arguments[0].evaluate(thread).getNumber();
+            if (index < 1) {
+                return;
+            }
+            if (index > list.length) {
+                return;
+            }
+            const value = this.arguments[1].evaluate(thread).getString();
+            const newList = list.toSpliced(index - 1, 0, value);
+            thread.setVar(variable.name, new ListValue(newList), variable.local);
+        } else if (op == 'replaceitemoflist') {
+            const variable = this.arguments[2] as Variable;
+            const list = variable.evaluate(thread).getList();
+            const index = this.arguments[0].evaluate(thread).getNumber();
+            if (index < 1) {
+                return;
+            }
+            if (index > list.length) {
+                return;
+            }
+            const value = this.arguments[1].evaluate(thread).getString();
+            const newList = list.toSpliced(index - 1, 1, value);
+            thread.setVar(variable.name, new ListValue(newList), variable.local);
+        } else {
+            return super._execute(thread);
+        }
     }
     async execute_displaymonitor(thread: Thread, op: string) {
         return super._execute(thread);
@@ -209,8 +272,9 @@ export class ActionStatement extends Statement {
             }
             // TODO: Support recordings and sound embedded in save files.
             const id = SoundLibrary.get(source.name);
-            const audio = new Audio(`https://spike.legoeducation.com/sounds/${id}.mp3`);
-            audio.play();
+            thread.vm.audio.pause();
+            thread.vm.audio.src = `https://spike.legoeducation.com/sounds/${id}.mp3`;
+            thread.vm.audio.play();
         } else if (op == 'playSoundUntilDone') {
             const sourceString = this.arguments[0].evaluate(thread).getString();
             if (!sourceString) {
@@ -222,13 +286,29 @@ export class ActionStatement extends Statement {
             }
             // TODO: Support recordings and sound embedded in save files.
             const id = SoundLibrary.get(source.name);
-            const audio = new Audio(`https://spike.legoeducation.com/sounds/${id}.mp3`);
-            audio.play();
-            while (!audio.ended) {
+            thread.vm.audio.pause();
+            thread.vm.audio.src = `https://spike.legoeducation.com/sounds/${id}.mp3`;
+            thread.vm.audio.play();
+            while (!thread.vm.audio.ended) {
                 await thread.cancellable(sleep(100));
             }
         } else if (op == 'beepForTime') {
+            const note = this.arguments[0].evaluate(thread).getNumber();
+            const duration = this.arguments[1].evaluate(thread).getNumber();
+            thread.vm.stopNote();
+            thread.vm.startNote(note * 10);
+            try {
+                await thread.cancellable(sleep(duration * 1000));
+            } finally {
+                thread.vm.stopNote();
+            }
         } else if (op == 'beep') {
+            const note = this.arguments[0].evaluate(thread).getNumber();
+            thread.vm.stopNote();
+            thread.vm.startNote(note * 10);
+        } else if (op == 'stopSound') {
+            thread.vm.stopNote();
+            thread.vm.audio.pause();
         } else {
             return super._execute(thread);
         }
@@ -443,6 +523,8 @@ export class UnaryExpression extends Expression {
             return new NumberValue(Math.exp(value.getNumber()));
         } else if (this.opcode == 'op_10 ^') {
             return new NumberValue(Math.pow(10, value.getNumber()));
+        } else if (this.opcode == 'data_lengthoflist') {
+            return new NumberValue(value.getList().length);
         }
         return super.evaluate(thread);
     }
@@ -519,6 +601,27 @@ export class BinaryExpression extends Expression {
             }
             // TODO: If integers, then this should be an integer
             return new NumberValue(Math.random() * (max - min) + min);
+        } else if (this.opcode == 'data_itemnumoflist') {
+            const variable = this.right as Variable;
+            const list = variable.evaluate(thread).getList();
+            const value = this.left.evaluate(thread).getString();
+            return new NumberValue(list.findIndex((x) => x == value) + 1);
+        } else if (this.opcode == 'data_itemoflist') {
+            const variable = this.right as Variable;
+            const list = variable.evaluate(thread).getList();
+            const index = this.left.evaluate(thread).getNumber();
+            if (index < 1) {
+                return new StringValue('');
+            }
+            if (index > list.length) {
+                return new StringValue('');
+            }
+            return new StringValue(list[index - 1]);
+        } else if (this.opcode == 'data_listcontainsitem') {
+            const variable = this.right as Variable;
+            const list = variable.evaluate(thread).getList();
+            const value = this.left.evaluate(thread).getString();
+            return new BooleanValue(list.findIndex((x) => x == value) >= 0);
         }
         return super.evaluate(thread);
     }
@@ -552,6 +655,9 @@ export class FunctionExpression extends Expression {
                 }
             }
             return new BooleanValue(false);
+        } else if (this.opcode == 'data_listcontents') {
+            const variable = this.arguments[0] as Variable;
+            return new ListValue([...variable.evaluate(thread).getList()]);
         } else {
             return super.evaluate(thread);
         }
@@ -1027,6 +1133,9 @@ export class Thread {
 
 export class VM {
     hub: Hub;
+    audio: HTMLAudioElement;
+    volume: number;
+    oscillator: OscillatorNode;
     globals: Namespace;
     events: Map<string, EventStatement>;
     procedures: Map<string, ProcedureBlock>;
@@ -1050,6 +1159,13 @@ export class VM {
         this.workspace = workspace;
         this.state = 'stopped';
         this.first = true;
+        this.volume = 100;
+        this.audio = new Audio();
+        const audioContext = new AudioContext();
+        const oscillator = audioContext.createOscillator();
+        oscillator.connect(audioContext.destination);
+        this.oscillator = oscillator;
+
         for (const entry of Array.from(events.entries())) {
             const key = entry[0];
             const event = entry[1];
@@ -1065,6 +1181,26 @@ export class VM {
         this.first = false;
     }
 
+    startNote(frequency: number) {
+        this.stopNote();
+        const audioContext = new AudioContext();
+        const oscillator = audioContext.createOscillator();
+        oscillator.type = 'sine';
+        oscillator.frequency.value = frequency;
+        oscillator.start();
+        oscillator.connect(audioContext.destination);
+        console.log(frequency);
+        this.oscillator = oscillator;
+    }
+
+    stopNote() {
+        try {
+            this.oscillator.stop();
+        } catch (e) {
+            // Do nothing
+        }
+    }
+
     stop() {
         this.state = 'stopped';
         for (const entry of Array.from(this.threads.entries())) {
@@ -1072,6 +1208,8 @@ export class VM {
             thread.unpause();
             thread.stop();
         }
+        this.audio.pause();
+        this.stopNote();
     }
 
     pause() {
@@ -1082,6 +1220,8 @@ export class VM {
                 thread.pause();
             }
         }
+        this.audio.pause();
+        this.stopNote();
     }
 
     unpause() {

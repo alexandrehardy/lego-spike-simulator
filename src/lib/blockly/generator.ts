@@ -457,7 +457,7 @@ spikeGenerator.forBlock['data_addtolist'] = function (block, generator) {
     const variable = new Variable('var', block.id, list, false);
     const item = getExpression(itemId);
     const id = newId();
-    nodes.set(id, new ActionStatement('addlist', block.id, [item, variable]));
+    nodes.set(id, new ActionStatement(block.type, block.id, [item, variable]));
     return id;
 };
 spikeGenerator.forBlock['data_changevariableby'] = function (block, generator) {
@@ -466,14 +466,14 @@ spikeGenerator.forBlock['data_changevariableby'] = function (block, generator) {
     const valueId = generator.statementToCode(block, 'VALUE');
     const value = getExpression(valueId);
     const id = newId();
-    nodes.set(id, new ActionStatement('inc', block.id, [variable, value]));
+    nodes.set(id, new ActionStatement(block.type, block.id, [variable, value]));
     return id;
 };
 spikeGenerator.forBlock['data_deletealloflist'] = function (block) {
     const list = block.getFieldValue('LIST')!;
     const variable = new Variable('var', block.id, list, false);
     const id = newId();
-    nodes.set(id, new ActionStatement('clear', block.id, [variable]));
+    nodes.set(id, new ActionStatement(block.type, block.id, [variable]));
     return id;
 };
 spikeGenerator.forBlock['data_deleteoflist'] = function (block, generator) {
@@ -482,7 +482,7 @@ spikeGenerator.forBlock['data_deleteoflist'] = function (block, generator) {
     const variable = new Variable('var', block.id, list, false);
     const index = getExpression(indexId);
     const id = newId();
-    nodes.set(id, new ActionStatement('del', block.id, [index, variable]));
+    nodes.set(id, new ActionStatement(block.type, block.id, [index, variable]));
     return id;
 };
 spikeGenerator.forBlock['data_insertatlist'] = function (block, generator) {
@@ -493,7 +493,7 @@ spikeGenerator.forBlock['data_insertatlist'] = function (block, generator) {
     const item = getExpression(itemId);
     const index = getExpression(indexId);
     const id = newId();
-    nodes.set(id, new ActionStatement('insert', block.id, [index, item, variable]));
+    nodes.set(id, new ActionStatement(block.type, block.id, [index, item, variable]));
     return id;
 };
 spikeGenerator.forBlock['data_itemnumoflist'] = function (block, generator) {
@@ -502,7 +502,7 @@ spikeGenerator.forBlock['data_itemnumoflist'] = function (block, generator) {
     const variable = new Variable('var', block.id, list, false);
     const item = getExpression(itemId);
     const id = newId();
-    nodes.set(id, new BinaryExpression('indexof', block.id, item, variable));
+    nodes.set(id, new BinaryExpression('data_itemnumoflist', block.id, item, variable));
     return id;
 };
 spikeGenerator.forBlock['data_itemoflist'] = function (block, generator) {
@@ -511,14 +511,14 @@ spikeGenerator.forBlock['data_itemoflist'] = function (block, generator) {
     const variable = new Variable('var', block.id, list, false);
     const index = getExpression(indexId);
     const id = newId();
-    nodes.set(id, new BinaryExpression('item', block.id, index, variable));
+    nodes.set(id, new BinaryExpression('data_itemoflist', block.id, index, variable));
     return id;
 };
 spikeGenerator.forBlock['data_lengthoflist'] = function (block) {
     const list = block.getFieldValue('LIST')!;
     const variable = new Variable('var', block.id, list, false);
     const id = newId();
-    nodes.set(id, new UnaryExpression('lstlen', block.id, variable));
+    nodes.set(id, new UnaryExpression('data_lengthoflist', block.id, variable));
     return id;
 };
 spikeGenerator.forBlock['data_listcontainsitem'] = function (block, generator) {
@@ -527,14 +527,14 @@ spikeGenerator.forBlock['data_listcontainsitem'] = function (block, generator) {
     const variable = new Variable('var', block.id, list, false);
     const item = getExpression(itemId);
     const id = newId();
-    nodes.set(id, new BinaryExpression('contains', block.id, item, variable));
+    nodes.set(id, new BinaryExpression('data_listcontainsitem', block.id, item, variable));
     return id;
 };
 spikeGenerator.forBlock['data_listcontents'] = function (block) {
     const list = block.getFieldValue('LIST')!;
     const variable = new Variable('var', block.id, list, false);
     const id = newId();
-    nodes.set(id, new FunctionExpression('list', block.id, [variable]));
+    nodes.set(id, new FunctionExpression('data_listcontents', block.id, [variable]));
     return id;
 };
 spikeGenerator.forBlock['data_replaceitemoflist'] = function (block, generator) {
@@ -545,7 +545,7 @@ spikeGenerator.forBlock['data_replaceitemoflist'] = function (block, generator) 
     const item = getExpression(itemId);
     const index = getExpression(indexId);
     const id = newId();
-    nodes.set(id, new ActionStatement('replace', block.id, [index, item, variable]));
+    nodes.set(id, new ActionStatement(block.type, block.id, [index, item, variable]));
     return id;
 };
 spikeGenerator.forBlock['data_setvariableto'] = function (block, generator) {
@@ -554,7 +554,7 @@ spikeGenerator.forBlock['data_setvariableto'] = function (block, generator) {
     const valueId = generator.statementToCode(block, 'VALUE');
     const value = getExpression(valueId);
     const id = newId();
-    nodes.set(id, new ActionStatement('set', block.id, [variable, value]));
+    nodes.set(id, new ActionStatement(block.type, block.id, [variable, value]));
     return id;
 };
 spikeGenerator.forBlock['data_variable'] = function (block) {
