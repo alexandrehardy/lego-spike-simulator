@@ -296,7 +296,8 @@ export class ActionStatement extends Statement {
             const note = this.arguments[0].evaluate(thread).getNumber();
             const duration = this.arguments[1].evaluate(thread).getNumber();
             thread.vm.stopNote();
-            thread.vm.startNote(note * 10);
+            const freq = Math.pow(2.0, (note - 69.0)/12.0) * 440;
+            thread.vm.startNote(freq, duration);
             try {
                 await thread.cancellable(sleep(duration * 1000));
             } finally {
@@ -305,7 +306,8 @@ export class ActionStatement extends Statement {
         } else if (op == 'beep') {
             const note = this.arguments[0].evaluate(thread).getNumber();
             thread.vm.stopNote();
-            thread.vm.startNote(note * 10);
+            const freq = Math.pow(2.0, (note - 69.0)/12.0) * 440;
+            thread.vm.startNote(freq, 0);
         } else if (op == 'stopSound') {
             thread.vm.stopNote();
             thread.vm.audio.pause();
@@ -1181,16 +1183,24 @@ export class VM {
         this.first = false;
     }
 
-    startNote(frequency: number) {
+    startNote(frequency: number, duration: number) {
         this.stopNote();
         const audioContext = new AudioContext();
         const oscillator = audioContext.createOscillator();
+        const gain = audioContext.createGain();
+        const now = audioContext.currentTime;
+        gain.gain.linearRampToValueAtTime(0, now);
+        gain.gain.linearRampToValueAtTime(.6, now + .1);
+        if (duration > 0) {
+            gain.gain.linearRampToValueAtTime(.6, now + duration - 0.8);
+            gain.gain.linearRampToValueAtTime(0, now + duration);
+        }
         oscillator.type = 'sine';
-        oscillator.frequency.value = frequency;
-        oscillator.start();
-        oscillator.connect(audioContext.destination);
-        console.log(frequency);
+        oscillator.frequency.value = Math.round(frequency);
+        oscillator.connect(gain);
+        gain.connect(audioContext.destination);
         this.oscillator = oscillator;
+        oscillator.start();
     }
 
     stopNote() {
