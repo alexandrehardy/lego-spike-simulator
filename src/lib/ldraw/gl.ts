@@ -79,6 +79,7 @@ export class WebGL {
         this.vertexBuffer = null;
         this.colourBuffer = null;
         this.parentColour = {
+            code: '0',
             inheritSurface: false,
             inheritEdge: false,
             surface: { r: 1.0, g: 1.0, b: 1.0, a: 1.0 },
@@ -209,6 +210,7 @@ export class WebGL {
     getParentColour(colour: BrickColour): BrickColour {
         const inherit = colour.inheritEdge || colour.inheritSurface;
         return {
+            code: inherit ? this.parentColour.code : colour.code,
             inheritEdge: false,
             inheritSurface: false,
             edge: inherit ? this.parentColour.edge : colour.edge,
@@ -951,9 +953,9 @@ export class WebGL {
                     maxsize = maxz - minz;
                 }
                 for (let i = 0; i < this.compileVertices.length; i += 4) {
-                    this.compileVertices[i + 0] /= maxsize * 0.003;
-                    this.compileVertices[i + 1] /= maxsize * 0.003;
-                    this.compileVertices[i + 2] /= maxsize * 0.003;
+                    this.compileVertices[i + 0] /= maxsize * 0.004;
+                    this.compileVertices[i + 1] /= maxsize * 0.004;
+                    this.compileVertices[i + 2] /= maxsize * 0.004;
                 }
             }
         }

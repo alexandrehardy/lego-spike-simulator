@@ -296,7 +296,7 @@ export class ActionStatement extends Statement {
             const note = this.arguments[0].evaluate(thread).getNumber();
             const duration = this.arguments[1].evaluate(thread).getNumber();
             thread.vm.stopNote();
-            const freq = Math.pow(2.0, (note - 69.0)/12.0) * 440;
+            const freq = Math.pow(2.0, (note - 69.0) / 12.0) * 440;
             thread.vm.startNote(freq, duration);
             try {
                 await thread.cancellable(sleep(duration * 1000));
@@ -306,7 +306,7 @@ export class ActionStatement extends Statement {
         } else if (op == 'beep') {
             const note = this.arguments[0].evaluate(thread).getNumber();
             thread.vm.stopNote();
-            const freq = Math.pow(2.0, (note - 69.0)/12.0) * 440;
+            const freq = Math.pow(2.0, (note - 69.0) / 12.0) * 440;
             thread.vm.startNote(freq, 0);
         } else if (op == 'stopSound') {
             thread.vm.stopNote();
@@ -1190,9 +1190,9 @@ export class VM {
         const gain = audioContext.createGain();
         const now = audioContext.currentTime;
         gain.gain.linearRampToValueAtTime(0, now);
-        gain.gain.linearRampToValueAtTime(.6, now + .1);
+        gain.gain.linearRampToValueAtTime(0.6, now + 0.1);
         if (duration > 0) {
-            gain.gain.linearRampToValueAtTime(.6, now + duration - 0.8);
+            gain.gain.linearRampToValueAtTime(0.6, now + duration - 0.8);
             gain.gain.linearRampToValueAtTime(0, now + duration);
         }
         oscillator.type = 'sine';

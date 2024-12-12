@@ -2,6 +2,7 @@
     import * as Blockly from 'blockly/core';
     import { Button, CloseButton } from 'flowbite-svelte';
     import SpikeSimulator from '$components/SpikeSimulator.svelte';
+    import SaveSimulation from '$components/SaveSimulation.svelte';
     import { type LDrawStore, componentStore } from '$lib/ldraw/components';
     import { codeStore } from '$lib/spike/vm';
     import {
@@ -13,6 +14,7 @@
 
     export let modalOpen = false;
     export let blocklyOpen: boolean;
+    export let saveOpen = false;
     export let workspace: Blockly.WorkspaceSvg | undefined;
     let robotButtonColour: 'light' | 'red' | 'green' = 'light';
     let libraryClass = '!p-2';
@@ -70,9 +72,14 @@
         runSimulation = false;
     }
 
+    function saveRobotOrScene() {
+        saveOpen = true;
+    }
+
     $: updateButtons($componentStore);
 </script>
 
+<SaveSimulation bind:modalOpen={saveOpen} />
 {#if modalOpen}
     <div class="flex-1 h-full">
         <div class="relative flex-1 h-full flex flex-col overflow-hidden">
@@ -88,6 +95,9 @@
                 </Button>
                 <Button color="light" class={libraryClass} on:click={askForLibrary}>
                     <img alt="scene" width="32" height="32" src="icons/Library.svg" />
+                </Button>
+                <Button color="light" class="!p-2" on:click={saveRobotOrScene}>
+                    <img alt="save" width="32" height="32" src="icons/SaveMedium.svg" />
                 </Button>
                 {#if runSimulation}
                     <Button color="light" class="!p-2" on:click={stopRobot}>

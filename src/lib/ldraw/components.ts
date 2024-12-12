@@ -12,6 +12,7 @@ export interface Colour {
 }
 
 export interface BrickColour {
+    code: string;
     inheritSurface: boolean;
     inheritEdge: boolean;
     edge: Colour;
@@ -60,6 +61,7 @@ export interface Subpart {
 }
 
 export interface Model {
+    name: string;
     subparts: Subpart[];
     lines: Line[];
     triangles: Triangle[];
@@ -97,6 +99,7 @@ export function brickColour(id: string): BrickColour {
     const record = ldrawColourMap.get(id);
     if (id == '16') {
         return {
+            code: id,
             inheritSurface: true,
             inheritEdge: false,
             edge: { r: 0.0, g: 0.0, b: 0.0, a: 1.0 },
@@ -105,6 +108,7 @@ export function brickColour(id: string): BrickColour {
     }
     if (id == '24') {
         return {
+            code: id,
             inheritSurface: false,
             inheritEdge: true,
             edge: { r: 0.0, g: 0.0, b: 0.0, a: 1.0 },
@@ -113,6 +117,7 @@ export function brickColour(id: string): BrickColour {
     }
     if (record) {
         return {
+            code: id,
             inheritSurface: false,
             inheritEdge: false,
             edge: hexColor(record.EDGE),
@@ -120,6 +125,7 @@ export function brickColour(id: string): BrickColour {
         };
     } else {
         return {
+            code: '0',
             inheritSurface: false,
             inheritEdge: false,
             edge: { r: 0.0, g: 0.0, b: 0.0, a: 1.0 },
@@ -133,7 +139,7 @@ export function getUnresolvedParts() {
 }
 
 export async function setRobotFromFile(file: File) {
-    robotModel = loadModel(await file.text());
+    robotModel = loadModel('main.ldr', await file.text());
     componentStore.set({
         robotModel: robotModel,
         unresolved: getUnresolvedParts(),
@@ -228,7 +234,7 @@ export function loadMPD(content: string): Model {
     for (const mpdPart of files) {
         const part = mpdPart.name;
         const content = mpdPart.content;
-        const model = loadModel(content);
+        const model = loadModel(part, content);
         models.push(model);
         components.set(part, model);
         const callbacks = unresolved.get(part);
@@ -242,8 +248,107 @@ export function loadMPD(content: string): Model {
     return models[0];
 }
 
-export function loadModel(content: string): Model {
-    const model: Model = { subparts: [], lines: [], triangles: [], quads: [], optionalLines: [] };
+export function saveMPD(model: Model) {
+    let content: string[] = [];
+    const saved = new Map<string, Model>();
+    const queue = new Map<string, Model>();
+    queue.set('main.ldr', model);
+    let items = [...queue];
+    while (items.length > 0) {
+        const [name, model] = items[0];
+        queue.delete(name);
+        saved.set(name, model);
+        content.push(`0 FILE ${name}`);
+        content.push(`0 ${name.replace('.ldr', '').replace('.dat', '')}`);
+        content.push(`0 Name: ${name}`);
+        for (const line of model.lines) {
+            const c = line.colour.code;
+            const x1 = line.p1.x;
+            const y1 = line.p1.y;
+            const z1 = line.p1.z;
+            const x2 = line.p2.x;
+            const y2 = line.p2.y;
+            const z2 = line.p2.z;
+            content.push(`2 ${c} ${x1} ${y1} ${z1} ${x2} ${y2} ${z2}`);
+        }
+        for (const triangle of model.triangles) {
+            const c = triangle.colour.code;
+            const x1 = triangle.p1.x;
+            const y1 = triangle.p1.y;
+            const z1 = triangle.p1.z;
+            const x2 = triangle.p2.x;
+            const y2 = triangle.p2.y;
+            const z2 = triangle.p2.z;
+            const x3 = triangle.p3.x;
+            const y3 = triangle.p3.y;
+            const z3 = triangle.p3.z;
+            content.push(`3 ${c} ${x1} ${y1} ${z1} ${x2} ${y2} ${z2} ${x3} ${y3} ${z3}`);
+        }
+        for (const quad of model.quads) {
+            const c = quad.colour.code;
+            const x1 = quad.p1.x;
+            const y1 = quad.p1.y;
+            const z1 = quad.p1.z;
+            const x2 = quad.p2.x;
+            const y2 = quad.p2.y;
+            const z2 = quad.p2.z;
+            const x3 = quad.p3.x;
+            const y3 = quad.p3.y;
+            const z3 = quad.p3.z;
+            const x4 = quad.p4.x;
+            const y4 = quad.p4.y;
+            const z4 = quad.p4.z;
+            content.push(
+                `4 ${c} ${x1} ${y1} ${z1} ${x2} ${y2} ${z2} ${x3} ${y3} ${z3} ${x4} ${y4} ${z4}`
+            );
+        }
+        for (const opt of model.optionalLines) {
+            const c = opt.colour.code;
+            const x1 = opt.p1.x;
+            const y1 = opt.p1.y;
+            const z1 = opt.p1.z;
+            const x2 = opt.p2.x;
+            const y2 = opt.p2.y;
+            const z2 = opt.p2.z;
+            const x3 = opt.c1.x;
+            const y3 = opt.c1.y;
+            const z3 = opt.c1.z;
+            const x4 = opt.c2.x;
+            const y4 = opt.c2.y;
+            const z4 = opt.c2.z;
+            content.push(
+                `5 ${c} ${x1} ${y1} ${z1} ${x2} ${y2} ${z2} ${x3} ${y3} ${z3} ${x4} ${y4} ${z4}`
+            );
+        }
+        for (const subpart of model.subparts) {
+            const clr = subpart.colour.code;
+            const [a, d, g, zero1, b, e, h, zero2, c, f, i, zero3, x, y, z, one] = subpart.matrix;
+            const sname = subpart.modelNumber;
+            content.push(
+                `1 ${clr} ${x} ${y} ${z} ${a} ${b} ${c} ${d} ${e} ${f} ${g} ${h} ${i} ${sname}`
+            );
+            if (subpart.model) {
+                if (!saved.get(subpart.modelNumber) && !queue.get(subpart.modelNumber)) {
+                    queue.set(subpart.modelNumber, subpart.model);
+                }
+            }
+        }
+        content.push('');
+        items = [...queue];
+    }
+    content.push('');
+    return content.join('\r\n');
+}
+
+export function loadModel(name: string, content: string): Model {
+    const model: Model = {
+        name: name,
+        subparts: [],
+        lines: [],
+        triangles: [],
+        quads: [],
+        optionalLines: []
+    };
     const lines = content.split('\n');
     for (let line of lines) {
         line = line.trim();
@@ -386,7 +491,7 @@ export async function resolveFromZip(f: Blob) {
                 continue;
             }
             const content = await file.async('string');
-            const model = loadModel(content);
+            const model = loadModel(part, content);
             components.set(part, model);
             const callbacks = unresolved.get(part);
             if (callbacks) {
@@ -435,7 +540,7 @@ export async function resolveFromHttp(partList: string) {
                 continue;
             }
             const content = await response.text();
-            const model = loadModel(content);
+            const model = loadModel(part, content);
             components.set(part, model);
             const callbacks = unresolved.get(part);
             if (callbacks) {
