@@ -1,14 +1,22 @@
 <script lang="ts">
     import { Button, Modal } from 'flowbite-svelte';
-    import { CirclePlusOutline, PlaySolid, TrashBinOutline } from 'flowbite-svelte-icons';
     import FileSaver from 'file-saver';
-    import { componentStore, saveMPD, type LDrawStore } from '$lib/ldraw/components';
+    import { componentStore, clearPorts, setPort, saveMPD } from '$lib/ldraw/components';
+    import { allPorts, Hub } from '$lib/spike/vm';
 
     export let modalOpen = false;
+    export let hub: Hub;
 
     function saveRobot() {
         const robot = $componentStore.robotModel;
         if (robot) {
+            clearPorts(robot);
+            for (const port of allPorts) {
+                const id = hub.ports[port].id();
+                if (id !== 'none') {
+                    setPort(robot, 'main', port, id);
+                }
+            }
             const content = saveMPD(robot);
             const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
             FileSaver.saveAs(blob, 'robot.mpd');

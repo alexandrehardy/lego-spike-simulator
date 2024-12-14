@@ -53,11 +53,18 @@ export interface OptionalLine {
     c2: Vertex;
 }
 
+export interface PortConnection {
+    hub: string;
+    port: string;
+}
+
 export interface Subpart {
     colour: BrickColour;
+    port?: PortConnection;
     matrix: Matrix;
     model: Model | undefined;
     modelNumber: string;
+    id: number;
 }
 
 export interface Model {
@@ -86,6 +93,12 @@ export let robotModel: Model | undefined;
 export const components = new Map<string, Model>();
 export const unresolved = new Map<string, ResolverCallback[]>();
 let canFetchComponents = (window?.location?.href ?? 'file://').startsWith('http');
+let subpartId = 0;
+
+function nextSubpartId() {
+    subpartId++;
+    return subpartId;
+}
 
 function hexColor(hex: string) {
     const bigint = parseInt(hex.substring(1), 16);
@@ -249,7 +262,7 @@ export function loadMPD(content: string): Model {
 }
 
 export function saveMPD(model: Model) {
-    let content: string[] = [];
+    const content: string[] = [];
     const saved = new Map<string, Model>();
     const queue = new Map<string, Model>();
     queue.set('main.ldr', model);
@@ -322,6 +335,11 @@ export function saveMPD(model: Model) {
         }
         for (const subpart of model.subparts) {
             const clr = subpart.colour.code;
+            if (subpart.port) {
+                // Add main to support multiple hubs in the future
+                content.push(`0 !SPIKE_PORT ${subpart.port.hub} ${subpart.port.port}`);
+            }
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
             const [a, d, g, zero1, b, e, h, zero2, c, f, i, zero3, x, y, z, one] = subpart.matrix;
             const sname = subpart.modelNumber;
             content.push(
@@ -341,6 +359,8 @@ export function saveMPD(model: Model) {
 }
 
 export function loadModel(name: string, content: string): Model {
+    let lastPort: string | undefined = undefined;
+    let lastHub: string | undefined = undefined;
     const model: Model = {
         name: name,
         subparts: [],
@@ -366,8 +386,12 @@ export function loadModel(name: string, content: string): Model {
         parts = parts.map((x) => x.trim()).filter((x) => x.length > 0);
         if (parts[0] == '0') {
             // comment or meta
-            // we don't worry about meta
-            continue;
+            // we don't worry about meta, except spike ports
+            if (parts[1] !== '!SPIKE_PORT') {
+                continue;
+            }
+            lastHub = parts[2];
+            lastPort = parts[3];
         } else if (parts[0] == '1') {
             // subpart
             const colour = parts[1];
@@ -385,13 +409,19 @@ export function loadModel(name: string, content: string): Model {
             const i = parts[13];
             const subpart = parts.slice(14).join(' ');
             const entry: Subpart = {
+                id: nextSubpartId(),
                 colour: brickColour(colour),
                 matrix: [+a, +d, +g, 0, +b, +e, +h, 0, +c, +f, +i, 0, +x, +y, +z, 1],
                 model: undefined,
                 modelNumber: subpart
             };
+            if (lastPort && lastHub) {
+                entry.port = { hub: lastHub, port: lastPort };
+            }
             model.subparts.push(entry);
             resolveSubpart(entry);
+            lastPort = undefined;
+            lastHub = undefined;
         } else if (parts[0] == '2') {
             // line
             const colour = parts[1];
@@ -406,6 +436,8 @@ export function loadModel(name: string, content: string): Model {
                 p1: { x: +x1, y: +y1, z: +z1 },
                 p2: { x: +x2, y: +y2, z: +z2 }
             });
+            lastPort = undefined;
+            lastHub = undefined;
         } else if (parts[0] == '3') {
             // triangle
             const colour = parts[1];
@@ -424,6 +456,8 @@ export function loadModel(name: string, content: string): Model {
                 p2: { x: +x2, y: +y2, z: +z2 },
                 p3: { x: +x3, y: +y3, z: +z3 }
             });
+            lastPort = undefined;
+            lastHub = undefined;
         } else if (parts[0] == '4') {
             // quad
             const colour = parts[1];
@@ -446,6 +480,8 @@ export function loadModel(name: string, content: string): Model {
                 p3: { x: +x3, y: +y3, z: +z3 },
                 p4: { x: +x4, y: +y4, z: +z4 }
             });
+            lastPort = undefined;
+            lastHub = undefined;
         } else if (parts[0] == '5') {
             // optional line
             const colour = parts[1];
@@ -468,6 +504,8 @@ export function loadModel(name: string, content: string): Model {
                 c1: { x: +x3, y: +y3, z: +z3 },
                 c2: { x: +x4, y: +y4, z: +z4 }
             });
+            lastPort = undefined;
+            lastHub = undefined;
         }
     }
     return model;
@@ -565,3 +603,52 @@ export const componentStore = writable<LDrawStore>({
     unresolved: [],
     canFetchComponents: canFetchComponents
 });
+
+export interface PartMatch {
+    id: number;
+    part: string;
+}
+
+export function findParts(model: Model | undefined, partList: string[]): PartMatch[] {
+    const result: PartMatch[] = [];
+    if (!model) {
+        return result;
+    }
+    for (const subpart of model.subparts) {
+        const match = partList.find((x) => `${x}.dat` === subpart.modelNumber);
+        if (match) {
+            result.push({ id: subpart.id, part: subpart.modelNumber.replace('.dat', '') });
+        } else {
+            if (subpart.model) {
+                const subMatches = findParts(subpart.model, partList);
+                for (const match of subMatches) {
+                    result.push(match);
+                }
+            }
+        }
+    }
+    return result;
+}
+
+export function clearPorts(model: Model | undefined) {
+    if (!model) {
+        return;
+    }
+    for (const subpart of model.subparts) {
+        subpart.port = undefined;
+        clearPorts(subpart.model);
+    }
+}
+
+export function setPort(model: Model | undefined, hub: string, port: string, id: number) {
+    if (!model) {
+        return;
+    }
+    for (const subpart of model.subparts) {
+        if (subpart.id === id) {
+            subpart.port = { hub: hub, port: port };
+        } else {
+            setPort(subpart.model, hub, port, id);
+        }
+    }
+}

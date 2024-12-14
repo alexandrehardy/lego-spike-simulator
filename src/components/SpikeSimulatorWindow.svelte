@@ -1,10 +1,12 @@
 <script lang="ts">
     import * as Blockly from 'blockly/core';
     import { Button, CloseButton } from 'flowbite-svelte';
+    import HubIcon from '$components/HubIcon.svelte';
     import SpikeSimulator from '$components/SpikeSimulator.svelte';
     import SaveSimulation from '$components/SaveSimulation.svelte';
+    import PortConnector from '$components/PortConnector.svelte';
     import { type LDrawStore, componentStore } from '$lib/ldraw/components';
-    import { codeStore } from '$lib/spike/vm';
+    import { Hub, codeStore } from '$lib/spike/vm';
     import {
         spikeGenerator,
         resetCode,
@@ -14,8 +16,11 @@
 
     export let modalOpen = false;
     export let blocklyOpen: boolean;
-    export let saveOpen = false;
     export let workspace: Blockly.WorkspaceSvg | undefined;
+    let hub = new Hub();
+
+    let connectorOpen = false;
+    let saveOpen = false;
     let robotButtonColour: 'light' | 'red' | 'green' = 'light';
     let libraryClass = '!p-2';
     let runSimulation = false;
@@ -76,10 +81,15 @@
         saveOpen = true;
     }
 
+    function connectPorts() {
+        connectorOpen = true;
+    }
+
     $: updateButtons($componentStore);
 </script>
 
-<SaveSimulation bind:modalOpen={saveOpen} />
+<PortConnector bind:modalOpen={connectorOpen} bind:hub />
+<SaveSimulation bind:modalOpen={saveOpen} bind:hub />
 {#if modalOpen}
     <div class="flex-1 h-full">
         <div class="relative flex-1 h-full flex flex-col overflow-hidden">
@@ -89,6 +99,9 @@
                 <img alt="code" width="32" height="32" src="icons/Brick.svg" />
                 <Button color={robotButtonColour} class="!p-2" on:click={askForRobot}>
                     <img alt="robot" width="32" height="32" src="icons/Robot.svg" />
+                </Button>
+                <Button color="light" class="!p-2" on:click={connectPorts}>
+                    <HubIcon />
                 </Button>
                 <Button color="light" class="!p-2">
                     <img alt="scene" width="32" height="32" src="icons/Scene.svg" />
@@ -119,7 +132,7 @@
                 {/if}
             </div>
             <div class="flex-1 w-full overflow-hidden">
-                <SpikeSimulator bind:runSimulation {workspace} />
+                <SpikeSimulator bind:runSimulation {workspace} bind:connectorOpen bind:hub />
             </div>
         </div>
     </div>

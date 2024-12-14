@@ -24,6 +24,8 @@ export interface CompileOptions {
     recenter?: boolean;
     rescale?: boolean;
     maxDepth?: number;
+    wireframe?: boolean;
+    select?: number;
 }
 
 export interface BBox {
@@ -610,9 +612,9 @@ export class WebGL {
         }
     }
 
-    compileLines(lines: Line[]) {
+    compileLines(lines: Line[], overrideColour: Colour | undefined) {
         for (const l of lines) {
-            const colour = this.getColour(l.colour, true);
+            const colour = overrideColour ?? this.getColour(l.colour, true);
             this.compileColours.push(colour.r);
             this.compileColours.push(colour.g);
             this.compileColours.push(colour.b);
@@ -635,20 +637,30 @@ export class WebGL {
         }
     }
 
-    compileSubModelQuads(model: Model, maxDepth: number) {
+    compileSubModelQuads(model: Model, maxDepth: number, selected: number | undefined) {
         if (maxDepth <= 0) {
             // Only one subpart need do this.
             // We get triangles to do this
             return;
         }
-        this.compileQuads(model.quads);
+        if (!selected) {
+            this.compileQuads(model.quads);
+        }
         const oldParent = this.parentColour;
         for (const subpart of model.subparts) {
             this.parentColour = this.getParentColour(subpart.colour);
             if (subpart.model) {
                 const oldMatrix = this.compileMatrix;
                 this.compileMatrix = m4.multiply(this.compileMatrix, subpart.matrix);
-                this.compileSubModelQuads(subpart.model, maxDepth - 1);
+                if (selected) {
+                    if (subpart.id == selected) {
+                        this.compileSubModelQuads(subpart.model, maxDepth - 1, undefined);
+                    } else {
+                        this.compileSubModelQuads(subpart.model, maxDepth - 1, selected);
+                    }
+                } else {
+                    this.compileSubModelQuads(subpart.model, maxDepth - 1, selected);
+                }
                 this.compileMatrix = oldMatrix;
             }
             this.parentColour = oldParent;
@@ -682,7 +694,7 @@ export class WebGL {
         this.compileVertices.push(v3[3]);
     }
 
-    compileSubModelTriangles(model: Model, maxDepth: number) {
+    compileSubModelTriangles(model: Model, maxDepth: number, selected: number | undefined) {
         if (maxDepth <= 0) {
             const bbox = this.computeBoundingBox(model);
             if (!bbox) {
@@ -727,21 +739,31 @@ export class WebGL {
             this.compiledTriangles += 12;
             return;
         }
-        this.compileTriangles(model.triangles);
+        if (!selected) {
+            this.compileTriangles(model.triangles);
+        }
         const oldParent = this.parentColour;
         for (const subpart of model.subparts) {
             this.parentColour = this.getParentColour(subpart.colour);
             if (subpart.model) {
                 const oldMatrix = this.compileMatrix;
                 this.compileMatrix = m4.multiply(this.compileMatrix, subpart.matrix);
-                this.compileSubModelTriangles(subpart.model, maxDepth - 1);
+                if (selected) {
+                    if (subpart.id == selected) {
+                        this.compileSubModelTriangles(subpart.model, maxDepth - 1, undefined);
+                    } else {
+                        this.compileSubModelTriangles(subpart.model, maxDepth - 1, selected);
+                    }
+                } else {
+                    this.compileSubModelTriangles(subpart.model, maxDepth - 1, selected);
+                }
                 this.compileMatrix = oldMatrix;
             }
             this.parentColour = oldParent;
         }
     }
 
-    compileSubModelLines(model: Model, maxDepth: number) {
+    compileSubModelLines(model: Model, maxDepth: number, selected: number | undefined) {
         if (maxDepth <= 0) {
             const bbox = this.computeBoundingBox(model);
             if (!bbox) {
@@ -876,14 +898,26 @@ export class WebGL {
             this.compiledLines += 12;
             return;
         }
-        this.compileLines(model.lines);
+        if (selected) {
+            this.compileLines(model.lines, { r: 0.5, g: 0.5, b: 0.5, a: 1.0 });
+        } else {
+            this.compileLines(model.lines, undefined);
+        }
         const oldParent = this.parentColour;
         for (const subpart of model.subparts) {
             this.parentColour = this.getParentColour(subpart.colour);
             if (subpart.model) {
                 const oldMatrix = this.compileMatrix;
                 this.compileMatrix = m4.multiply(this.compileMatrix, subpart.matrix);
-                this.compileSubModelLines(subpart.model, maxDepth - 1);
+                if (selected) {
+                    if (subpart.id == selected) {
+                        this.compileSubModelLines(subpart.model, maxDepth - 1, undefined);
+                    } else {
+                        this.compileSubModelLines(subpart.model, maxDepth - 1, selected);
+                    }
+                } else {
+                    this.compileSubModelLines(subpart.model, maxDepth - 1, selected);
+                }
                 this.compileMatrix = oldMatrix;
             }
             this.parentColour = oldParent;
@@ -894,20 +928,26 @@ export class WebGL {
         const recenter = options?.recenter ?? true;
         const rescale = options?.rescale ?? true;
         const maxDepth = options?.maxDepth ?? 1000;
+        const wireframe = options?.wireframe ?? false;
+        const selected = options?.select;
         this.compiledLines = 0;
         this.compiledTriangles = 0;
         this.compileColours = [];
         this.compileVertices = [];
 
         this.compileMatrix = m4.identity();
-        this.compileSubModelLines(model, maxDepth);
+        this.compileSubModelLines(model, maxDepth, selected);
 
         const triangleOffset = this.compileVertices.length;
         this.compileMatrix = m4.identity();
-        this.compileSubModelTriangles(model, maxDepth);
+        if (!wireframe) {
+            this.compileSubModelTriangles(model, maxDepth, selected);
+        }
 
         this.compileMatrix = m4.identity();
-        this.compileSubModelQuads(model, maxDepth);
+        if (!wireframe) {
+            this.compileSubModelQuads(model, maxDepth, selected);
+        }
 
         if ((recenter || rescale) && this.compileVertices.length > 0) {
             let minx = this.compileVertices[0];

@@ -3,6 +3,9 @@ import { writable } from 'svelte/store';
 import { font } from '$lib/spike/font';
 import { SoundLibrary } from '$lib/blockly/audio';
 
+export type PortType = 'A' | 'B' | 'C' | 'D' | 'E' | 'F';
+export const allPorts: PortType[] = ['A', 'B', 'C', 'D', 'E', 'F'];
+
 export interface CompiledCode {
     events: Map<string, EventStatement>;
     procedures: Map<string, ProcedureBlock>;
@@ -809,22 +812,34 @@ export class Motor {
     //54696 medium
     //68488 small
     //54675 large
-    constructor() {}
+    id: number;
+    constructor(id: number) {
+        this.id = id;
+    }
 }
 
 export class LightSensor {
     //37308
-    constructor() {}
+    id: number;
+    constructor(id: number) {
+        this.id = id;
+    }
 }
 
 export class UltraSoundSensor {
     //37316
-    constructor() {}
+    id: number;
+    constructor(id: number) {
+        this.id = id;
+    }
 }
 
 export class ForceSensor {
     //37312
-    constructor() {}
+    id: number;
+    constructor(id: number) {
+        this.id = id;
+    }
 }
 
 export class Port {
@@ -837,9 +852,33 @@ export class Port {
     constructor(type: 'none' | 'force' | 'distance' | 'light' | 'motor') {
         this.type = type;
     }
+
+    id(): number | 'none' {
+        if (this.type == 'none') {
+            return 'none';
+        } else if (this.type == 'force') {
+            return this.force!.id;
+        } else if (this.type == 'distance') {
+            return this.ultra!.id;
+        } else if (this.type == 'light') {
+            return this.light!.id;
+        } else if (this.type == 'motor') {
+            return this.motor!.id;
+        }
+        return 'none';
+    }
 }
 
 export type HubEventHandler = (event: string, parameter: string) => void;
+
+export interface HubPorts {
+    A: Port;
+    B: Port;
+    C: Port;
+    D: Port;
+    E: Port;
+    F: Port;
+}
 
 export class Hub {
     //67718
@@ -848,8 +887,30 @@ export class Hub {
     rightPressed: boolean;
     screen: string;
     screenBrightness: number;
-    ports: Record<string, Port>;
+    ports: HubPorts;
     eventHandler: HubEventHandler | undefined;
+
+    reload() {
+        this.leftPressed = false;
+        this.rightPressed = false;
+        this.screen = '0000000000000000000000000';
+        this.screenBrightness = 0;
+        this.ports = {
+            A: new Port('none'),
+            B: new Port('none'),
+            C: new Port('none'),
+            D: new Port('none'),
+            E: new Port('none'),
+            F: new Port('none')
+        };
+    }
+
+    reset() {
+        this.leftPressed = false;
+        this.rightPressed = false;
+        this.screen = '0000000000000000000000000';
+        this.screenBrightness = 0;
+    }
 
     constructor() {
         this.leftPressed = false;
@@ -1190,10 +1251,19 @@ export class VM {
         const gain = audioContext.createGain();
         const now = audioContext.currentTime;
         gain.gain.linearRampToValueAtTime(0, now);
-        gain.gain.linearRampToValueAtTime(0.6, now + 0.1);
         if (duration > 0) {
-            gain.gain.linearRampToValueAtTime(0.6, now + duration - 0.8);
-            gain.gain.linearRampToValueAtTime(0, now + duration);
+            const start = 0.05;
+            const end = duration - 0.8;
+            if (start < end) {
+                gain.gain.linearRampToValueAtTime(0.6, now + start);
+                gain.gain.linearRampToValueAtTime(0.6, now + end);
+                gain.gain.linearRampToValueAtTime(0, now + duration);
+            } else {
+                gain.gain.linearRampToValueAtTime(0.6, now + duration * 0.2);
+                gain.gain.linearRampToValueAtTime(0, now + duration);
+            }
+        } else {
+            gain.gain.linearRampToValueAtTime(0.6, now + 0.05);
         }
         oscillator.type = 'sine';
         oscillator.frequency.value = Math.round(frequency);

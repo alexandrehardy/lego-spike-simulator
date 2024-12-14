@@ -4,6 +4,7 @@
     import { createEventDispatcher } from 'svelte';
 
     export let image: string = '0000000000000000000000000';
+    export let selectedPort = '';
     let imageRows = splitImage(image);
     let pressed = '';
     const dispatch = createEventDispatcher();
@@ -74,19 +75,28 @@
         <div class="flex flex-col gap-4">
             <button
                 on:click={() => dispatch('A')}
-                class="border-t border-b border-r border-black rounded-r-xl px-3 py-5 bg-white hover:bg-blue-200"
+                class="border-t border-b border-r border-black rounded-r-xl px-3 py-5 {selectedPort ==
+                'A'
+                    ? 'bg-blue-200'
+                    : 'bg-white'} hover:bg-blue-200"
             >
                 A
             </button>
             <button
                 on:click={() => dispatch('C')}
-                class="border-t border-b border-r border-black rounded-r-xl px-3 py-5 bg-white hover:bg-blue-200"
+                class="border-t border-b border-r border-black rounded-r-xl px-3 py-5 {selectedPort ==
+                'C'
+                    ? 'bg-blue-200'
+                    : 'bg-white'} hover:bg-blue-200"
             >
                 C
             </button>
             <button
                 on:click={() => dispatch('E')}
-                class="border-t border-b border-r border-black rounded-r-xl px-3 py-5 bg-white hover:bg-blue-200"
+                class="border-t border-b border-r border-black rounded-r-xl px-3 py-5 {selectedPort ==
+                'E'
+                    ? 'bg-blue-200'
+                    : 'bg-white'} hover:bg-blue-200"
             >
                 E
             </button>
@@ -103,19 +113,28 @@
         <div class="flex flex-col gap-4">
             <button
                 on:click={() => dispatch('B')}
-                class="border-t border-b border-l border-black rounded-l-xl px-3 py-5 bg-white hover:bg-blue-200"
+                class="border-t border-b border-l border-black rounded-l-xl px-3 py-5 {selectedPort ==
+                'B'
+                    ? 'bg-blue-200'
+                    : 'bg-white'} hover:bg-blue-200"
             >
                 B
             </button>
             <button
                 on:click={() => dispatch('D')}
-                class="border-t border-b border-l border-black rounded-l-xl px-3 py-5 bg-white hover:bg-blue-200"
+                class="border-t border-b border-l border-black rounded-l-xl px-3 py-5 {selectedPort ==
+                'D'
+                    ? 'bg-blue-200'
+                    : 'bg-white'} hover:bg-blue-200"
             >
                 D
             </button>
             <button
                 on:click={() => dispatch('F')}
-                class="border-t border-b border-l border-black rounded-l-xl px-3 py-5 bg-white hover:bg-blue-200"
+                class="border-t border-b border-l border-black rounded-l-xl px-3 py-5 {selectedPort ==
+                'F'
+                    ? 'bg-blue-200'
+                    : 'bg-white'} hover:bg-blue-200"
             >
                 F
             </button>
