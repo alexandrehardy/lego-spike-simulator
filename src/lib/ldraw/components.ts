@@ -199,18 +199,18 @@ export function getRobotModel() {
 }
 
 export function resolveSubpart(subpart: Subpart) {
-    const model = components.get(subpart.modelNumber);
+    const model = components.get(subpart.modelNumber.toLowerCase());
     if (model) {
         subpart.model = model;
     } else {
-        let callbacks = unresolved.get(subpart.modelNumber);
+        let callbacks = unresolved.get(subpart.modelNumber.toLowerCase());
         if (!callbacks) {
             callbacks = [];
         }
         callbacks.push((part: PartDetail) => {
             subpart.model = part.model;
         });
-        unresolved.set(subpart.modelNumber, callbacks);
+        unresolved.set(subpart.modelNumber.toLowerCase(), callbacks);
     }
 }
 
@@ -249,14 +249,14 @@ export function loadMPD(content: string): Model {
         const content = mpdPart.content;
         const model = loadModel(part, content);
         models.push(model);
-        components.set(part, model);
-        const callbacks = unresolved.get(part);
+        components.set(part.toLowerCase(), model);
+        const callbacks = unresolved.get(part.toLowerCase());
         if (callbacks) {
             for (const callback of callbacks) {
                 callback({ partNumber: part, model: model });
             }
         }
-        unresolved.delete(part);
+        unresolved.delete(part.toLowerCase());
     }
     return models[0];
 }
@@ -270,7 +270,7 @@ export function saveMPD(model: Model) {
     while (items.length > 0) {
         const [name, model] = items[0];
         queue.delete(name);
-        saved.set(name, model);
+        saved.set(name.toLowerCase(), model);
         content.push(`0 FILE ${name}`);
         content.push(`0 ${name.replace('.ldr', '').replace('.dat', '')}`);
         content.push(`0 Name: ${name}`);
@@ -346,8 +346,8 @@ export function saveMPD(model: Model) {
                 `1 ${clr} ${x} ${y} ${z} ${a} ${b} ${c} ${d} ${e} ${f} ${g} ${h} ${i} ${sname}`
             );
             if (subpart.model) {
-                if (!saved.get(subpart.modelNumber) && !queue.get(subpart.modelNumber)) {
-                    queue.set(subpart.modelNumber, subpart.model);
+                if (!saved.get(subpart.modelNumber.toLowerCase()) && !queue.get(subpart.modelNumber.toLowerCase())) {
+                    queue.set(subpart.modelNumber.toLowerCase(), subpart.model);
                 }
             }
         }
@@ -530,8 +530,8 @@ export async function resolveFromZip(f: Blob) {
             }
             const content = await file.async('string');
             const model = loadModel(part, content);
-            components.set(part, model);
-            const callbacks = unresolved.get(part);
+            components.set(part.toLowerCase(), model);
+            const callbacks = unresolved.get(part.toLowerCase());
             if (callbacks) {
                 for (const callback of callbacks) {
                     callback({ partNumber: part, model: model });
@@ -579,8 +579,8 @@ export async function resolveFromHttp(partList: string) {
             }
             const content = await response.text();
             const model = loadModel(part, content);
-            components.set(part, model);
-            const callbacks = unresolved.get(part);
+            components.set(part.toLowerCase(), model);
+            const callbacks = unresolved.get(part.toLowerCase());
             if (callbacks) {
                 for (const callback of callbacks) {
                     callback({ partNumber: part, model: model });
