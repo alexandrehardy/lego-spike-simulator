@@ -1,6 +1,12 @@
-import { ldrawColourMap } from '$lib/ldraw/colours';
+import { ldrawColourMap, studioColourMap } from '$lib/ldraw/colours';
 import { writable } from 'svelte/store';
 import JSZip from 'jszip';
+
+let studioMode = false;
+
+export function setStudioMode(mode: boolean) {
+    studioMode = mode;
+}
 
 export type Matrix = number[];
 
@@ -109,8 +115,14 @@ function hexColor(hex: string) {
 }
 
 export function brickColour(id: string): BrickColour {
+    if (studioMode) {
+        const ldrawId = studioColourMap.get(id);
+        if (ldrawId) {
+            id = ldrawId;
+        }
+    }
     const record = ldrawColourMap.get(id);
-    if (id == '16') {
+    if (id == '16' || id == '-1') {
         return {
             code: id,
             inheritSurface: true,
@@ -119,7 +131,7 @@ export function brickColour(id: string): BrickColour {
             surface: { r: 0.0, g: 0.0, b: 0.0, a: 1.0 }
         };
     }
-    if (id == '24') {
+    if (id == '24' || id == '-2') {
         return {
             code: id,
             inheritSurface: false,
@@ -151,8 +163,8 @@ export function getUnresolvedParts() {
     return Array.from(unresolved.keys());
 }
 
-export async function setRobotFromFile(file: File) {
-    robotModel = loadModel('main.ldr', await file.text());
+export function setRobotFromContent(content: string) {
+    robotModel = loadModel('main.ldr', content);
     componentStore.set({
         robotModel: robotModel,
         unresolved: getUnresolvedParts(),
@@ -162,6 +174,10 @@ export async function setRobotFromFile(file: File) {
         fetchAndResolveParts();
     }
     return robotModel;
+}
+
+export async function setRobotFromFile(file: File) {
+    return setRobotFromContent(await file.text());
 }
 
 export async function fetchAndResolveParts() {
@@ -198,19 +214,36 @@ export function getRobotModel() {
     return robotModel;
 }
 
+const substituteParts: Record<string, string> = {
+    'bb1142c01.dat': '45601c01.dat',
+    '37308c01.dat': '37308.dat',
+    '37312c01.dat': '37312.dat',
+    '37316c01.dat': '37316.dat',
+    '54696c01.dat': '54696.dat',
+    '54675c01.dat': '54675.dat',
+    '68488c01.dat': '68488.dat'
+};
+
 export function resolveSubpart(subpart: Subpart) {
-    const model = components.get(subpart.modelNumber.toLowerCase());
+    let partNumber = subpart.modelNumber.toLowerCase();
+    // Lego studio workaround
+    const replacement = substituteParts[partNumber];
+    if (replacement) {
+        partNumber = replacement;
+        subpart.modelNumber = replacement;
+    }
+    const model = components.get(partNumber);
     if (model) {
         subpart.model = model;
     } else {
-        let callbacks = unresolved.get(subpart.modelNumber.toLowerCase());
+        let callbacks = unresolved.get(partNumber);
         if (!callbacks) {
             callbacks = [];
         }
         callbacks.push((part: PartDetail) => {
             subpart.model = part.model;
         });
-        unresolved.set(subpart.modelNumber.toLowerCase(), callbacks);
+        unresolved.set(partNumber, callbacks);
     }
 }
 
@@ -245,18 +278,22 @@ export function loadMPD(content: string): Model {
     lastContents = [];
     const models: Model[] = [];
     for (const mpdPart of files) {
-        const part = mpdPart.name;
+        let part = mpdPart.name.toLowerCase();
+        const replacement = substituteParts[part];
+        if (replacement) {
+            part = replacement;
+        }
         const content = mpdPart.content;
         const model = loadModel(part, content);
         models.push(model);
-        components.set(part.toLowerCase(), model);
-        const callbacks = unresolved.get(part.toLowerCase());
+        components.set(part, model);
+        const callbacks = unresolved.get(part);
         if (callbacks) {
             for (const callback of callbacks) {
                 callback({ partNumber: part, model: model });
             }
         }
-        unresolved.delete(part.toLowerCase());
+        unresolved.delete(part);
     }
     return models[0];
 }
@@ -346,7 +383,10 @@ export function saveMPD(model: Model) {
                 `1 ${clr} ${x} ${y} ${z} ${a} ${b} ${c} ${d} ${e} ${f} ${g} ${h} ${i} ${sname}`
             );
             if (subpart.model) {
-                if (!saved.get(subpart.modelNumber.toLowerCase()) && !queue.get(subpart.modelNumber.toLowerCase())) {
+                if (
+                    !saved.get(subpart.modelNumber.toLowerCase()) &&
+                    !queue.get(subpart.modelNumber.toLowerCase())
+                ) {
                     queue.set(subpart.modelNumber.toLowerCase(), subpart.model);
                 }
             }

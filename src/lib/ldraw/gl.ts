@@ -1,4 +1,9 @@
-import { vertex_shader, fragment_shader } from '$lib/ldraw/shaders';
+import {
+    lego_vertex_shader,
+    lego_fragment_shader,
+    map_vertex_shader,
+    map_fragment_shader
+} from '$lib/ldraw/shaders';
 import {
     type Vertex,
     type Model,
@@ -37,19 +42,34 @@ export interface BBox {
     maxz: number;
 }
 
-export class WebGL {
-    gl: WebGLRenderingContext;
-    pipeline: WebGLProgram | undefined;
-    canvas: HTMLCanvasElement;
-    projectionMatrix: m4.Matrix4;
-    modelMatrix: m4.Matrix4;
-    matrixStack: m4.Matrix4[];
+export interface PipeLine {
+    program: WebGLProgram;
     vertexAttribute: GLint;
+    texcoordAttribute: GLint;
     colourAttribute: GLint;
     projectionMatrixUniform: WebGLUniformLocation | null;
     modelMatrixUniform: WebGLUniformLocation | null;
+    samplerUniform: WebGLUniformLocation | null;
+}
+
+export interface MapTexture {
+    width: number;
+    height: number;
+    texture: WebGLTexture;
+}
+
+export class WebGL {
+    gl: WebGLRenderingContext;
+    canvas: HTMLCanvasElement;
+    pipeline: PipeLine | undefined;
+    brickPipeline: PipeLine | undefined;
+    mapPipeline: PipeLine | undefined;
+    projectionMatrix: m4.Matrix4;
+    modelMatrix: m4.Matrix4;
+    matrixStack: m4.Matrix4[];
     vertexBuffer: WebGLBuffer | null;
     colourBuffer: WebGLBuffer | null;
+    texcoordBuffer: WebGLBuffer | null;
     parentColour: BrickColour;
     compileVertices: number[];
     compileColours: number[];
@@ -72,14 +92,9 @@ export class WebGL {
         this.matrixStack = [];
         this.modelMatrix = m4.identity();
         this.projectionMatrix = m4.identity();
-        this.vertexAttribute = -1;
-        this.colourAttribute = -1;
-        this.projectionMatrixUniform = -1;
-        this.modelMatrixUniform = -1;
-        this.projectionMatrixUniform = null;
-        this.modelMatrixUniform = null;
         this.vertexBuffer = null;
         this.colourBuffer = null;
+        this.texcoordBuffer = null;
         this.parentColour = {
             code: '0',
             inheritSurface: false,
@@ -102,8 +117,12 @@ export class WebGL {
             near,
             far
         );
-        if (this.projectionMatrixUniform) {
-            this.gl.uniformMatrix4fv(this.projectionMatrixUniform, false, this.projectionMatrix);
+        if (this.brickPipeline?.projectionMatrixUniform) {
+            this.gl.uniformMatrix4fv(
+                this.brickPipeline.projectionMatrixUniform,
+                false,
+                this.projectionMatrix
+            );
         }
     }
 
@@ -116,29 +135,45 @@ export class WebGL {
         far: number
     ) {
         this.projectionMatrix = m4.frustum(left, right, bottom, top, near, far);
-        if (this.projectionMatrixUniform) {
-            this.gl.uniformMatrix4fv(this.projectionMatrixUniform, false, this.projectionMatrix);
+        if (this.brickPipeline?.projectionMatrixUniform) {
+            this.gl.uniformMatrix4fv(
+                this.brickPipeline.projectionMatrixUniform,
+                false,
+                this.projectionMatrix
+            );
         }
     }
 
     setOrtho(left: number, right: number, bottom: number, top: number, near: number, far: number) {
         this.projectionMatrix = m4.orthographic(left, right, bottom, top, near, far);
-        if (this.projectionMatrixUniform) {
-            this.gl.uniformMatrix4fv(this.projectionMatrixUniform, false, this.projectionMatrix);
+        if (this.brickPipeline?.projectionMatrixUniform) {
+            this.gl.uniformMatrix4fv(
+                this.brickPipeline.projectionMatrixUniform,
+                false,
+                this.projectionMatrix
+            );
         }
     }
 
     setProjectionIdentity() {
         this.projectionMatrix = m4.identity();
-        if (this.projectionMatrixUniform) {
-            this.gl.uniformMatrix4fv(this.projectionMatrixUniform, false, this.projectionMatrix);
+        if (this.brickPipeline?.projectionMatrixUniform) {
+            this.gl.uniformMatrix4fv(
+                this.brickPipeline.projectionMatrixUniform,
+                false,
+                this.projectionMatrix
+            );
         }
     }
 
     setModelIdentity() {
         this.modelMatrix = m4.identity();
-        if (this.modelMatrixUniform) {
-            this.gl.uniformMatrix4fv(this.modelMatrixUniform, false, this.modelMatrix);
+        if (this.brickPipeline?.modelMatrixUniform) {
+            this.gl.uniformMatrix4fv(
+                this.brickPipeline.modelMatrixUniform,
+                false,
+                this.modelMatrix
+            );
         }
     }
 
@@ -148,38 +183,58 @@ export class WebGL {
 
     popMatrix() {
         this.modelMatrix = this.matrixStack.pop()!;
-        if (this.modelMatrixUniform) {
-            this.gl.uniformMatrix4fv(this.modelMatrixUniform, false, this.modelMatrix);
+        if (this.brickPipeline?.modelMatrixUniform) {
+            this.gl.uniformMatrix4fv(
+                this.brickPipeline.modelMatrixUniform,
+                false,
+                this.modelMatrix
+            );
         }
     }
 
     translate(x: number, y: number, z: number) {
         this.modelMatrix = m4.translate(this.modelMatrix, x, y, z);
-        if (this.modelMatrixUniform) {
-            this.gl.uniformMatrix4fv(this.modelMatrixUniform, false, this.modelMatrix);
+        if (this.brickPipeline?.modelMatrixUniform) {
+            this.gl.uniformMatrix4fv(
+                this.brickPipeline.modelMatrixUniform,
+                false,
+                this.modelMatrix
+            );
         }
     }
 
     rotate(angle: number, x: number, y: number, z: number) {
         const radians = (angle * Math.PI) / 180.0;
         this.modelMatrix = m4.axisRotate(this.modelMatrix, [x, y, z], radians);
-        if (this.modelMatrixUniform) {
-            this.gl.uniformMatrix4fv(this.modelMatrixUniform, false, this.modelMatrix);
+        if (this.brickPipeline?.modelMatrixUniform) {
+            this.gl.uniformMatrix4fv(
+                this.brickPipeline.modelMatrixUniform,
+                false,
+                this.modelMatrix
+            );
         }
     }
 
     scale(s: number) {
         // The inverse is incorrect for non-unifor scaling
         this.modelMatrix = m4.scale(this.modelMatrix, s, s, s);
-        if (this.modelMatrixUniform) {
-            this.gl.uniformMatrix4fv(this.modelMatrixUniform, false, this.modelMatrix);
+        if (this.brickPipeline?.modelMatrixUniform) {
+            this.gl.uniformMatrix4fv(
+                this.brickPipeline.modelMatrixUniform,
+                false,
+                this.modelMatrix
+            );
         }
     }
 
     multMatrix(m: m4.Matrix4) {
         this.modelMatrix = m4.multiply(this.modelMatrix, m);
-        if (this.modelMatrixUniform) {
-            this.gl.uniformMatrix4fv(this.modelMatrixUniform, false, this.modelMatrix);
+        if (this.brickPipeline?.modelMatrixUniform) {
+            this.gl.uniformMatrix4fv(
+                this.brickPipeline.modelMatrixUniform,
+                false,
+                this.modelMatrix
+            );
         }
     }
 
@@ -227,6 +282,9 @@ export class WebGL {
         if (!this.colourBuffer) {
             return;
         }
+        if (!this.brickPipeline) {
+            return;
+        }
         const vertices: number[] = [];
         const colours: number[] = [];
         for (const t of triangles) {
@@ -258,10 +316,24 @@ export class WebGL {
         }
         this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.vertexBuffer);
         this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(vertices), this.gl.STATIC_DRAW);
-        this.gl.vertexAttribPointer(this.vertexAttribute, 4, this.gl.FLOAT, false, 0, 0);
+        this.gl.vertexAttribPointer(
+            this.brickPipeline.vertexAttribute,
+            4,
+            this.gl.FLOAT,
+            false,
+            0,
+            0
+        );
         this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.colourBuffer);
         this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(colours), this.gl.STATIC_DRAW);
-        this.gl.vertexAttribPointer(this.colourAttribute, 4, this.gl.FLOAT, false, 0, 0);
+        this.gl.vertexAttribPointer(
+            this.brickPipeline.colourAttribute,
+            4,
+            this.gl.FLOAT,
+            false,
+            0,
+            0
+        );
         this.gl.drawArrays(this.gl.TRIANGLES, 0, triangles.length * 3);
     }
 
@@ -270,6 +342,9 @@ export class WebGL {
             return;
         }
         if (!this.colourBuffer) {
+            return;
+        }
+        if (!this.brickPipeline) {
             return;
         }
         const vertices: number[] = [];
@@ -295,10 +370,24 @@ export class WebGL {
         }
         this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.vertexBuffer);
         this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(vertices), this.gl.STATIC_DRAW);
-        this.gl.vertexAttribPointer(this.vertexAttribute, 4, this.gl.FLOAT, false, 0, 0);
+        this.gl.vertexAttribPointer(
+            this.brickPipeline.vertexAttribute,
+            4,
+            this.gl.FLOAT,
+            false,
+            0,
+            0
+        );
         this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.colourBuffer);
         this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(colours), this.gl.STATIC_DRAW);
-        this.gl.vertexAttribPointer(this.colourAttribute, 4, this.gl.FLOAT, false, 0, 0);
+        this.gl.vertexAttribPointer(
+            this.brickPipeline.colourAttribute,
+            4,
+            this.gl.FLOAT,
+            false,
+            0,
+            0
+        );
         this.gl.drawArrays(this.gl.LINES, 0, lines.length * 2);
     }
 
@@ -307,6 +396,9 @@ export class WebGL {
             return;
         }
         if (!this.colourBuffer) {
+            return;
+        }
+        if (!this.brickPipeline) {
             return;
         }
         const vertices: number[] = [];
@@ -364,14 +456,32 @@ export class WebGL {
         }
         this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.vertexBuffer);
         this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(vertices), this.gl.STATIC_DRAW);
-        this.gl.vertexAttribPointer(this.vertexAttribute, 4, this.gl.FLOAT, false, 0, 0);
+        this.gl.vertexAttribPointer(
+            this.brickPipeline.vertexAttribute,
+            4,
+            this.gl.FLOAT,
+            false,
+            0,
+            0
+        );
         this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.colourBuffer);
         this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(colours), this.gl.STATIC_DRAW);
-        this.gl.vertexAttribPointer(this.colourAttribute, 4, this.gl.FLOAT, false, 0, 0);
+        this.gl.vertexAttribPointer(
+            this.brickPipeline.colourAttribute,
+            4,
+            this.gl.FLOAT,
+            false,
+            0,
+            0
+        );
         this.gl.drawArrays(this.gl.TRIANGLES, 0, quads.length * 6);
     }
 
     drawModel(model: Model) {
+        if (!this.brickPipeline) {
+            return;
+        }
+        this.gl.useProgram(this.brickPipeline.program);
         this.drawLines(model.lines);
         this.drawTriangles(model.triangles);
         this.drawQuads(model.quads);
@@ -1021,17 +1131,123 @@ export class WebGL {
         if (!this.colourBuffer) {
             return;
         }
+        if (!this.brickPipeline) {
+            return;
+        }
         if (model.lines + model.triangles == 0) {
             return;
         }
+        this.gl.useProgram(this.brickPipeline.program);
         this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.vertexBuffer);
         this.gl.bufferData(this.gl.ARRAY_BUFFER, model.vertices, this.gl.STATIC_DRAW);
-        this.gl.vertexAttribPointer(this.vertexAttribute, 4, this.gl.FLOAT, false, 0, 0);
+        this.gl.vertexAttribPointer(
+            this.brickPipeline.vertexAttribute,
+            4,
+            this.gl.FLOAT,
+            false,
+            0,
+            0
+        );
         this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.colourBuffer);
         this.gl.bufferData(this.gl.ARRAY_BUFFER, model.colours, this.gl.STATIC_DRAW);
-        this.gl.vertexAttribPointer(this.colourAttribute, 4, this.gl.FLOAT, false, 0, 0);
+        this.gl.vertexAttribPointer(
+            this.brickPipeline.colourAttribute,
+            4,
+            this.gl.FLOAT,
+            false,
+            0,
+            0
+        );
         this.gl.drawArrays(this.gl.LINES, model.lineOffset, model.lines * 2);
         this.gl.drawArrays(this.gl.TRIANGLES, model.triangleOffset, model.triangles * 3);
+    }
+
+    drawTexturedQuad(texture: MapTexture) {
+        if (!this.vertexBuffer) {
+            return;
+        }
+        if (!this.texcoordBuffer) {
+            return;
+        }
+        if (!this.mapPipeline) {
+            return;
+        }
+        const aspect = texture.height / texture.width;
+        this.gl.useProgram(this.mapPipeline.program);
+        this.gl.activeTexture(this.gl.TEXTURE0);
+        this.gl.bindTexture(this.gl.TEXTURE_2D, texture.texture);
+        this.gl.uniform1i(this.mapPipeline.samplerUniform, 0);
+        if (this.mapPipeline.modelMatrixUniform) {
+            this.gl.uniformMatrix4fv(this.mapPipeline.modelMatrixUniform, false, this.modelMatrix);
+        }
+        if (this.mapPipeline.projectionMatrixUniform) {
+            this.gl.uniformMatrix4fv(
+                this.mapPipeline.projectionMatrixUniform,
+                false,
+                this.projectionMatrix
+            );
+        }
+        const vertices: number[] = [];
+        const texcoords: number[] = [];
+        vertices.push(-1.0);
+        vertices.push(-aspect);
+        vertices.push(0.0);
+        vertices.push(1.0);
+        texcoords.push(0.0);
+        texcoords.push(0.0);
+        vertices.push(1.0);
+        vertices.push(-aspect);
+        vertices.push(0.0);
+        vertices.push(1.0);
+        texcoords.push(1.0);
+        texcoords.push(0.0);
+        vertices.push(-1.0);
+        vertices.push(aspect);
+        vertices.push(0.0);
+        vertices.push(1.0);
+        texcoords.push(0.0);
+        texcoords.push(1.0);
+
+        vertices.push(-1.0);
+        vertices.push(aspect);
+        vertices.push(0.0);
+        vertices.push(1.0);
+        texcoords.push(0.0);
+        texcoords.push(1.0);
+        vertices.push(1.0);
+        vertices.push(-aspect);
+        vertices.push(0.0);
+        vertices.push(1.0);
+        texcoords.push(1.0);
+        texcoords.push(0.0);
+        vertices.push(1.0);
+        vertices.push(aspect);
+        vertices.push(0.0);
+        vertices.push(1.0);
+        texcoords.push(1.0);
+        texcoords.push(1.0);
+        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.vertexBuffer);
+        this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(vertices), this.gl.STATIC_DRAW);
+        this.gl.vertexAttribPointer(
+            this.mapPipeline.vertexAttribute,
+            4,
+            this.gl.FLOAT,
+            false,
+            0,
+            0
+        );
+        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.texcoordBuffer);
+        this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(texcoords), this.gl.STATIC_DRAW);
+        this.gl.vertexAttribPointer(
+            this.mapPipeline.texcoordAttribute,
+            2,
+            this.gl.FLOAT,
+            false,
+            0,
+            0
+        );
+        this.gl.drawArrays(this.gl.TRIANGLES, 0, 2 * 3);
+        this.gl.useProgram(this.brickPipeline.program);
     }
 
     resizeToFit() {
@@ -1043,45 +1259,100 @@ export class WebGL {
 
     setupPipeline() {
         this.resizeToFit();
-        const vertexShaderSource = vertex_shader;
-        const fragmentShaderSource = fragment_shader;
+        const vertexShaderSource = lego_vertex_shader;
+        const fragmentShaderSource = lego_fragment_shader;
 
         const vertexShader = this.createShader(this.gl.VERTEX_SHADER, vertexShaderSource);
         const fragmentShader = this.createShader(this.gl.FRAGMENT_SHADER, fragmentShaderSource);
 
         if (vertexShader && fragmentShader) {
-            this.pipeline = this.createProgram(vertexShader, fragmentShader);
-            if (this.pipeline) {
-                this.gl.useProgram(this.pipeline);
-                this.colourAttribute = this.gl.getAttribLocation(this.pipeline, 'a_colour');
-                this.vertexAttribute = this.gl.getAttribLocation(this.pipeline, 'a_vertex');
-                this.modelMatrixUniform = this.gl.getUniformLocation(this.pipeline, 'model_matrix');
-                this.projectionMatrixUniform = this.gl.getUniformLocation(
-                    this.pipeline,
+            const legoProgram = this.createProgram(vertexShader, fragmentShader);
+            if (legoProgram) {
+                this.gl.useProgram(legoProgram);
+                const colourAttribute = this.gl.getAttribLocation(legoProgram, 'a_colour');
+                const vertexAttribute = this.gl.getAttribLocation(legoProgram, 'a_vertex');
+                const modelMatrixUniform = this.gl.getUniformLocation(legoProgram, 'model_matrix');
+                const projectionMatrixUniform = this.gl.getUniformLocation(
+                    legoProgram,
                     'projection_matrix'
                 );
-                if (this.modelMatrixUniform) {
-                    this.gl.uniformMatrix4fv(this.modelMatrixUniform, false, this.modelMatrix);
+                this.brickPipeline = {
+                    program: legoProgram,
+                    vertexAttribute: vertexAttribute,
+                    colourAttribute: colourAttribute,
+                    texcoordAttribute: -1,
+                    projectionMatrixUniform: projectionMatrixUniform,
+                    modelMatrixUniform: modelMatrixUniform,
+                    samplerUniform: null
+                };
+                this.pipeline = this.brickPipeline;
+                if (modelMatrixUniform) {
+                    this.gl.uniformMatrix4fv(modelMatrixUniform, false, this.modelMatrix);
                 }
-                if (this.projectionMatrixUniform) {
-                    this.gl.uniformMatrix4fv(
-                        this.projectionMatrixUniform,
-                        false,
-                        this.projectionMatrix
-                    );
+                if (projectionMatrixUniform) {
+                    this.gl.uniformMatrix4fv(projectionMatrixUniform, false, this.projectionMatrix);
                 }
-                if (this.vertexAttribute >= 0) {
-                    this.gl.enableVertexAttribArray(this.vertexAttribute);
+                if (vertexAttribute >= 0) {
+                    this.gl.enableVertexAttribArray(vertexAttribute);
                 }
-                if (this.colourAttribute >= 0) {
-                    this.gl.enableVertexAttribArray(this.colourAttribute);
+                if (colourAttribute >= 0) {
+                    this.gl.enableVertexAttribArray(colourAttribute);
                 }
             }
         }
+
+        const mapVertexShaderSource = map_vertex_shader;
+        const mapFragmentShaderSource = map_fragment_shader;
+
+        const mapVertexShader = this.createShader(this.gl.VERTEX_SHADER, mapVertexShaderSource);
+        const mapFragmentShader = this.createShader(
+            this.gl.FRAGMENT_SHADER,
+            mapFragmentShaderSource
+        );
+        if (mapVertexShader && mapFragmentShader) {
+            const mapProgram = this.createProgram(mapVertexShader, mapFragmentShader);
+            if (mapProgram) {
+                this.gl.useProgram(mapProgram);
+                const texcoordAttribute = this.gl.getAttribLocation(mapProgram, 'a_texture');
+                const vertexAttribute = this.gl.getAttribLocation(mapProgram, 'a_vertex');
+                const modelMatrixUniform = this.gl.getUniformLocation(mapProgram, 'model_matrix');
+                const projectionMatrixUniform = this.gl.getUniformLocation(
+                    mapProgram,
+                    'projection_matrix'
+                );
+                const samplerUniform = this.gl.getUniformLocation(mapProgram, 'sampler');
+                this.mapPipeline = {
+                    program: mapProgram,
+                    colourAttribute: -1,
+                    vertexAttribute: vertexAttribute,
+                    texcoordAttribute: texcoordAttribute,
+                    projectionMatrixUniform: projectionMatrixUniform,
+                    modelMatrixUniform: modelMatrixUniform,
+                    samplerUniform: samplerUniform
+                };
+                if (modelMatrixUniform) {
+                    this.gl.uniformMatrix4fv(modelMatrixUniform, false, this.modelMatrix);
+                }
+                if (projectionMatrixUniform) {
+                    this.gl.uniformMatrix4fv(projectionMatrixUniform, false, this.projectionMatrix);
+                }
+                if (vertexAttribute >= 0) {
+                    this.gl.enableVertexAttribArray(vertexAttribute);
+                }
+                if (texcoordAttribute >= 0) {
+                    this.gl.enableVertexAttribArray(texcoordAttribute);
+                }
+            }
+        }
+
         this.vertexBuffer = this.gl.createBuffer();
         this.colourBuffer = this.gl.createBuffer();
+        this.texcoordBuffer = this.gl.createBuffer();
         this.gl.enable(this.gl.DEPTH_TEST);
         this.gl.depthFunc(this.gl.LESS);
+        if (this.brickPipeline) {
+            this.gl.useProgram(this.brickPipeline.program);
+        }
     }
 
     createShader(type: GLenum, source: string): WebGLShader | undefined {
@@ -1139,5 +1410,72 @@ export class WebGL {
         }
 
         return needResize;
+    }
+
+    loadImage(f: File) {
+        return new Promise<HTMLImageElement>((resolve, reject) => {
+            const image = new Image();
+            const url = URL.createObjectURL(f);
+            image.onload = () => {
+                URL.revokeObjectURL(url);
+                resolve(image);
+            };
+            image.onerror = (err) => {
+                URL.revokeObjectURL(url);
+                reject(err);
+            };
+            image.src = url;
+        });
+    }
+
+    async loadTexture(f: File): Promise<MapTexture | null> {
+        const image = await this.loadImage(f);
+        const texture = this.gl.createTexture();
+
+        if (!texture) {
+            return null;
+        }
+
+        const level = 0;
+        const internalFormat = this.gl.RGBA;
+        const srcFormat = this.gl.RGBA;
+        const srcType = this.gl.UNSIGNED_BYTE;
+
+        this.gl.bindTexture(this.gl.TEXTURE_2D, texture);
+        this.gl.pixelStorei(this.gl.UNPACK_FLIP_Y_WEBGL, true);
+        this.gl.texImage2D(this.gl.TEXTURE_2D, level, internalFormat, srcFormat, srcType, image);
+
+        // WebGL1 has different requirements for power of 2 images
+        // vs. non power of 2 images so check if the image is a
+        // power of 2 in both dimensions.
+        if (this.isPowerOf2(image.width) && this.isPowerOf2(image.height)) {
+            // Yes, it's a power of 2. Generate mips.
+            this.gl.generateMipmap(this.gl.TEXTURE_2D);
+        } else {
+            // No, it's not a power of 2. Turn off mips and set
+            // wrapping to clamp to edge
+            this.gl.texParameteri(
+                this.gl.TEXTURE_2D,
+                this.gl.TEXTURE_WRAP_S,
+                this.gl.CLAMP_TO_EDGE
+            );
+            this.gl.texParameteri(
+                this.gl.TEXTURE_2D,
+                this.gl.TEXTURE_WRAP_T,
+                this.gl.CLAMP_TO_EDGE
+            );
+            this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.LINEAR);
+            this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MAG_FILTER, this.gl.LINEAR);
+        }
+
+        return { width: image.naturalWidth, height: image.naturalHeight, texture: texture };
+    }
+
+    isPowerOf2(value: number) {
+        return (value & (value - 1)) === 0;
+    }
+
+    deleteTexture(t: WebGLTexture) {
+        this.gl.deleteTexture(t);
     }
 }

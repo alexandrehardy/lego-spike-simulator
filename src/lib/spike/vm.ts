@@ -1,10 +1,11 @@
 import * as Blockly from 'blockly/core';
 import { writable } from 'svelte/store';
-import { font } from '$lib/spike/font';
+import { mbitfont } from '$lib/spike/font';
 import { SoundLibrary } from '$lib/blockly/audio';
 
 export type PortType = 'A' | 'B' | 'C' | 'D' | 'E' | 'F';
 export const allPorts: PortType[] = ['A', 'B', 'C', 'D', 'E', 'F'];
+export const fontEmbedsSpace = false;
 
 export interface CompiledCode {
     events: Map<string, EventStatement>;
@@ -184,7 +185,7 @@ export class ActionStatement extends Statement {
             thread.vm.hub.setScreen('0000000000000000000000000');
         } else if (op == 'lightDisplayText') {
             const textValue = this.arguments[0].evaluate(thread);
-            const text = textValue.getString().toUpperCase();
+            const text = textValue.getString();
             let row0 = '';
             let row1 = '';
             let row2 = '';
@@ -192,11 +193,11 @@ export class ActionStatement extends Statement {
             let row4 = '';
             thread.vm.hub.setScreen('0000000000000000000000000');
             for (let i = 0; i < text.length; i++) {
-                let char = font[text.charAt(i)];
+                let char = mbitfont[text.charAt(i)];
                 if (!char) {
                     char = '0000000000000000000000000';
                 }
-                if (i != 0) {
+                if (i != 0 && !fontEmbedsSpace) {
                     // Add a space between characters
                     row0 += '0';
                     row1 += '0';

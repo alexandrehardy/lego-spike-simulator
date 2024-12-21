@@ -92,7 +92,7 @@
     size="xl"
     bind:open={modalOpen}
 >
-    <div class="flex flex-row gap-2 h-full">
+    <div class="flex flex-row gap-2 h-[80dvh]">
         <div class="flex-1 flex flex-row gap-4 mb-4">
             <HubWidget
                 bind:selectedPort={port}

@@ -4,7 +4,9 @@
         type Model,
         componentStore,
         resolveFromZip,
-        setRobotFromFile
+        setRobotFromFile,
+        setRobotFromContent,
+        setStudioMode
     } from '$lib/ldraw/components';
     import { type CompiledModel } from '$lib/ldraw/gl';
     import {
@@ -23,10 +25,12 @@
     } from '$lib/spike/vm';
     import HubWidget from '$components/HubWidget.svelte';
     import RobotPreview from '$components/RobotPreview.svelte';
+    import JSZip from 'jszip';
 
     export let runSimulation: boolean = false;
     export let workspace: Blockly.WorkspaceSvg | undefined;
     export let connectorOpen = false;
+    export let sceneOpen = false;
     export let hub = new Hub();
 
     let numberOfLoads = 0;
@@ -61,7 +65,7 @@
                         hub.ports[port] = new Port('distance');
                         hub.ports[port].ultra = new UltraSoundSensor(subpart.id);
                     } else if (type === 'force') {
-                        hub.ports[port] = new Port('distance');
+                        hub.ports[port] = new Port('force');
                         hub.ports[port].force = new ForceSensor(subpart.id);
                     }
                 }
@@ -78,9 +82,24 @@
                 if (fileElement.files.length > 0) {
                     const first = fileElement.files[0];
                     numberOfLoads++;
-                    const robot = await setRobotFromFile(first);
-                    hub.reload();
-                    connectPorts(hub, robot);
+                    if (first.name.toLowerCase().endsWith('.io')) {
+                        const zip = new JSZip();
+                        const zipFile = await zip.loadAsync(first);
+                        const file = zipFile.file('model2.ldr');
+                        if (file) {
+                            const content = await file.async('string');
+                            try {
+                                setStudioMode(true);
+                                setRobotFromContent(content);
+                            } finally {
+                                setStudioMode(false);
+                            }
+                        }
+                    } else {
+                        const robot = await setRobotFromFile(first);
+                        hub.reload();
+                        connectPorts(hub, robot);
+                    }
                 }
             }
         }
@@ -176,7 +195,7 @@
             type="file"
             id="load_robot"
             class="hidden"
-            accept=".ldr,.mpd"
+            accept=".ldr,.mpd,.io"
             on:change={loadRobot}
         />
         <input type="file" id="load_library" class="hidden" accept=".zip" on:change={loadLibrary} />
@@ -228,7 +247,7 @@
                 class="flex-1 w-full h-full"
                 robotModel={$componentStore.robotModel}
                 bind:compiledRobot
-                enabled={!connectorOpen}
+                enabled={!connectorOpen && !sceneOpen}
             />
         </div>
     </div>

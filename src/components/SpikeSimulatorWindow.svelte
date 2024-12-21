@@ -5,6 +5,7 @@
     import SpikeSimulator from '$components/SpikeSimulator.svelte';
     import SaveSimulation from '$components/SaveSimulation.svelte';
     import PortConnector from '$components/PortConnector.svelte';
+    import LoadScene from '$components/LoadScene.svelte';
     import { type LDrawStore, componentStore } from '$lib/ldraw/components';
     import { Hub, codeStore } from '$lib/spike/vm';
     import {
@@ -21,6 +22,7 @@
 
     let connectorOpen = false;
     let saveOpen = false;
+    let sceneOpen = false;
     let robotButtonColour: 'light' | 'red' | 'green' = 'light';
     let libraryClass = '!p-2';
     let runSimulation = false;
@@ -85,11 +87,16 @@
         connectorOpen = true;
     }
 
+    function loadScene() {
+        sceneOpen = true;
+    }
+
     $: updateButtons($componentStore);
 </script>
 
 <PortConnector bind:modalOpen={connectorOpen} bind:hub />
 <SaveSimulation bind:modalOpen={saveOpen} bind:hub />
+<LoadScene bind:modalOpen={sceneOpen} />
 {#if modalOpen}
     <div class="flex-1 h-full">
         <div class="relative flex-1 h-full flex flex-col overflow-hidden">
@@ -103,7 +110,7 @@
                 <Button color="light" class="!p-2" on:click={connectPorts}>
                     <HubIcon />
                 </Button>
-                <Button color="light" class="!p-2">
+                <Button color="light" class="!p-2" on:click={loadScene}>
                     <img alt="scene" width="32" height="32" src="icons/Scene.svg" />
                 </Button>
                 <Button color="light" class={libraryClass} on:click={askForLibrary}>
@@ -132,7 +139,13 @@
                 {/if}
             </div>
             <div class="flex-1 w-full overflow-hidden">
-                <SpikeSimulator bind:runSimulation {workspace} bind:connectorOpen bind:hub />
+                <SpikeSimulator
+                    bind:runSimulation
+                    {workspace}
+                    bind:connectorOpen
+                    bind:hub
+                    bind:sceneOpen
+                />
             </div>
         </div>
     </div>
