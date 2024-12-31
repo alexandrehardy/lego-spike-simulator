@@ -1,15 +1,120 @@
 <script lang="ts">
-    import { onDestroy, onMount } from 'svelte';
-    import { Button, Modal } from 'flowbite-svelte';
+    import { Modal } from 'flowbite-svelte';
     import FileSaver from 'file-saver';
-    import { WebGL, type CompiledModel } from '$lib/ldraw/gl';
-    import { loadModel } from '$lib/ldraw/components';
-    import { sceneStore } from '$lib/spike/scene';
+    import { loadModel, setStudioMode } from '$lib/ldraw/components';
+    import { sceneStore, type SceneStore } from '$lib/spike/scene';
+    import { TrashBinOutline } from 'flowbite-svelte-icons';
     import ScenePreview from '$components/ScenePreview.svelte';
+    import Menu from '$components/Menu.svelte';
+    import { type MenuAction, type MenuEntry } from '$components/Menu.svelte';
+    import JSZip from 'jszip';
 
     export let modalOpen = false;
     let numberOfLoads = 0;
     let mapFile: File | undefined = $sceneStore.map;
+    let camera: 'top' | 'left' | 'right' | 'front' | 'back' | 'angle' = 'angle';
+    let rotate = false;
+    let mapWidth = 0;
+    let mapHeight = 0;
+
+    let menu = prepareMenu(rotate, camera, $sceneStore);
+    $: menu = prepareMenu(rotate, camera, $sceneStore);
+
+    function toggleRotate() {
+        rotate = !rotate;
+    }
+
+    function setCamera(direction: 'top' | 'left' | 'right' | 'front' | 'back' | 'angle') {
+        camera = direction;
+    }
+
+    function prepareMenu(rotate: boolean, camera: string, scene: SceneStore) {
+        let menu: MenuEntry[] = [];
+        menu.push({
+            name: 'Load',
+            actions: [
+                { name: 'Load mat', action: () => loadBackgroundMap() },
+                { name: 'Load full scene', action: () => loadScene() },
+                { name: 'Load object', action: () => loadObject() }
+            ]
+        });
+        menu.push({
+            name: 'Camera',
+            actions: [
+                {
+                    name: 'Angle',
+                    action: () => {
+                        setCamera('angle');
+                    },
+                    radio: camera == 'angle'
+                },
+                {
+                    name: 'Top',
+                    action: () => {
+                        setCamera('top');
+                    },
+                    radio: camera == 'top'
+                },
+                {
+                    name: 'Left',
+                    action: () => {
+                        setCamera('left');
+                    },
+                    radio: camera == 'left'
+                },
+                {
+                    name: 'Right',
+                    action: () => {
+                        setCamera('right');
+                    },
+                    radio: camera == 'right'
+                },
+                {
+                    name: 'Front',
+                    action: () => {
+                        setCamera('front');
+                    },
+                    radio: camera == 'front'
+                },
+                {
+                    name: 'Back',
+                    action: () => {
+                        setCamera('back');
+                    },
+                    radio: camera == 'back'
+                },
+                {
+                    name: 'Rotate',
+                    action: () => {
+                        toggleRotate();
+                    },
+                    checkbox: rotate
+                }
+            ]
+        });
+
+        let select: MenuAction[] = [];
+        if (scene.map) {
+            select.push({ name: 'Mat', action: () => {}, radio: true });
+        }
+        select.push({ name: 'Robot', action: () => {}, radio: false });
+        menu.push({
+            name: 'Select',
+            actions: select
+        });
+        for (const obj of scene.objects) {
+            select.push({ name: obj.name, action: () => {}, radio: false });
+        }
+        let remove: MenuAction[] = [];
+        for (const obj of scene.objects) {
+            remove.push({ name: obj.name, action: () => {}, icon: TrashBinOutline });
+        }
+        menu.push({
+            name: 'Remove',
+            actions: remove
+        });
+        return menu;
+    }
 
     function loadBackgroundMap() {
         const element = document.getElementById('load_map_image');
@@ -54,20 +159,48 @@
             if (fileElement.files) {
                 if (fileElement.files.length > 0) {
                     const first = fileElement.files[0];
-                    const model = loadModel(first.name, await first.text());
-                    sceneStore.update((old) => {
-                        return {
-                            ...old,
-                            objects: old.objects.concat([
-                                {
-                                    bricks: model,
-                                    anchored: true,
-                                    position: { x: 0, y: 0, z: 0 },
-                                    name: first.name
-                                }
-                            ])
-                        };
-                    });
+                    if (first.name.toLowerCase().endsWith('.io')) {
+                        const zip = new JSZip();
+                        const zipFile = await zip.loadAsync(first);
+                        const file = zipFile.file('model2.ldr');
+                        if (file) {
+                            const content = await file.async('string');
+                            try {
+                                setStudioMode(true);
+                                const model = loadModel(first.name, content);
+                                sceneStore.update((old) => {
+                                    return {
+                                        ...old,
+                                        objects: old.objects.concat([
+                                            {
+                                                bricks: model,
+                                                anchored: true,
+                                                position: { x: 0, y: 0, z: 0 },
+                                                name: first.name
+                                            }
+                                        ])
+                                    };
+                                });
+                            } finally {
+                                setStudioMode(false);
+                            }
+                        }
+                    } else {
+                        const model = loadModel(first.name, await first.text());
+                        sceneStore.update((old) => {
+                            return {
+                                ...old,
+                                objects: old.objects.concat([
+                                    {
+                                        bricks: model,
+                                        anchored: true,
+                                        position: { x: 0, y: 0, z: 0 },
+                                        name: first.name
+                                    }
+                                ])
+                            };
+                        });
+                    }
                     numberOfLoads++;
                 }
             }
@@ -87,7 +220,7 @@
         type="file"
         id="load_object_file"
         class="hidden"
-        accept=".ldr,.mpd"
+        accept=".ldr,.mpd,.io"
         on:change={loadObjectFromFile}
     />
 {/key}
@@ -98,33 +231,18 @@
     size="xl"
     bind:open={modalOpen}
 >
+    <Menu {menu} />
     <div class="flex flex-row h-[80dvh]">
-        <div class="flex-1 flex flex-col gap-2 items-center">
-            <Button color="light" class="!p-2 w-96" on:click={loadBackgroundMap}>
-                <div class="flex flex-row gap-2 items-center">
-                    <img alt="scene" width="32" height="32" src="icons/Scene.svg" />
-                    <span>Load background</span>
-                </div>
-            </Button>
-            <Button color="light" class="!p-2 w-96" on:click={loadScene}>
-                <div class="flex flex-row gap-2 items-center">
-                    <img alt="scene" width="32" height="32" src="icons/Scene.svg" />
-                    <span>Load full scene</span>
-                </div>
-            </Button>
-            <Button color="light" class="!p-2 w-96" on:click={loadObject}>
-                <div class="flex flex-row gap-2 items-center">
-                    <img alt="scene" width="32" height="32" src="icons/Scene.svg" />
-                    <span>Load object</span>
-                </div>
-            </Button>
-        </div>
         <div class="flex-1 h-full">
             <ScenePreview
                 id="scene_preview"
-                robotModel={undefined}
+                scene={$sceneStore}
                 class="h-full w-full"
                 map={mapFile}
+                {rotate}
+                {camera}
+                bind:mapWidth
+                bind:mapHeight
             />
         </div>
     </div>
