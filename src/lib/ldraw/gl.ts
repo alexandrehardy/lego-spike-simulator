@@ -1045,16 +1045,18 @@ export class WebGL {
         this.compileColours = [];
         this.compileVertices = [];
 
-        this.compileMatrix = m4.identity();
+        // LDRAW axes don't match GL axes.
+        // Rotate by PI to get them the same
+        this.compileMatrix = m4.xRotation(Math.PI);
         this.compileSubModelLines(model, maxDepth, selected);
 
         const triangleOffset = this.compileVertices.length;
-        this.compileMatrix = m4.identity();
+        this.compileMatrix = m4.xRotation(Math.PI);
         if (!wireframe) {
             this.compileSubModelTriangles(model, maxDepth, selected);
         }
 
-        this.compileMatrix = m4.identity();
+        this.compileMatrix = m4.xRotation(Math.PI);
         if (!wireframe) {
             this.compileSubModelQuads(model, maxDepth, selected);
         }
@@ -1190,39 +1192,39 @@ export class WebGL {
         const vertices: number[] = [];
         const texcoords: number[] = [];
         vertices.push(-1.0);
-        vertices.push(-aspect);
         vertices.push(0.0);
+        vertices.push(aspect);
         vertices.push(1.0);
         texcoords.push(0.0);
         texcoords.push(0.0);
         vertices.push(1.0);
-        vertices.push(-aspect);
         vertices.push(0.0);
+        vertices.push(aspect);
         vertices.push(1.0);
         texcoords.push(1.0);
         texcoords.push(0.0);
         vertices.push(-1.0);
-        vertices.push(aspect);
         vertices.push(0.0);
+        vertices.push(-aspect);
         vertices.push(1.0);
         texcoords.push(0.0);
         texcoords.push(1.0);
 
         vertices.push(-1.0);
-        vertices.push(aspect);
         vertices.push(0.0);
-        vertices.push(1.0);
-        texcoords.push(0.0);
-        texcoords.push(1.0);
-        vertices.push(1.0);
         vertices.push(-aspect);
+        vertices.push(1.0);
+        texcoords.push(0.0);
+        texcoords.push(1.0);
+        vertices.push(1.0);
         vertices.push(0.0);
+        vertices.push(aspect);
         vertices.push(1.0);
         texcoords.push(1.0);
         texcoords.push(0.0);
         vertices.push(1.0);
-        vertices.push(aspect);
         vertices.push(0.0);
+        vertices.push(-aspect);
         vertices.push(1.0);
         texcoords.push(1.0);
         texcoords.push(1.0);
@@ -1247,7 +1249,9 @@ export class WebGL {
             0
         );
         this.gl.drawArrays(this.gl.TRIANGLES, 0, 2 * 3);
-        this.gl.useProgram(this.brickPipeline.program);
+        if (this.brickPipeline) {
+            this.gl.useProgram(this.brickPipeline.program);
+        }
     }
 
     resizeToFit() {

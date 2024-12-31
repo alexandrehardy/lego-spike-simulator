@@ -91,6 +91,7 @@
                             try {
                                 setStudioMode(true);
                                 setRobotFromContent(content);
+                                hub.reload();
                             } finally {
                                 setStudioMode(false);
                             }
