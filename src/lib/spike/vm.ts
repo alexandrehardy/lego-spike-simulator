@@ -6,6 +6,8 @@ import { SoundLibrary } from '$lib/blockly/audio';
 export type PortType = 'A' | 'B' | 'C' | 'D' | 'E' | 'F';
 export const allPorts: PortType[] = ['A', 'B', 'C', 'D', 'E', 'F'];
 export const fontEmbedsSpace = false;
+let stepSleep = 1000;
+let timeFactor = 1.0;
 
 export interface CompiledCode {
     events: Map<string, EventStatement>;
@@ -19,6 +21,10 @@ export const codeStore = writable<CompiledCode>({
 
 function sleep(ms: number): Promise<void> {
     return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function vmSleep(ms: number): Promise<void> {
+    return sleep(Math.round(ms * timeFactor));
 }
 
 export class Node {
@@ -43,7 +49,7 @@ export class Statement extends Node {
         }
         try {
             this.highlight(thread);
-            await sleep(1000);
+            await sleep(stepSleep);
             await this._execute(thread);
         } finally {
             this.removeHighlight(thread);
@@ -178,7 +184,7 @@ export class ActionStatement extends Statement {
             thread.vm.hub.setScreen(screen.getString());
             const delay = duration.getNumber();
             if (delay > 0) {
-                await thread.cancellable(sleep(delay * 1000));
+                await thread.cancellable(vmSleep(delay * 1000));
             }
             thread.vm.hub.setScreen('0000000000000000000000000');
         } else if (op == 'lightDisplayOff') {
@@ -230,7 +236,7 @@ export class ActionStatement extends Statement {
                     row4.substring(offset, offset + 5);
                 offset++;
                 thread.vm.hub.setScreen(screen);
-                await thread.cancellable(sleep(200));
+                await thread.cancellable(vmSleep(200));
             }
         } else if (op == 'lightDisplayRotate') {
             return super._execute(thread);
@@ -303,7 +309,7 @@ export class ActionStatement extends Statement {
             const freq = Math.pow(2.0, (note - 69.0) / 12.0) * 440;
             thread.vm.startNote(freq, duration);
             try {
-                await thread.cancellable(sleep(duration * 1000));
+                await thread.cancellable(vmSleep(duration * 1000));
             } finally {
                 thread.vm.stopNote();
             }
@@ -769,7 +775,7 @@ export class ControlStatement extends Statement {
             const duration = this.condition.evaluate(thread);
             const delay = duration.getNumber();
             if (delay > 0) {
-                await thread.cancellable(sleep(delay * 1000));
+                await thread.cancellable(vmSleep(delay * 1000));
             }
         } else if (this.opcode == 'wait4') {
             if (!this.condition) {
