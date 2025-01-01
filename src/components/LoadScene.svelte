@@ -12,19 +12,26 @@
     export let modalOpen = false;
     let numberOfLoads = 0;
     let mapFile: File | undefined = $sceneStore.map;
-    let camera: 'top' | 'left' | 'right' | 'front' | 'back' | 'angle' = 'angle';
+    let camera: 'top' | 'left' | 'right' | 'front' | 'back' = 'front';
+    let tilt = true;
     let rotate = false;
     let mapWidth = 0;
     let mapHeight = 0;
+    let select: string | undefined = undefined;
+    let selectedText: string | undefined;
 
-    let menu = prepareMenu(rotate, camera, $sceneStore);
-    $: menu = prepareMenu(rotate, camera, $sceneStore);
+    let menu = prepareMenu(rotate, tilt, camera, select, $sceneStore);
+    $: menu = prepareMenu(rotate, tilt, camera, select, $sceneStore);
 
     function toggleRotate() {
         rotate = !rotate;
     }
 
-    function setCamera(direction: 'top' | 'left' | 'right' | 'front' | 'back' | 'angle') {
+    function toggleTilt() {
+        tilt = !tilt;
+    }
+
+    function setCamera(direction: 'top' | 'left' | 'right' | 'front' | 'back') {
         camera = direction;
     }
 
@@ -39,7 +46,28 @@
         });
     }
 
-    function prepareMenu(rotate: boolean, camera: string, scene: SceneStore) {
+    function setSelected(name: string) {
+        select = name;
+        if (name.startsWith('#')) {
+            if (name == '#map') {
+                selectedText = 'Mat';
+            } else if (name == '#robot') {
+                selectedText = 'Spike robot';
+            } else {
+                selectedText = undefined;
+            }
+        } else {
+            selectedText = `Object: ${name}`;
+        }
+    }
+
+    function prepareMenu(
+        rotate: boolean,
+        tilt: boolean,
+        camera: string,
+        select: string | undefined,
+        scene: SceneStore
+    ) {
         let menu: MenuEntry[] = [];
         menu.push({
             name: 'Load',
@@ -52,13 +80,6 @@
         menu.push({
             name: 'Camera',
             actions: [
-                {
-                    name: 'Angle',
-                    action: () => {
-                        setCamera('angle');
-                    },
-                    radio: camera == 'angle'
-                },
                 {
                     name: 'Top',
                     action: () => {
@@ -100,22 +121,47 @@
                         toggleRotate();
                     },
                     checkbox: rotate
+                },
+                {
+                    name: 'Tilt',
+                    action: () => {
+                        toggleTilt();
+                    },
+                    checkbox: tilt
                 }
             ]
         });
 
-        let select: MenuAction[] = [];
+        let selectMenu: MenuAction[] = [];
         if (scene.map) {
-            select.push({ name: 'Mat', action: () => {}, radio: true });
+            selectMenu.push({
+                name: 'Mat',
+                action: () => {
+                    setSelected('#map');
+                },
+                radio: select == '#map'
+            });
         }
-        select.push({ name: 'Robot', action: () => {}, radio: false });
-        menu.push({
-            name: 'Select',
-            actions: select
+        selectMenu.push({
+            name: 'Robot',
+            action: () => {
+                setSelected('#robot');
+            },
+            radio: select == '#robot'
         });
         for (const obj of scene.objects) {
-            select.push({ name: obj.name, action: () => {}, radio: false });
+            selectMenu.push({
+                name: obj.name,
+                action: () => {
+                    setSelected(obj.name);
+                },
+                radio: select == obj.name
+            });
         }
+        menu.push({
+            name: 'Select',
+            actions: selectMenu
+        });
 
         let remove: MenuAction[] = [];
         for (const obj of scene.objects) {
@@ -177,6 +223,7 @@
                             map: mapFile
                         };
                     });
+                    setSelected('#map');
                     numberOfLoads++;
                 }
             }
@@ -212,6 +259,7 @@
                                         ])
                                     };
                                 });
+                                setSelected(first.name);
                             } finally {
                                 setStudioMode(false);
                             }
@@ -231,6 +279,7 @@
                                 ])
                             };
                         });
+                        setSelected(first.name);
                     }
                     numberOfLoads++;
                 }
@@ -266,6 +315,9 @@
         <Menu {menu} class="absolute z-50" />
         <div class="flex flex-row flex-1 relative">
             <div class="flex-1 h-full">
+                {#if selectedText}
+                    <div class="absolute right-0 top-0 text-white mx-2 my-1">{selectedText}</div>
+                {/if}
                 <ScenePreview
                     id="scene_preview"
                     scene={$sceneStore}
@@ -273,6 +325,8 @@
                     map={mapFile}
                     {rotate}
                     {camera}
+                    {tilt}
+                    {select}
                     bind:mapWidth
                     bind:mapHeight
                 />

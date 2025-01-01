@@ -6,8 +6,9 @@
     export let id: string;
     export let scene: SceneStore;
     export let enabled = true;
-    export let select: number | undefined = undefined;
-    export let camera: 'top' | 'left' | 'right' | 'front' | 'back' | 'angle';
+    export let select: string | undefined = undefined;
+    export let camera: 'top' | 'left' | 'right' | 'front' | 'back';
+    export let tilt = true;
     export let rotate = false;
     export let mapWidth = 0;
     export let mapHeight = 0;
@@ -49,9 +50,10 @@
         gl.clearColour(0.0, 0.0, 0.0);
         gl.clear();
         gl.translate(0, 0, -20);
-        if (camera == 'angle') {
+        if (tilt) {
             gl.rotate(45, 1.0, 0.0, 0.0);
-        } else if (camera == 'top') {
+        }
+        if (camera == 'top') {
             gl.rotate(90, 1.0, 0.0, 0.0);
         } else if (camera == 'left') {
             gl.rotate(90, 0.0, 1.0, 0.0);
@@ -66,20 +68,39 @@
             gl.rotate(angle, 0.0, 1.0, 0.0);
         }
         if (mapTexture) {
+            if (select === '#map') {
+                gl.setBrightness(1.0);
+            } else {
+                gl.setBrightness(0.3);
+            }
             gl.pushMatrix();
             gl.scale(10);
             gl.drawTexturedQuad(mapTexture);
             gl.popMatrix();
+            gl.setBrightness(1.0);
         }
         gl.translate(0, 0, 0);
         // The mapTexture is -1 to 1 (x)
         // then scaled to -10 to 10 (x)
         // ldraw units are 0.4mm
         // The map width is available, so scale accordingly
-        gl.scale((1.0 / mapWidth) * 20);
+        if (mapWidth > 1.0) {
+            gl.scale((1.0 / mapWidth) * 20);
+        } else {
+            gl.scale((1.0 / 2360.0) * 20);
+        }
         for (const obj of scene.objects) {
             if (obj.compiled) {
+                if (select === obj.name) {
+                    gl.setBrightness(1.0);
+                } else {
+                    gl.setBrightness(0.3);
+                }
+                gl.pushMatrix();
+                gl.translate(0, -obj.compiled.bbox.min.y, 0);
                 gl.drawCompiled(obj.compiled);
+                gl.popMatrix();
+                gl.setBrightness(1.0);
             }
         }
         gl.flush();
