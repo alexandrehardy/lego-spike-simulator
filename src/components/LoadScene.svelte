@@ -3,7 +3,7 @@
     import FileSaver from 'file-saver';
     import { loadModel, setStudioMode } from '$lib/ldraw/components';
     import { sceneStore, type SceneStore } from '$lib/spike/scene';
-    import { TrashBinOutline } from 'flowbite-svelte-icons';
+    import { EditOutline, TrashBinOutline } from 'flowbite-svelte-icons';
     import ScenePreview from '$components/ScenePreview.svelte';
     import Menu from '$components/Menu.svelte';
     import { type MenuAction, type MenuEntry } from '$components/Menu.svelte';
@@ -26,6 +26,17 @@
 
     function setCamera(direction: 'top' | 'left' | 'right' | 'front' | 'back' | 'angle') {
         camera = direction;
+    }
+
+    function removeObject(name: string) {
+        console.log(`REMOVE ${name}`);
+        sceneStore.update((old) => {
+            const objects = old.objects.filter((x) => x.name !== name);
+            return {
+                ...old,
+                objects: objects
+            };
+        });
     }
 
     function prepareMenu(rotate: boolean, camera: string, scene: SceneStore) {
@@ -105,13 +116,33 @@
         for (const obj of scene.objects) {
             select.push({ name: obj.name, action: () => {}, radio: false });
         }
+
         let remove: MenuAction[] = [];
         for (const obj of scene.objects) {
-            remove.push({ name: obj.name, action: () => {}, icon: TrashBinOutline });
+            remove.push({
+                name: obj.name,
+                action: () => {
+                    removeObject(obj.name);
+                },
+                icon: TrashBinOutline
+            });
         }
         menu.push({
             name: 'Remove',
             actions: remove
+        });
+
+        let rename: MenuAction[] = [];
+        for (const obj of scene.objects) {
+            rename.push({
+                name: obj.name,
+                action: () => {},
+                icon: EditOutline
+            });
+        }
+        menu.push({
+            name: 'Rename',
+            actions: rename
         });
         return menu;
     }
