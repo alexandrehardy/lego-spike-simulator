@@ -16,6 +16,11 @@ import {
 
 import * as m4 from '$lib/ldraw/m4';
 
+export interface BBox {
+    min: Vertex;
+    max: Vertex;
+}
+
 export interface CompiledModel {
     vertices: Float32Array;
     colours: Float32Array;
@@ -23,6 +28,7 @@ export interface CompiledModel {
     lines: number;
     triangleOffset: number;
     triangles: number;
+    bbox: BBox;
 }
 
 export interface CompileOptions {
@@ -50,6 +56,7 @@ export interface PipeLine {
     projectionMatrixUniform: WebGLUniformLocation | null;
     modelMatrixUniform: WebGLUniformLocation | null;
     samplerUniform: WebGLUniformLocation | null;
+    brightnessUniform: WebGLUniformLocation | null;
 }
 
 export interface MapTexture {
@@ -76,6 +83,7 @@ export class WebGL {
     compileMatrix: m4.Matrix4;
     compiledLines: number;
     compiledTriangles: number;
+    brightness: number;
 
     static create(canvas: HTMLCanvasElement): WebGL | undefined {
         const gl = canvas.getContext('webgl');
@@ -107,6 +115,7 @@ export class WebGL {
         this.compileVertices = [];
         this.compiledLines = 0;
         this.compiledTriangles = 0;
+        this.brightness = 1.0;
         this.setupPipeline();
     }
 
@@ -248,6 +257,16 @@ export class WebGL {
 
     flush() {
         this.gl.flush();
+    }
+
+    setBrightness(brightness: number) {
+        if (brightness < 0.0) {
+            brightness = 0.0;
+        }
+        if (brightness > 1.0) {
+            brightness = 1.0;
+        }
+        this.brightness = brightness;
     }
 
     getColour(colour: BrickColour, edge: boolean): Colour {
@@ -1116,13 +1135,33 @@ export class WebGL {
             }
         }
 
+        // compute a bounding box
+        let minx = this.compileVertices[0];
+        let maxx = this.compileVertices[0];
+        let miny = this.compileVertices[1];
+        let maxy = this.compileVertices[1];
+        let minz = this.compileVertices[2];
+        let maxz = this.compileVertices[2];
+        for (let i = 0; i < this.compileVertices.length; i += 4) {
+            const x = this.compileVertices[i + 0];
+            const y = this.compileVertices[i + 1];
+            const z = this.compileVertices[i + 2];
+            if (x < minx) minx = x;
+            if (y < miny) miny = y;
+            if (z < minz) minz = z;
+            if (x > maxx) maxx = x;
+            if (y > maxy) maxy = y;
+            if (z > maxz) maxz = z;
+        }
+
         const compiledModel = {
             vertices: new Float32Array(this.compileVertices),
             colours: new Float32Array(this.compileColours),
             lineOffset: 0,
             lines: this.compiledLines,
             triangleOffset: triangleOffset / 4,
-            triangles: this.compiledTriangles
+            triangles: this.compiledTriangles,
+            bbox: { min: { x: minx, y: miny, z: minz }, max: { x: maxx, y: maxy, z: maxz } }
         };
         this.compileMatrix = m4.identity();
         this.compileColours = [];
@@ -1144,6 +1183,7 @@ export class WebGL {
             return;
         }
         this.gl.useProgram(this.brickPipeline.program);
+        this.gl.uniform1f(this.brickPipeline.brightnessUniform, this.brightness);
         this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.vertexBuffer);
         this.gl.bufferData(this.gl.ARRAY_BUFFER, model.vertices, this.gl.STATIC_DRAW);
         this.gl.vertexAttribPointer(
@@ -1183,6 +1223,7 @@ export class WebGL {
         this.gl.activeTexture(this.gl.TEXTURE0);
         this.gl.bindTexture(this.gl.TEXTURE_2D, texture.texture);
         this.gl.uniform1i(this.mapPipeline.samplerUniform, 0);
+        this.gl.uniform1f(this.mapPipeline.brightnessUniform, this.brightness);
         if (this.mapPipeline.modelMatrixUniform) {
             this.gl.uniformMatrix4fv(this.mapPipeline.modelMatrixUniform, false, this.modelMatrix);
         }
@@ -1279,6 +1320,7 @@ export class WebGL {
                 this.gl.useProgram(legoProgram);
                 const colourAttribute = this.gl.getAttribLocation(legoProgram, 'a_colour');
                 const vertexAttribute = this.gl.getAttribLocation(legoProgram, 'a_vertex');
+                const brightnessUniform = this.gl.getUniformLocation(legoProgram, 'brightness');
                 const modelMatrixUniform = this.gl.getUniformLocation(legoProgram, 'model_matrix');
                 const projectionMatrixUniform = this.gl.getUniformLocation(
                     legoProgram,
@@ -1291,7 +1333,8 @@ export class WebGL {
                     texcoordAttribute: -1,
                     projectionMatrixUniform: projectionMatrixUniform,
                     modelMatrixUniform: modelMatrixUniform,
-                    samplerUniform: null
+                    samplerUniform: null,
+                    brightnessUniform: brightnessUniform
                 };
                 this.pipeline = this.brickPipeline;
                 if (modelMatrixUniform) {
@@ -1299,6 +1342,9 @@ export class WebGL {
                 }
                 if (projectionMatrixUniform) {
                     this.gl.uniformMatrix4fv(projectionMatrixUniform, false, this.projectionMatrix);
+                }
+                if (brightnessUniform) {
+                    this.gl.uniform1f(brightnessUniform, 1.0);
                 }
                 if (vertexAttribute >= 0) {
                     this.gl.enableVertexAttribArray(vertexAttribute);
@@ -1323,6 +1369,7 @@ export class WebGL {
                 this.gl.useProgram(mapProgram);
                 const texcoordAttribute = this.gl.getAttribLocation(mapProgram, 'a_texture');
                 const vertexAttribute = this.gl.getAttribLocation(mapProgram, 'a_vertex');
+                const brightnessUniform = this.gl.getUniformLocation(mapProgram, 'brightness');
                 const modelMatrixUniform = this.gl.getUniformLocation(mapProgram, 'model_matrix');
                 const projectionMatrixUniform = this.gl.getUniformLocation(
                     mapProgram,
@@ -1336,13 +1383,17 @@ export class WebGL {
                     texcoordAttribute: texcoordAttribute,
                     projectionMatrixUniform: projectionMatrixUniform,
                     modelMatrixUniform: modelMatrixUniform,
-                    samplerUniform: samplerUniform
+                    samplerUniform: samplerUniform,
+                    brightnessUniform: brightnessUniform
                 };
                 if (modelMatrixUniform) {
                     this.gl.uniformMatrix4fv(modelMatrixUniform, false, this.modelMatrix);
                 }
                 if (projectionMatrixUniform) {
                     this.gl.uniformMatrix4fv(projectionMatrixUniform, false, this.projectionMatrix);
+                }
+                if (brightnessUniform) {
+                    this.gl.uniform1f(brightnessUniform, 1.0);
                 }
                 if (vertexAttribute >= 0) {
                     this.gl.enableVertexAttribArray(vertexAttribute);

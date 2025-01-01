@@ -4,6 +4,7 @@ export const lego_vertex_shader = `
       attribute vec4 a_colour;
       uniform mat4 model_matrix;
       uniform mat4 projection_matrix;
+      uniform float brightness;
       varying vec4 v_colour;
      
       // all shaders have a main function
@@ -11,7 +12,7 @@ export const lego_vertex_shader = `
      
         // gl_Position is a special variable a vertex shader
         // is responsible for setting
-        v_colour = a_colour;
+        v_colour = vec4(a_colour.rgb * brightness, a_colour.a);
         gl_Position = projection_matrix * model_matrix * a_vertex;
       }
       `;
@@ -55,10 +56,12 @@ export const map_fragment_shader = `
       precision mediump float;
       varying highp vec2 v_texture;
       uniform sampler2D sampler;
+      uniform float brightness;
      
       void main() {
         // gl_FragColor is a special variable a fragment shader
         // is responsible for setting
-        gl_FragColor = texture2D(sampler, v_texture);
+        vec4 colour = texture2D(sampler, v_texture);
+        gl_FragColor = vec4(colour.rgb * brightness, colour.a);
       }
 `;
