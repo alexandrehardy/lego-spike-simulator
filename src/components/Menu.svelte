@@ -23,9 +23,9 @@
     export let menu: MenuEntry[];
 </script>
 
-<div class="flex flex-row">
+<div class="flex flex-row {$$props.class}">
     {#each menu as item}
-        <Button outline color="blue" class="rounded-none py-1">{item.name}</Button>
+        <Button color="blue" class="rounded-none py-1">{item.name}</Button>
         <MenuDropdown name={item.name} actions={item.actions} />
     {/each}
 </div>

@@ -231,19 +231,21 @@
     size="xl"
     bind:open={modalOpen}
 >
-    <Menu {menu} />
-    <div class="flex flex-row h-[80dvh]">
-        <div class="flex-1 h-full">
-            <ScenePreview
-                id="scene_preview"
-                scene={$sceneStore}
-                class="h-full w-full"
-                map={mapFile}
-                {rotate}
-                {camera}
-                bind:mapWidth
-                bind:mapHeight
-            />
+    <div class="flex flex-col gap-1 h-[80dvh] relative">
+        <Menu {menu} class="absolute z-50" />
+        <div class="flex flex-row flex-1 relative">
+            <div class="flex-1 h-full">
+                <ScenePreview
+                    id="scene_preview"
+                    scene={$sceneStore}
+                    class="h-full w-full"
+                    map={mapFile}
+                    {rotate}
+                    {camera}
+                    bind:mapWidth
+                    bind:mapHeight
+                />
+            </div>
         </div>
     </div>
 </Modal>
