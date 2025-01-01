@@ -1048,15 +1048,19 @@ export class WebGL {
         // LDRAW axes don't match GL axes.
         // Rotate by PI to get them the same
         this.compileMatrix = m4.xRotation(Math.PI);
+        // Make all units in mm
+        this.compileMatrix = m4.multiply(this.compileMatrix, m4.scaling(0.4, 0.4, 0.4));
         this.compileSubModelLines(model, maxDepth, selected);
 
         const triangleOffset = this.compileVertices.length;
         this.compileMatrix = m4.xRotation(Math.PI);
+        this.compileMatrix = m4.multiply(this.compileMatrix, m4.scaling(0.4, 0.4, 0.4));
         if (!wireframe) {
             this.compileSubModelTriangles(model, maxDepth, selected);
         }
 
         this.compileMatrix = m4.xRotation(Math.PI);
+        this.compileMatrix = m4.multiply(this.compileMatrix, m4.scaling(0.4, 0.4, 0.4));
         if (!wireframe) {
             this.compileSubModelQuads(model, maxDepth, selected);
         }

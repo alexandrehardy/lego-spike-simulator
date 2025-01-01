@@ -76,7 +76,7 @@
         // then scaled to -10 to 10 (x)
         // ldraw units are 0.4mm
         // The map width is available, so scale accordingly
-        gl.scale((0.4 / mapWidth) * 20);
+        gl.scale((1.0 / mapWidth) * 20);
         for (const obj of scene.objects) {
             if (obj.compiled) {
                 gl.drawCompiled(obj.compiled);

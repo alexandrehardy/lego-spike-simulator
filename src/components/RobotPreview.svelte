@@ -60,7 +60,6 @@
         gl.clearColour(0.0, 0.0, 0.0);
         gl.clear();
         gl.translate(0, 0, -20);
-        //gl.rotate(180, 1.0, 0.0, 0.0);
         gl.rotate(angle, 0.0, 1.0, 0.0);
         //gl.rotate(angle2, 1.0, 0.0, 0.0);
         if (compiledRobot) {
