@@ -3,6 +3,8 @@
     import FileSaver from 'file-saver';
     import { componentStore, clearPorts, setPort, saveMPD } from '$lib/ldraw/components';
     import { allPorts, Hub } from '$lib/spike/vm';
+    import { sceneStore } from '$lib/spike/scene';
+    import JSZip from 'jszip';
 
     export let modalOpen = false;
     export let hub: Hub;
@@ -23,7 +25,39 @@
         }
     }
 
-    function saveScene() {}
+    async function saveScene() {
+        const scene = $sceneStore;
+        const zip = new JSZip();
+        if (scene.map) {
+            zip.file('mat.jpg', scene.map);
+        }
+        for (const obj of scene.objects) {
+            if (obj.bricks) {
+                const content = saveMPD(obj.bricks);
+                zip.file(`bricks-${obj.name}`, content);
+            }
+        }
+        const json = {
+            version: 1,
+            robot: {
+                anchored: scene.robot.anchored,
+                position: scene.robot.position,
+                rotation: scene.robot.rotation,
+                name: '#robot'
+            },
+            matWidth: scene.mapWidth,
+            matHeight: scene.mapHeight,
+            objects: scene.objects.map((o) => ({
+                anchored: o.anchored,
+                position: o.position,
+                rotation: o.rotation,
+                name: o.name
+            }))
+        };
+        zip.file('scene.json', JSON.stringify(json));
+        const sceneZip = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE' });
+        FileSaver.saveAs(sceneZip, 'scene.zip');
+    }
 </script>
 
 <Modal
