@@ -10,14 +10,15 @@ export interface Vector {
 
 export interface SceneObject {
     anchored: boolean;
-    bricks: Model;
-    position: Vector;
+    bricks?: Model;
+    position?: Vector;
+    rotation?: number;
     name: string;
     compiled?: CompiledModel;
 }
 
 export interface SceneStore {
-    robot: SceneObject | undefined;
+    robot: SceneObject;
     objects: SceneObject[];
     map: File | undefined;
     mapWidth: number;
@@ -25,7 +26,7 @@ export interface SceneStore {
 }
 
 export const sceneStore = writable<SceneStore>({
-    robot: undefined,
+    robot: { anchored: false, name: 'Robot', position: { x: 0, y: 0, z: 0 } },
     objects: [],
     map: undefined,
     mapWidth: 0,

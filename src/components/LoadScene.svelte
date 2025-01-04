@@ -1,8 +1,8 @@
 <script lang="ts">
+    import { onDestroy, onMount } from 'svelte';
     import { Modal } from 'flowbite-svelte';
-    import FileSaver from 'file-saver';
-    import { loadModel, setStudioMode } from '$lib/ldraw/components';
-    import { sceneStore, type SceneStore } from '$lib/spike/scene';
+    import { type Model, loadModel, setStudioMode, componentStore } from '$lib/ldraw/components';
+    import { sceneStore, type SceneStore, type SceneObject } from '$lib/spike/scene';
     import { EditOutline, TrashBinOutline } from 'flowbite-svelte-icons';
     import ScenePreview from '$components/ScenePreview.svelte';
     import Menu from '$components/Menu.svelte';
@@ -19,9 +19,11 @@
     let mapHeight = 0;
     let select: string | undefined = undefined;
     let selectedText: string | undefined;
+    let selectedObject: SceneObject | undefined;
 
     let menu = prepareMenu(rotate, tilt, camera, select, $sceneStore);
     $: menu = prepareMenu(rotate, tilt, camera, select, $sceneStore);
+    $: setRobotModel($componentStore.robotModel);
 
     function toggleRotate() {
         rotate = !rotate;
@@ -35,8 +37,22 @@
         camera = direction;
     }
 
+    function setRobotModel(robot: Model | undefined) {
+        sceneStore.update((old) => {
+            const newRobot = { ...old.robot, bricks: robot, compiled: undefined };
+            return {
+                ...old,
+                robot: newRobot
+            };
+        });
+    }
+
     function removeObject(name: string) {
-        console.log(`REMOVE ${name}`);
+        if (name === select) {
+            select = undefined;
+            selectedText = undefined;
+            selectedObject = undefined;
+        }
         sceneStore.update((old) => {
             const objects = old.objects.filter((x) => x.name !== name);
             return {
@@ -51,13 +67,17 @@
         if (name.startsWith('#')) {
             if (name == '#map') {
                 selectedText = 'Mat';
+                selectedObject = undefined;
             } else if (name == '#robot') {
                 selectedText = 'Spike robot';
+                selectedObject = $sceneStore.robot;
             } else {
                 selectedText = undefined;
+                selectedObject = undefined;
             }
         } else {
             selectedText = `Object: ${name}`;
+            selectedObject = $sceneStore.objects.find((x) => x.name === name);
         }
     }
 
@@ -253,7 +273,6 @@
                                             {
                                                 bricks: model,
                                                 anchored: true,
-                                                position: { x: 0, y: 0, z: 0 },
                                                 name: first.name
                                             }
                                         ])
@@ -273,7 +292,6 @@
                                     {
                                         bricks: model,
                                         anchored: true,
-                                        position: { x: 0, y: 0, z: 0 },
                                         name: first.name
                                     }
                                 ])
@@ -286,6 +304,104 @@
             }
         }
     }
+
+    function moveObjectLeft() {
+        if (!modalOpen) {
+            return;
+        }
+        if (!selectedObject) {
+            return;
+        }
+        if (selectedObject.position) {
+            selectedObject.position.x -= 10.0;
+        }
+    }
+
+    function moveObjectRight() {
+        if (!modalOpen) {
+            return;
+        }
+        if (!selectedObject) {
+            return;
+        }
+        if (selectedObject.position) {
+            selectedObject.position.x += 10.0;
+        }
+    }
+
+    function moveObjectUp() {
+        if (!modalOpen) {
+            return;
+        }
+        if (!selectedObject) {
+            return;
+        }
+        if (selectedObject.position) {
+            selectedObject.position.z -= 10.0;
+        }
+    }
+
+    function moveObjectDown() {
+        if (!modalOpen) {
+            return;
+        }
+        if (!selectedObject) {
+            return;
+        }
+        if (selectedObject.position) {
+            selectedObject.position.z += 10.0;
+        }
+    }
+
+    function rotateObjectClockwise() {
+        if (!modalOpen) {
+            return;
+        }
+        if (!selectedObject) {
+            return;
+        }
+        if (selectedObject.rotation === undefined) {
+            selectedObject.rotation = 0.0;
+        }
+        selectedObject.rotation -= 10.0;
+    }
+
+    function rotateObjectAntiClockwise() {
+        if (!modalOpen) {
+            return;
+        }
+        if (!selectedObject) {
+            return;
+        }
+        if (selectedObject.rotation === undefined) {
+            selectedObject.rotation = 0.0;
+        }
+        selectedObject.rotation += 10.0;
+    }
+
+    function moveObjectWithKey(event: KeyboardEvent) {
+        if (event.key === 'ArrowDown') {
+            moveObjectDown();
+        } else if (event.key === 'ArrowUp') {
+            moveObjectUp();
+        } else if (event.key === 'ArrowLeft') {
+            moveObjectLeft();
+        } else if (event.key === 'ArrowRight') {
+            moveObjectRight();
+        } else if (event.key === 'r') {
+            rotateObjectClockwise();
+        } else if (event.key === 'R') {
+            rotateObjectAntiClockwise();
+        }
+    }
+
+    onMount(() => {
+        window.addEventListener('keyup', moveObjectWithKey);
+    });
+
+    onDestroy(() => {
+        window.removeEventListener('keyup', moveObjectWithKey);
+    });
 </script>
 
 {#key numberOfLoads}
@@ -318,7 +434,49 @@
                 {#if selectedText}
                     <div class="absolute right-0 top-0 text-white mx-2 my-1">{selectedText}</div>
                 {/if}
+                <button
+                    class="absolute bottom-[70px] right-[60px] text-white"
+                    on:click={moveObjectUp}
+                >
+                    <img alt="Move up" width="32" height="32" src="icons/MoveUp.svg" />
+                </button>
+                <button
+                    class="absolute bottom-[20px] right-[60px] text-white"
+                    on:click={moveObjectDown}
+                >
+                    <img alt="Move down" width="32" height="32" src="icons/MoveDown.svg" />
+                </button>
+                <button
+                    class="absolute bottom-[45px] right-[90px] text-white"
+                    on:click={moveObjectLeft}
+                >
+                    <img alt="Move left" width="32" height="32" src="icons/MoveLeft.svg" />
+                </button>
+                <button
+                    class="absolute bottom-[45px] right-[30px] text-white"
+                    on:click={moveObjectRight}
+                >
+                    <img alt="Move right" width="32" height="32" src="icons/MoveRight.svg" />
+                </button>
+                <button
+                    class="absolute bottom-[65px] right-[130px] text-white"
+                    on:click={rotateObjectAntiClockwise}
+                >
+                    <img
+                        alt="Rotate anti-clockwise"
+                        width="32"
+                        height="32"
+                        src="icons/FieldAcw.svg"
+                    />
+                </button>
+                <button
+                    class="absolute bottom-[25px] right-[130px] text-white"
+                    on:click={rotateObjectClockwise}
+                >
+                    <img alt="Rotate clockwise" width="32" height="32" src="icons/FieldCw.svg" />
+                </button>
                 <ScenePreview
+                    <ScenePreview
                     id="scene_preview"
                     scene={$sceneStore}
                     class="h-full w-full"

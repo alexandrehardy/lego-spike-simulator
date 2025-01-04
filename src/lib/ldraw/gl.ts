@@ -39,15 +39,6 @@ export interface CompileOptions {
     select?: number;
 }
 
-export interface BBox {
-    minx: number;
-    miny: number;
-    minz: number;
-    maxx: number;
-    maxy: number;
-    maxz: number;
-}
-
 export interface PipeLine {
     program: WebGLProgram;
     vertexAttribute: GLint;
@@ -294,6 +285,345 @@ export class WebGL {
         };
     }
 
+    drawBox(width: number, height: number, depth: number) {
+        if (!this.vertexBuffer) {
+            return;
+        }
+        if (!this.colourBuffer) {
+            return;
+        }
+        if (!this.brickPipeline) {
+            return;
+        }
+        const vertices: number[] = [];
+        const colours: number[] = [];
+        const w = width / 2;
+        const d = depth / 2;
+        const h = height;
+        let colour: Colour = { r: 1.0, g: 1.0, b: 1.0, a: 1.0 };
+        colours.push(colour.r);
+        colours.push(colour.g);
+        colours.push(colour.b);
+        colours.push(colour.a);
+        vertices.push(-w);
+        vertices.push(0);
+        vertices.push(d);
+        vertices.push(1.0);
+        colours.push(colour.r);
+        colours.push(colour.g);
+        colours.push(colour.b);
+        colours.push(colour.a);
+        vertices.push(w);
+        vertices.push(0);
+        vertices.push(d);
+        vertices.push(1.0);
+        colours.push(colour.r);
+        colours.push(colour.g);
+        colours.push(colour.b);
+        colours.push(colour.a);
+        vertices.push(-w);
+        vertices.push(h);
+        vertices.push(d);
+        vertices.push(1.0);
+        colours.push(colour.r);
+        colours.push(colour.g);
+        colours.push(colour.b);
+        colours.push(colour.a);
+        vertices.push(-w);
+        vertices.push(h);
+        vertices.push(d);
+        vertices.push(1.0);
+        colours.push(colour.r);
+        colours.push(colour.g);
+        colours.push(colour.b);
+        colours.push(colour.a);
+        vertices.push(w);
+        vertices.push(0);
+        vertices.push(d);
+        vertices.push(1.0);
+        colours.push(colour.r);
+        colours.push(colour.g);
+        colours.push(colour.b);
+        colours.push(colour.a);
+        vertices.push(w);
+        vertices.push(h);
+        vertices.push(d);
+        vertices.push(1.0);
+
+        colour = { r: 1.0, g: 0.0, b: 0.0, a: 1.0 };
+        colours.push(colour.r);
+        colours.push(colour.g);
+        colours.push(colour.b);
+        colours.push(colour.a);
+        vertices.push(-w);
+        vertices.push(0);
+        vertices.push(-d);
+        vertices.push(1.0);
+        colours.push(colour.r);
+        colours.push(colour.g);
+        colours.push(colour.b);
+        colours.push(colour.a);
+        vertices.push(w);
+        vertices.push(0);
+        vertices.push(-d);
+        vertices.push(1.0);
+        colours.push(colour.r);
+        colours.push(colour.g);
+        colours.push(colour.b);
+        colours.push(colour.a);
+        vertices.push(-w);
+        vertices.push(h);
+        vertices.push(-d);
+        vertices.push(1.0);
+        colours.push(colour.r);
+        colours.push(colour.g);
+        colours.push(colour.b);
+        colours.push(colour.a);
+        vertices.push(-w);
+        vertices.push(h);
+        vertices.push(-d);
+        vertices.push(1.0);
+        colours.push(colour.r);
+        colours.push(colour.g);
+        colours.push(colour.b);
+        colours.push(colour.a);
+        vertices.push(w);
+        vertices.push(0);
+        vertices.push(-d);
+        vertices.push(1.0);
+        colours.push(colour.r);
+        colours.push(colour.g);
+        colours.push(colour.b);
+        colours.push(colour.a);
+        vertices.push(w);
+        vertices.push(h);
+        vertices.push(-d);
+        vertices.push(1.0);
+
+        colour = { r: 0.0, g: 1.0, b: 0.0, a: 1.0 };
+        colours.push(colour.r);
+        colours.push(colour.g);
+        colours.push(colour.b);
+        colours.push(colour.a);
+        vertices.push(-w);
+        vertices.push(0);
+        vertices.push(-d);
+        vertices.push(1.0);
+        colours.push(colour.r);
+        colours.push(colour.g);
+        colours.push(colour.b);
+        colours.push(colour.a);
+        vertices.push(w);
+        vertices.push(0);
+        vertices.push(-d);
+        vertices.push(1.0);
+        colours.push(colour.r);
+        colours.push(colour.g);
+        colours.push(colour.b);
+        colours.push(colour.a);
+        vertices.push(-w);
+        vertices.push(0);
+        vertices.push(d);
+        vertices.push(1.0);
+        colours.push(colour.r);
+        colours.push(colour.g);
+        colours.push(colour.b);
+        colours.push(colour.a);
+        vertices.push(-w);
+        vertices.push(0);
+        vertices.push(d);
+        vertices.push(1.0);
+        colours.push(colour.r);
+        colours.push(colour.g);
+        colours.push(colour.b);
+        colours.push(colour.a);
+        vertices.push(w);
+        vertices.push(0);
+        vertices.push(-d);
+        vertices.push(1.0);
+        colours.push(colour.r);
+        colours.push(colour.g);
+        colours.push(colour.b);
+        colours.push(colour.a);
+        vertices.push(w);
+        vertices.push(0);
+        vertices.push(d);
+        vertices.push(1.0);
+
+        colour = { r: 0.0, g: 1.0, b: 0.0, a: 1.0 };
+        colours.push(colour.r);
+        colours.push(colour.g);
+        colours.push(colour.b);
+        colours.push(colour.a);
+        vertices.push(-w);
+        vertices.push(h);
+        vertices.push(-d);
+        vertices.push(1.0);
+        colours.push(colour.r);
+        colours.push(colour.g);
+        colours.push(colour.b);
+        colours.push(colour.a);
+        vertices.push(w);
+        vertices.push(h);
+        vertices.push(-d);
+        vertices.push(1.0);
+        colours.push(colour.r);
+        colours.push(colour.g);
+        colours.push(colour.b);
+        colours.push(colour.a);
+        vertices.push(-w);
+        vertices.push(h);
+        vertices.push(d);
+        vertices.push(1.0);
+        colours.push(colour.r);
+        colours.push(colour.g);
+        colours.push(colour.b);
+        colours.push(colour.a);
+        vertices.push(-w);
+        vertices.push(h);
+        vertices.push(d);
+        vertices.push(1.0);
+        colours.push(colour.r);
+        colours.push(colour.g);
+        colours.push(colour.b);
+        colours.push(colour.a);
+        vertices.push(w);
+        vertices.push(h);
+        vertices.push(-d);
+        vertices.push(1.0);
+        colours.push(colour.r);
+        colours.push(colour.g);
+        colours.push(colour.b);
+        colours.push(colour.a);
+        vertices.push(w);
+        vertices.push(h);
+        vertices.push(d);
+        vertices.push(1.0);
+
+        colour = { r: 0.0, g: 0.0, b: 1.0, a: 1.0 };
+        colours.push(colour.r);
+        colours.push(colour.g);
+        colours.push(colour.b);
+        colours.push(colour.a);
+        vertices.push(w);
+        vertices.push(0);
+        vertices.push(-d);
+        vertices.push(1.0);
+        colours.push(colour.r);
+        colours.push(colour.g);
+        colours.push(colour.b);
+        colours.push(colour.a);
+        vertices.push(w);
+        vertices.push(h);
+        vertices.push(-d);
+        vertices.push(1.0);
+        colours.push(colour.r);
+        colours.push(colour.g);
+        colours.push(colour.b);
+        colours.push(colour.a);
+        vertices.push(w);
+        vertices.push(0);
+        vertices.push(d);
+        vertices.push(1.0);
+        colours.push(colour.r);
+        colours.push(colour.g);
+        colours.push(colour.b);
+        colours.push(colour.a);
+        vertices.push(w);
+        vertices.push(0);
+        vertices.push(d);
+        vertices.push(1.0);
+        colours.push(colour.r);
+        colours.push(colour.g);
+        colours.push(colour.b);
+        colours.push(colour.a);
+        vertices.push(w);
+        vertices.push(h);
+        vertices.push(-d);
+        vertices.push(1.0);
+        colours.push(colour.r);
+        colours.push(colour.g);
+        colours.push(colour.b);
+        colours.push(colour.a);
+        vertices.push(w);
+        vertices.push(h);
+        vertices.push(d);
+        vertices.push(1.0);
+
+        colour = { r: 0.0, g: 0.0, b: 1.0, a: 1.0 };
+        colours.push(colour.r);
+        colours.push(colour.g);
+        colours.push(colour.b);
+        colours.push(colour.a);
+        vertices.push(-w);
+        vertices.push(0);
+        vertices.push(-d);
+        vertices.push(1.0);
+        colours.push(colour.r);
+        colours.push(colour.g);
+        colours.push(colour.b);
+        colours.push(colour.a);
+        vertices.push(-w);
+        vertices.push(h);
+        vertices.push(-d);
+        vertices.push(1.0);
+        colours.push(colour.r);
+        colours.push(colour.g);
+        colours.push(colour.b);
+        colours.push(colour.a);
+        vertices.push(-w);
+        vertices.push(0);
+        vertices.push(d);
+        vertices.push(1.0);
+        colours.push(colour.r);
+        colours.push(colour.g);
+        colours.push(colour.b);
+        colours.push(colour.a);
+        vertices.push(-w);
+        vertices.push(0);
+        vertices.push(d);
+        vertices.push(1.0);
+        colours.push(colour.r);
+        colours.push(colour.g);
+        colours.push(colour.b);
+        colours.push(colour.a);
+        vertices.push(-w);
+        vertices.push(h);
+        vertices.push(-d);
+        vertices.push(1.0);
+        colours.push(colour.r);
+        colours.push(colour.g);
+        colours.push(colour.b);
+        colours.push(colour.a);
+        vertices.push(-w);
+        vertices.push(h);
+        vertices.push(d);
+        vertices.push(1.0);
+
+        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.vertexBuffer);
+        this.gl.uniform1f(this.brickPipeline.brightnessUniform, this.brightness);
+        this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(vertices), this.gl.STATIC_DRAW);
+        this.gl.vertexAttribPointer(
+            this.brickPipeline.vertexAttribute,
+            4,
+            this.gl.FLOAT,
+            false,
+            0,
+            0
+        );
+        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.colourBuffer);
+        this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(colours), this.gl.STATIC_DRAW);
+        this.gl.vertexAttribPointer(
+            this.brickPipeline.colourAttribute,
+            4,
+            this.gl.FLOAT,
+            false,
+            0,
+            0
+        );
+        this.gl.drawArrays(this.gl.TRIANGLES, 0, 36);
+    }
+
     drawTriangles(triangles: Triangle[]) {
         if (!this.vertexBuffer) {
             return;
@@ -333,6 +663,7 @@ export class WebGL {
             vertices.push(t.p3.z);
             vertices.push(1.0);
         }
+        this.gl.uniform1f(this.brickPipeline.brightnessUniform, this.brightness);
         this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.vertexBuffer);
         this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(vertices), this.gl.STATIC_DRAW);
         this.gl.vertexAttribPointer(
@@ -387,6 +718,7 @@ export class WebGL {
             vertices.push(l.p2.z);
             vertices.push(1.0);
         }
+        this.gl.uniform1f(this.brickPipeline.brightnessUniform, this.brightness);
         this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.vertexBuffer);
         this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(vertices), this.gl.STATIC_DRAW);
         this.gl.vertexAttribPointer(
@@ -473,6 +805,7 @@ export class WebGL {
             vertices.push(q.p3.z);
             vertices.push(1.0);
         }
+        this.gl.uniform1f(this.brickPipeline.brightnessUniform, this.brightness);
         this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.vertexBuffer);
         this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(vertices), this.gl.STATIC_DRAW);
         this.gl.vertexAttribPointer(
@@ -597,14 +930,14 @@ export class WebGL {
                     continue;
                 }
                 const vertices: Vertex[] = [
-                    { x: bbox.minx, y: bbox.miny, z: bbox.minz },
-                    { x: bbox.maxx, y: bbox.miny, z: bbox.minz },
-                    { x: bbox.maxx, y: bbox.maxy, z: bbox.minz },
-                    { x: bbox.minx, y: bbox.maxy, z: bbox.minz },
-                    { x: bbox.minx, y: bbox.miny, z: bbox.maxz },
-                    { x: bbox.maxx, y: bbox.miny, z: bbox.maxz },
-                    { x: bbox.maxx, y: bbox.maxy, z: bbox.maxz },
-                    { x: bbox.minx, y: bbox.maxy, z: bbox.maxz }
+                    { x: bbox.min.x, y: bbox.min.y, z: bbox.min.z },
+                    { x: bbox.max.x, y: bbox.min.y, z: bbox.min.z },
+                    { x: bbox.max.x, y: bbox.max.y, z: bbox.min.z },
+                    { x: bbox.min.x, y: bbox.max.y, z: bbox.min.z },
+                    { x: bbox.min.x, y: bbox.min.y, z: bbox.max.z },
+                    { x: bbox.max.x, y: bbox.min.y, z: bbox.max.z },
+                    { x: bbox.max.x, y: bbox.max.y, z: bbox.max.z },
+                    { x: bbox.min.x, y: bbox.max.y, z: bbox.max.z }
                 ];
                 for (const b of vertices) {
                     const v4 = m4.transformVector(submodel.matrix, [b.x, b.y, b.z, 1]);
@@ -641,7 +974,7 @@ export class WebGL {
         ) {
             return undefined;
         }
-        return { minx: minx, miny: miny, minz: minz, maxx: maxx, maxy: maxy, maxz: maxz };
+        return { min: { x: minx, y: miny, z: minz }, max: { x: maxx, y: maxy, z: maxz } };
     }
 
     compileQuads(quads: Quad[]) {
@@ -835,35 +1168,55 @@ export class WebGL {
                 this.compileColours.push(this.parentColour.surface.b);
                 this.compileColours.push(this.parentColour.surface.a);
             }
-            let v1 = m4.transformVector(this.compileMatrix, [bbox.minx, bbox.miny, bbox.minz, 1]);
-            let v2 = m4.transformVector(this.compileMatrix, [bbox.maxx, bbox.miny, bbox.minz, 1]);
-            let v3 = m4.transformVector(this.compileMatrix, [bbox.maxx, bbox.maxy, bbox.minz, 1]);
-            let v4 = m4.transformVector(this.compileMatrix, [bbox.minx, bbox.maxy, bbox.minz, 1]);
+            let v1 = m4.transformVector(this.compileMatrix, [
+                bbox.min.x,
+                bbox.min.y,
+                bbox.min.z,
+                1
+            ]);
+            let v2 = m4.transformVector(this.compileMatrix, [
+                bbox.max.x,
+                bbox.min.y,
+                bbox.min.z,
+                1
+            ]);
+            let v3 = m4.transformVector(this.compileMatrix, [
+                bbox.max.x,
+                bbox.max.y,
+                bbox.min.z,
+                1
+            ]);
+            let v4 = m4.transformVector(this.compileMatrix, [
+                bbox.min.x,
+                bbox.max.y,
+                bbox.min.z,
+                1
+            ]);
             this.compileBQuad(v1, v2, v3, v4);
-            v1 = m4.transformVector(this.compileMatrix, [bbox.minx, bbox.miny, bbox.maxz, 1]);
-            v2 = m4.transformVector(this.compileMatrix, [bbox.maxx, bbox.miny, bbox.maxz, 1]);
-            v3 = m4.transformVector(this.compileMatrix, [bbox.maxx, bbox.maxy, bbox.maxz, 1]);
-            v4 = m4.transformVector(this.compileMatrix, [bbox.minx, bbox.maxy, bbox.maxz, 1]);
+            v1 = m4.transformVector(this.compileMatrix, [bbox.min.x, bbox.min.y, bbox.max.z, 1]);
+            v2 = m4.transformVector(this.compileMatrix, [bbox.max.x, bbox.min.y, bbox.max.z, 1]);
+            v3 = m4.transformVector(this.compileMatrix, [bbox.max.x, bbox.max.y, bbox.max.z, 1]);
+            v4 = m4.transformVector(this.compileMatrix, [bbox.min.x, bbox.max.y, bbox.max.z, 1]);
             this.compileBQuad(v1, v2, v3, v4);
-            v1 = m4.transformVector(this.compileMatrix, [bbox.minx, bbox.miny, bbox.minz, 1]);
-            v2 = m4.transformVector(this.compileMatrix, [bbox.maxx, bbox.miny, bbox.minz, 1]);
-            v3 = m4.transformVector(this.compileMatrix, [bbox.maxx, bbox.miny, bbox.maxz, 1]);
-            v4 = m4.transformVector(this.compileMatrix, [bbox.minx, bbox.miny, bbox.maxz, 1]);
+            v1 = m4.transformVector(this.compileMatrix, [bbox.min.x, bbox.min.y, bbox.min.z, 1]);
+            v2 = m4.transformVector(this.compileMatrix, [bbox.max.x, bbox.min.y, bbox.min.z, 1]);
+            v3 = m4.transformVector(this.compileMatrix, [bbox.max.x, bbox.min.y, bbox.max.z, 1]);
+            v4 = m4.transformVector(this.compileMatrix, [bbox.min.x, bbox.min.y, bbox.max.z, 1]);
             this.compileBQuad(v1, v2, v3, v4);
-            v1 = m4.transformVector(this.compileMatrix, [bbox.minx, bbox.maxy, bbox.minz, 1]);
-            v2 = m4.transformVector(this.compileMatrix, [bbox.maxx, bbox.maxy, bbox.minz, 1]);
-            v3 = m4.transformVector(this.compileMatrix, [bbox.maxx, bbox.maxy, bbox.maxz, 1]);
-            v4 = m4.transformVector(this.compileMatrix, [bbox.minx, bbox.maxy, bbox.maxz, 1]);
+            v1 = m4.transformVector(this.compileMatrix, [bbox.min.x, bbox.max.y, bbox.min.z, 1]);
+            v2 = m4.transformVector(this.compileMatrix, [bbox.max.x, bbox.max.y, bbox.min.z, 1]);
+            v3 = m4.transformVector(this.compileMatrix, [bbox.max.x, bbox.max.y, bbox.max.z, 1]);
+            v4 = m4.transformVector(this.compileMatrix, [bbox.min.x, bbox.max.y, bbox.max.z, 1]);
             this.compileBQuad(v1, v2, v3, v4);
-            v1 = m4.transformVector(this.compileMatrix, [bbox.minx, bbox.miny, bbox.minz, 1]);
-            v2 = m4.transformVector(this.compileMatrix, [bbox.minx, bbox.maxy, bbox.minz, 1]);
-            v3 = m4.transformVector(this.compileMatrix, [bbox.minx, bbox.maxy, bbox.maxz, 1]);
-            v4 = m4.transformVector(this.compileMatrix, [bbox.minx, bbox.miny, bbox.maxz, 1]);
+            v1 = m4.transformVector(this.compileMatrix, [bbox.min.x, bbox.min.y, bbox.min.z, 1]);
+            v2 = m4.transformVector(this.compileMatrix, [bbox.min.x, bbox.max.y, bbox.min.z, 1]);
+            v3 = m4.transformVector(this.compileMatrix, [bbox.min.x, bbox.max.y, bbox.max.z, 1]);
+            v4 = m4.transformVector(this.compileMatrix, [bbox.min.x, bbox.min.y, bbox.max.z, 1]);
             this.compileBQuad(v1, v2, v3, v4);
-            v1 = m4.transformVector(this.compileMatrix, [bbox.maxx, bbox.miny, bbox.minz, 1]);
-            v2 = m4.transformVector(this.compileMatrix, [bbox.maxx, bbox.maxy, bbox.minz, 1]);
-            v3 = m4.transformVector(this.compileMatrix, [bbox.maxx, bbox.maxy, bbox.maxz, 1]);
-            v4 = m4.transformVector(this.compileMatrix, [bbox.maxx, bbox.miny, bbox.maxz, 1]);
+            v1 = m4.transformVector(this.compileMatrix, [bbox.max.x, bbox.min.y, bbox.min.z, 1]);
+            v2 = m4.transformVector(this.compileMatrix, [bbox.max.x, bbox.max.y, bbox.min.z, 1]);
+            v3 = m4.transformVector(this.compileMatrix, [bbox.max.x, bbox.max.y, bbox.max.z, 1]);
+            v4 = m4.transformVector(this.compileMatrix, [bbox.max.x, bbox.min.y, bbox.max.z, 1]);
             this.compileBQuad(v1, v2, v3, v4);
             this.compiledTriangles += 12;
             return;
@@ -904,122 +1257,122 @@ export class WebGL {
                 this.compileColours.push(this.parentColour.edge.b);
                 this.compileColours.push(this.parentColour.edge.a);
             }
-            let v = m4.transformVector(this.compileMatrix, [bbox.minx, bbox.miny, bbox.minz, 1]);
+            let v = m4.transformVector(this.compileMatrix, [bbox.min.x, bbox.min.y, bbox.min.z, 1]);
             this.compileVertices.push(v[0]);
             this.compileVertices.push(v[1]);
             this.compileVertices.push(v[2]);
             this.compileVertices.push(v[3]);
-            v = m4.transformVector(this.compileMatrix, [bbox.maxx, bbox.miny, bbox.minz, 1]);
+            v = m4.transformVector(this.compileMatrix, [bbox.max.x, bbox.min.y, bbox.min.z, 1]);
             this.compileVertices.push(v[0]);
             this.compileVertices.push(v[1]);
             this.compileVertices.push(v[2]);
             this.compileVertices.push(v[3]);
-            v = m4.transformVector(this.compileMatrix, [bbox.minx, bbox.maxy, bbox.minz, 1]);
+            v = m4.transformVector(this.compileMatrix, [bbox.min.x, bbox.max.y, bbox.min.z, 1]);
             this.compileVertices.push(v[0]);
             this.compileVertices.push(v[1]);
             this.compileVertices.push(v[2]);
             this.compileVertices.push(v[3]);
-            v = m4.transformVector(this.compileMatrix, [bbox.maxx, bbox.maxy, bbox.minz, 1]);
+            v = m4.transformVector(this.compileMatrix, [bbox.max.x, bbox.max.y, bbox.min.z, 1]);
             this.compileVertices.push(v[0]);
             this.compileVertices.push(v[1]);
             this.compileVertices.push(v[2]);
             this.compileVertices.push(v[3]);
-            v = m4.transformVector(this.compileMatrix, [bbox.minx, bbox.miny, bbox.maxz, 1]);
+            v = m4.transformVector(this.compileMatrix, [bbox.min.x, bbox.min.y, bbox.max.z, 1]);
             this.compileVertices.push(v[0]);
             this.compileVertices.push(v[1]);
             this.compileVertices.push(v[2]);
             this.compileVertices.push(v[3]);
-            v = m4.transformVector(this.compileMatrix, [bbox.maxx, bbox.miny, bbox.maxz, 1]);
+            v = m4.transformVector(this.compileMatrix, [bbox.max.x, bbox.min.y, bbox.max.z, 1]);
             this.compileVertices.push(v[0]);
             this.compileVertices.push(v[1]);
             this.compileVertices.push(v[2]);
             this.compileVertices.push(v[3]);
-            v = m4.transformVector(this.compileMatrix, [bbox.minx, bbox.maxy, bbox.maxz, 1]);
+            v = m4.transformVector(this.compileMatrix, [bbox.min.x, bbox.max.y, bbox.max.z, 1]);
             this.compileVertices.push(v[0]);
             this.compileVertices.push(v[1]);
             this.compileVertices.push(v[2]);
             this.compileVertices.push(v[3]);
-            v = m4.transformVector(this.compileMatrix, [bbox.maxx, bbox.maxy, bbox.maxz, 1]);
+            v = m4.transformVector(this.compileMatrix, [bbox.max.x, bbox.max.y, bbox.max.z, 1]);
             this.compileVertices.push(v[0]);
             this.compileVertices.push(v[1]);
             this.compileVertices.push(v[2]);
             this.compileVertices.push(v[3]);
-            v = m4.transformVector(this.compileMatrix, [bbox.minx, bbox.miny, bbox.minz, 1]);
+            v = m4.transformVector(this.compileMatrix, [bbox.min.x, bbox.min.y, bbox.min.z, 1]);
             this.compileVertices.push(v[0]);
             this.compileVertices.push(v[1]);
             this.compileVertices.push(v[2]);
             this.compileVertices.push(v[3]);
-            v = m4.transformVector(this.compileMatrix, [bbox.minx, bbox.miny, bbox.maxz, 1]);
+            v = m4.transformVector(this.compileMatrix, [bbox.min.x, bbox.min.y, bbox.max.z, 1]);
             this.compileVertices.push(v[0]);
             this.compileVertices.push(v[1]);
             this.compileVertices.push(v[2]);
             this.compileVertices.push(v[3]);
-            v = m4.transformVector(this.compileMatrix, [bbox.minx, bbox.maxy, bbox.minz, 1]);
+            v = m4.transformVector(this.compileMatrix, [bbox.min.x, bbox.max.y, bbox.min.z, 1]);
             this.compileVertices.push(v[0]);
             this.compileVertices.push(v[1]);
             this.compileVertices.push(v[2]);
             this.compileVertices.push(v[3]);
-            v = m4.transformVector(this.compileMatrix, [bbox.minx, bbox.maxy, bbox.maxz, 1]);
+            v = m4.transformVector(this.compileMatrix, [bbox.min.x, bbox.max.y, bbox.max.z, 1]);
             this.compileVertices.push(v[0]);
             this.compileVertices.push(v[1]);
             this.compileVertices.push(v[2]);
             this.compileVertices.push(v[3]);
-            v = m4.transformVector(this.compileMatrix, [bbox.maxx, bbox.miny, bbox.minz, 1]);
+            v = m4.transformVector(this.compileMatrix, [bbox.max.x, bbox.min.y, bbox.min.z, 1]);
             this.compileVertices.push(v[0]);
             this.compileVertices.push(v[1]);
             this.compileVertices.push(v[2]);
             this.compileVertices.push(v[3]);
-            v = m4.transformVector(this.compileMatrix, [bbox.maxx, bbox.miny, bbox.maxz, 1]);
+            v = m4.transformVector(this.compileMatrix, [bbox.max.x, bbox.min.y, bbox.max.z, 1]);
             this.compileVertices.push(v[0]);
             this.compileVertices.push(v[1]);
             this.compileVertices.push(v[2]);
             this.compileVertices.push(v[3]);
-            v = m4.transformVector(this.compileMatrix, [bbox.maxx, bbox.maxy, bbox.minz, 1]);
+            v = m4.transformVector(this.compileMatrix, [bbox.max.x, bbox.max.y, bbox.min.z, 1]);
             this.compileVertices.push(v[0]);
             this.compileVertices.push(v[1]);
             this.compileVertices.push(v[2]);
             this.compileVertices.push(v[3]);
-            v = m4.transformVector(this.compileMatrix, [bbox.maxx, bbox.maxy, bbox.maxz, 1]);
+            v = m4.transformVector(this.compileMatrix, [bbox.max.x, bbox.max.y, bbox.max.z, 1]);
             this.compileVertices.push(v[0]);
             this.compileVertices.push(v[1]);
             this.compileVertices.push(v[2]);
             this.compileVertices.push(v[3]);
-            v = m4.transformVector(this.compileMatrix, [bbox.minx, bbox.miny, bbox.minz, 1]);
+            v = m4.transformVector(this.compileMatrix, [bbox.min.x, bbox.min.y, bbox.min.z, 1]);
             this.compileVertices.push(v[0]);
             this.compileVertices.push(v[1]);
             this.compileVertices.push(v[2]);
             this.compileVertices.push(v[3]);
-            v = m4.transformVector(this.compileMatrix, [bbox.minx, bbox.maxy, bbox.minz, 1]);
+            v = m4.transformVector(this.compileMatrix, [bbox.min.x, bbox.max.y, bbox.min.z, 1]);
             this.compileVertices.push(v[0]);
             this.compileVertices.push(v[1]);
             this.compileVertices.push(v[2]);
             this.compileVertices.push(v[3]);
-            v = m4.transformVector(this.compileMatrix, [bbox.maxx, bbox.miny, bbox.minz, 1]);
+            v = m4.transformVector(this.compileMatrix, [bbox.max.x, bbox.min.y, bbox.min.z, 1]);
             this.compileVertices.push(v[0]);
             this.compileVertices.push(v[1]);
             this.compileVertices.push(v[2]);
             this.compileVertices.push(v[3]);
-            v = m4.transformVector(this.compileMatrix, [bbox.maxx, bbox.maxy, bbox.minz, 1]);
+            v = m4.transformVector(this.compileMatrix, [bbox.max.x, bbox.max.y, bbox.min.z, 1]);
             this.compileVertices.push(v[0]);
             this.compileVertices.push(v[1]);
             this.compileVertices.push(v[2]);
             this.compileVertices.push(v[3]);
-            v = m4.transformVector(this.compileMatrix, [bbox.minx, bbox.miny, bbox.maxz, 1]);
+            v = m4.transformVector(this.compileMatrix, [bbox.min.x, bbox.min.y, bbox.max.z, 1]);
             this.compileVertices.push(v[0]);
             this.compileVertices.push(v[1]);
             this.compileVertices.push(v[2]);
             this.compileVertices.push(v[3]);
-            v = m4.transformVector(this.compileMatrix, [bbox.minx, bbox.maxy, bbox.maxz, 1]);
+            v = m4.transformVector(this.compileMatrix, [bbox.min.x, bbox.max.y, bbox.max.z, 1]);
             this.compileVertices.push(v[0]);
             this.compileVertices.push(v[1]);
             this.compileVertices.push(v[2]);
             this.compileVertices.push(v[3]);
-            v = m4.transformVector(this.compileMatrix, [bbox.maxx, bbox.miny, bbox.maxz, 1]);
+            v = m4.transformVector(this.compileMatrix, [bbox.max.x, bbox.min.y, bbox.max.z, 1]);
             this.compileVertices.push(v[0]);
             this.compileVertices.push(v[1]);
             this.compileVertices.push(v[2]);
             this.compileVertices.push(v[3]);
-            v = m4.transformVector(this.compileMatrix, [bbox.maxx, bbox.maxy, bbox.maxz, 1]);
+            v = m4.transformVector(this.compileMatrix, [bbox.max.x, bbox.max.y, bbox.max.z, 1]);
             this.compileVertices.push(v[0]);
             this.compileVertices.push(v[1]);
             this.compileVertices.push(v[2]);

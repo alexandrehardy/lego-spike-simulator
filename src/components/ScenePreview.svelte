@@ -90,19 +90,50 @@
             gl.scale((1.0 / 2360.0) * 20);
         }
         for (const obj of scene.objects) {
-            if (obj.compiled) {
-                if (select === obj.name) {
-                    gl.setBrightness(1.0);
-                } else {
-                    gl.setBrightness(0.3);
-                }
-                gl.pushMatrix();
-                gl.translate(0, -obj.compiled.bbox.min.y, 0);
-                gl.drawCompiled(obj.compiled);
-                gl.popMatrix();
+            if (select === obj.name) {
                 gl.setBrightness(1.0);
+            } else {
+                gl.setBrightness(0.3);
             }
+            gl.pushMatrix();
+            if (obj.position) {
+                gl.translate(obj.position.x, obj.position.y, obj.position.z);
+            }
+            if (obj.rotation) {
+                gl.rotate(obj.rotation, 0.0, 1.0, 0.0);
+            }
+            if (obj.compiled) {
+                gl.drawCompiled(obj.compiled);
+            } else {
+                gl.drawBox(100, 100, 100);
+            }
+            gl.popMatrix();
+            gl.setBrightness(1.0);
         }
+
+        if (scene.robot) {
+            const obj = scene.robot;
+            if (select === '#robot') {
+                gl.setBrightness(1.0);
+            } else {
+                gl.setBrightness(0.3);
+            }
+            gl.pushMatrix();
+            if (obj.position) {
+                gl.translate(obj.position.x, obj.position.y, obj.position.z);
+            }
+            if (obj.rotation) {
+                gl.rotate(obj.rotation, 0.0, 1.0, 0.0);
+            }
+            if (obj.compiled) {
+                gl.drawCompiled(obj.compiled);
+            } else {
+                gl.drawBox(100, 100, 100);
+            }
+            gl.popMatrix();
+            gl.setBrightness(1.0);
+        }
+
         gl.flush();
         if (rotate) {
             angle = angle + 5 * 0.1;
@@ -152,13 +183,37 @@
         }
     }
 
+    function loadRobot(robot: SceneObject, forceCompile: boolean) {
+        if (!gl) {
+            return;
+        }
+        const obj = robot;
+        if (obj.bricks) {
+            if (!obj.compiled || forceCompile) {
+                obj.compiled = gl.compileModel(obj.bricks, { rescale: false });
+            }
+        }
+        if (!obj.position && obj.compiled) {
+            obj.position = { x: 0.0, y: -obj.compiled.bbox.min.y, z: 0.0 };
+        } else if (obj.compiled && obj.position) {
+            obj.position = { x: obj.position.x, y: -obj.compiled.bbox.min.y, z: obj.position.z };
+        } else if (obj.compiled) {
+            obj.position = { x: 0.0, y: -obj.compiled.bbox.min.y, z: 0.0 };
+        }
+    }
+
     function loadSceneItems(objects: SceneObject[], forceCompile: boolean) {
         if (!gl) {
             return;
         }
         for (const obj of objects) {
-            if (!obj.compiled || forceCompile) {
-                obj.compiled = gl.compileModel(obj.bricks, { rescale: false });
+            if (obj.bricks) {
+                if (!obj.compiled || forceCompile) {
+                    obj.compiled = gl.compileModel(obj.bricks, { rescale: false });
+                }
+            }
+            if (!obj.position && obj.compiled) {
+                obj.position = { x: 0.0, y: -obj.compiled.bbox.min.y, z: 0.0 };
             }
         }
     }
@@ -170,6 +225,7 @@
             if (gl) {
                 resizeGL(scene);
                 loadSceneItems(scene.objects, true);
+                loadRobot(scene.robot, true);
                 loadMapTexture(scene.map);
             }
             canRender = true;
@@ -193,6 +249,7 @@
     $: checkEnabled(enabled);
     $: loadMapTexture(scene.map);
     $: loadSceneItems(scene.objects, false);
+    $: loadRobot(scene.robot, false);
 </script>
 
 <canvas {id} class={$$props.class}></canvas>
