@@ -5,6 +5,7 @@
 
     export let image: string = '0000000000000000000000000';
     export let selectedPort = '';
+    export let centreButtonColour = '#ffffff';
     let imageRows = splitImage(image);
     let pressed = '';
     const dispatch = createEventDispatcher();
@@ -155,8 +156,8 @@
                     viewBox="0 0 40 40"
                     xmlns="http://www.w3.org/2000/svg"
                 >
-                    <circle r="18" cx="20" cy="20" stroke="#000" fill="currentColor" />
-                    <circle r="15" cx="20" cy="20" stroke="#000" fill="currentColor" />
+                    <circle r="18" cx="20" cy="20" stroke="#000" fill={centreButtonColour} />
+                    <circle r="15" cx="20" cy="20" stroke="#000" fill={centreButtonColour} />
                 </svg>
             </button>
             <button on:mousedown={() => handlePress('right')}>

@@ -241,7 +241,25 @@ export class ActionStatement extends Statement {
         } else if (op == 'lightDisplayRotate') {
             return super._execute(thread);
         } else if (op == 'centerButtonLight') {
-            return super._execute(thread);
+            const colourIndex = this.arguments[0].evaluate(thread).getString();
+            const colourMap: Record<string, string> = {
+                '1': '#e700a7',
+                '2': '#c061f1',
+                '3': '#0090f5',
+                '4': '#77e8ff',
+                '5': '#00cb54',
+                '6': '#00a845',
+                '7': '#f5da5d',
+                '8': '#fcac00',
+                '9': '#ff000c',
+                '10': '#ffffff',
+                '0': '#571cc1'
+            };
+            const colour = colourMap[colourIndex];
+            if (colour) {
+                thread.vm.hub.setButtonColour(colour);
+            }
+            return;
         } else {
             return super._execute(thread);
         }
@@ -268,6 +286,10 @@ export class ActionStatement extends Statement {
         return super._execute(thread);
     }
     async execute_flippersensors(thread: Thread, op: string) {
+        if (op == 'resetTimer') {
+            thread.vm.resetTimer();
+            return;
+        }
         return super._execute(thread);
     }
     async execute_flippersound(thread: Thread, op: string) {
@@ -667,9 +689,24 @@ export class FunctionExpression extends Expression {
                 }
             }
             return new BooleanValue(false);
+        } else if (this.opcode == 'flippersensors_timer') {
+            return new NumberValue(thread.vm.getTimer());
         } else if (this.opcode == 'data_listcontents') {
             const variable = this.arguments[0] as Variable;
             return new ListValue([...variable.evaluate(thread).getList()]);
+        } else if (this.opcode == 'flippersensors_isColor') {
+            const portString = this.arguments[0].evaluate(thread).getString();
+            const value = this.arguments[1].evaluate(thread).getString();
+            const port = portString as 'A' | 'B' | 'C' | 'D' | 'E' | 'F';
+            const attachment = thread.vm.hub.ports[port];
+            if (attachment && attachment.type == 'light') {
+                // Correct sensor on the correct port
+                // Get the sensor from the robot model
+                // And cast some rays into the scene to sample
+                // for the colour.
+                console.log('GOOD TO GO');
+            }
+            return new BooleanValue(false);
         } else {
             return super.evaluate(thread);
         }
@@ -896,12 +933,14 @@ export class Hub {
     screenBrightness: number;
     ports: HubPorts;
     eventHandler: HubEventHandler | undefined;
+    buttonColour: string;
 
     reload() {
         this.leftPressed = false;
         this.rightPressed = false;
         this.screen = '0000000000000000000000000';
         this.screenBrightness = 0;
+        this.buttonColour = '#ffffff';
         this.ports = {
             A: new Port('none'),
             B: new Port('none'),
@@ -917,6 +956,7 @@ export class Hub {
         this.rightPressed = false;
         this.screen = '0000000000000000000000000';
         this.screenBrightness = 0;
+        this.buttonColour = '#ffffff';
     }
 
     constructor() {
@@ -924,6 +964,7 @@ export class Hub {
         this.rightPressed = false;
         this.screen = '0000000000000000000000000';
         this.screenBrightness = 0;
+        this.buttonColour = '#ffffff';
         this.ports = {
             A: new Port('none'),
             B: new Port('none'),
@@ -946,6 +987,13 @@ export class Hub {
         this.screen = screen;
         if (this.eventHandler) {
             this.eventHandler('screen', screen);
+        }
+    }
+
+    setButtonColour(colour: string) {
+        this.buttonColour = colour;
+        if (this.eventHandler) {
+            this.eventHandler('hubButtonColour', colour);
         }
     }
 }
@@ -1213,6 +1261,7 @@ export class VM {
     workspace: Blockly.WorkspaceSvg | undefined;
     state: 'running' | 'stopped' | 'paused';
     first: boolean;
+    timerStart: number;
 
     constructor(
         hub: Hub,
@@ -1230,6 +1279,7 @@ export class VM {
         this.state = 'stopped';
         this.first = true;
         this.volume = 100;
+        this.timerStart = Date.now() / 1000.0;
         this.audio = new Audio();
         const audioContext = new AudioContext();
         const oscillator = audioContext.createOscillator();
@@ -1241,6 +1291,15 @@ export class VM {
             const event = entry[1];
             this.threads.set(key, new Thread(this, event, this.globals));
         }
+    }
+
+    getTimer(): Number {
+        const now = Date.now() / 1000.0;
+        return (now - this.timerStart) * timeFactor;
+    }
+
+    resetTimer() {
+        this.timerStart = Date.now() / 1000.0;
     }
 
     runThreads() {

@@ -36,6 +36,7 @@
     let numberOfLoads = 0;
     let vm: VM | undefined;
     let hubImage = '0000000000000000000000000';
+    let hubCentreButtonColour = '#ffffff';
     let compiledRobot: CompiledModel | undefined = undefined;
 
     const partNames: Record<string, string> = {
@@ -124,6 +125,9 @@
         if (event == 'screen') {
             hubImage = value;
         }
+        if (event == 'hubButtonColour') {
+            hubCentreButtonColour = value;
+        }
     }
 
     function startOrPauseSimulation(start: boolean) {
@@ -131,6 +135,7 @@
             if (vm) {
                 vm.stop();
                 hubImage = '0000000000000000000000000';
+                hubCentreButtonColour = '#ffffff';
             }
             const selected = Blockly.common.getSelected();
             if (selected) {
@@ -155,6 +160,7 @@
             if (vm) {
                 vm.stop();
                 hubImage = '0000000000000000000000000';
+                hubCentreButtonColour = '#ffffff';
             }
         }
     }
@@ -237,6 +243,7 @@
             <div class="m-3 h-min">
                 <HubWidget
                     image={hubImage}
+                    centreButtonColour={hubCentreButtonColour}
                     on:leftPress={hubLeftPress}
                     on:rightPress={hubRightPress}
                     on:leftRelease={hubLeftRelease}
