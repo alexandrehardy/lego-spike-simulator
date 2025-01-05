@@ -1824,7 +1824,7 @@ export class WebGL {
         return needResize;
     }
 
-    loadImage(f: File) {
+    loadImage(f: Blob) {
         return new Promise<HTMLImageElement>((resolve, reject) => {
             const image = new Image();
             const url = URL.createObjectURL(f);
@@ -1840,7 +1840,7 @@ export class WebGL {
         });
     }
 
-    async loadTexture(f: File): Promise<MapTexture | null> {
+    async loadTexture(f: Blob): Promise<MapTexture | null> {
         const image = await this.loadImage(f);
         const texture = this.gl.createTexture();
 

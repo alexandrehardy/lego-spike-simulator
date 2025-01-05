@@ -20,7 +20,7 @@ export interface SceneObject {
 export interface SceneStore {
     robot: SceneObject;
     objects: SceneObject[];
-    map: File | undefined;
+    map: Blob | undefined;
     mapWidth: number;
     mapHeight: number;
 }

@@ -164,7 +164,7 @@
         }
     }
 
-    async function loadMapTexture(map: File | undefined) {
+    async function loadMapTexture(map: Blob | undefined) {
         if (!gl) {
             mapTexture = null;
             return;
