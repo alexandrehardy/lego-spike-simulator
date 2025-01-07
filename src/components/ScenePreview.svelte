@@ -10,8 +10,6 @@
     export let camera: 'top' | 'left' | 'right' | 'front' | 'back';
     export let tilt = true;
     export let rotate = false;
-    export let mapWidth = 0;
-    export let mapHeight = 0;
 
     let canRender = false;
     let gl: WebGL | undefined;
@@ -50,6 +48,8 @@
         gl.clearColour(0.0, 0.0, 0.0);
         gl.clear();
         gl.translate(0, 0, -20);
+        // Make unit meters
+        gl.scale(0.01);
         if (tilt) {
             gl.rotate(45, 1.0, 0.0, 0.0);
         }
@@ -68,29 +68,19 @@
             gl.rotate(angle, 0.0, 1.0, 0.0);
         }
         if (mapTexture) {
-            if (select === '#map') {
+            if (select === '#map' || select === '#all') {
                 gl.setBrightness(1.0);
             } else {
                 gl.setBrightness(0.3);
             }
             gl.pushMatrix();
-            gl.scale(10);
             gl.drawTexturedQuad(mapTexture);
             gl.popMatrix();
             gl.setBrightness(1.0);
         }
         gl.translate(0, 0, 0);
-        // The mapTexture is -1 to 1 (x)
-        // then scaled to -10 to 10 (x)
-        // ldraw units are 0.4mm
-        // The map width is available, so scale accordingly
-        if (mapWidth > 1.0) {
-            gl.scale((1.0 / mapWidth) * 20);
-        } else {
-            gl.scale((1.0 / 2360.0) * 20);
-        }
         for (const obj of scene.objects) {
-            if (select === obj.name) {
+            if (select === obj.name || select === '#all') {
                 gl.setBrightness(1.0);
             } else {
                 gl.setBrightness(0.3);
@@ -113,7 +103,7 @@
 
         if (scene.robot) {
             const obj = scene.robot;
-            if (select === '#robot') {
+            if (select === '#robot' || select === '#all') {
                 gl.setBrightness(1.0);
             } else {
                 gl.setBrightness(0.3);
@@ -177,9 +167,13 @@
             return;
         }
         mapTexture = await gl.loadTexture(map);
+        // We could get the size from the texture.
+        // But better not, since it isn't real units.
+        // mapWidth = mapTexture.width;
+        // mapHeight = mapTexture.height;
         if (mapTexture) {
-            mapWidth = mapTexture.width;
-            mapHeight = mapTexture.height;
+            mapTexture.width = scene.mapWidth;
+            mapTexture.height = scene.mapHeight;
         }
     }
 
@@ -245,9 +239,17 @@
         }
     });
 
+    function setMapSize(scene: SceneStore) {
+        if (mapTexture) {
+            mapTexture.width = scene.mapWidth;
+            mapTexture.height = scene.mapHeight;
+        }
+    }
+
     $: resizeGL(scene);
     $: checkEnabled(enabled);
     $: loadMapTexture(scene.map);
+    $: setMapSize(scene);
     $: loadSceneItems(scene.objects, false);
     $: loadRobot(scene.robot, false);
 </script>

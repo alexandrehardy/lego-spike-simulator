@@ -1293,7 +1293,7 @@ export class VM {
         }
     }
 
-    getTimer(): Number {
+    getTimer(): number {
         const now = Date.now() / 1000.0;
         return (now - this.timerStart) * timeFactor;
     }

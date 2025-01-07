@@ -29,8 +29,8 @@ export const sceneStore = writable<SceneStore>({
     robot: { anchored: false, name: 'Robot', position: { x: 0, y: 0, z: 0 } },
     objects: [],
     map: undefined,
-    mapWidth: 0,
-    mapHeight: 0
+    mapWidth: 2360,
+    mapHeight: 1140
 });
 
 // FLL table is 2434mm x 1145mm

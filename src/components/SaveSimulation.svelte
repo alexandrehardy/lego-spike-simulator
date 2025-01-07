@@ -56,7 +56,7 @@
         };
         zip.file('scene.json', JSON.stringify(json));
         const sceneZip = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE' });
-        FileSaver.saveAs(sceneZip, 'scene.zip');
+        FileSaver.saveAs(sceneZip, 'scene.spk');
     }
 </script>
 

@@ -138,15 +138,17 @@
                     <CloseButton on:click={closeWindow} />
                 {/if}
             </div>
-            <div class="flex-1 w-full overflow-hidden">
-                <SpikeSimulator
-                    bind:runSimulation
-                    {workspace}
-                    bind:connectorOpen
-                    bind:hub
-                    bind:sceneOpen
-                />
-            </div>
+            {#key blocklyOpen}
+                <div class="flex-1 w-full overflow-hidden">
+                    <SpikeSimulator
+                        bind:runSimulation
+                        {workspace}
+                        bind:connectorOpen
+                        bind:hub
+                        bind:sceneOpen
+                    />
+                </div>
+            {/key}
         </div>
     </div>
 {/if}

@@ -1,6 +1,6 @@
 <script lang="ts">
     import { onDestroy, onMount } from 'svelte';
-    import { Modal } from 'flowbite-svelte';
+    import { Button, Input, Modal } from 'flowbite-svelte';
     import { type Model, loadModel, setStudioMode, componentStore } from '$lib/ldraw/components';
     import { sceneStore, type SceneStore, type SceneObject } from '$lib/spike/scene';
     import { EditOutline, TrashBinOutline } from 'flowbite-svelte-icons';
@@ -15,11 +15,14 @@
     let camera: 'top' | 'left' | 'right' | 'front' | 'back' = 'front';
     let tilt = true;
     let rotate = false;
-    let mapWidth = 0;
-    let mapHeight = 0;
-    let select: string | undefined = undefined;
+    let select: string | undefined = '#all';
     let selectedText: string | undefined;
     let selectedObject: SceneObject | undefined;
+    let renameObject: SceneObject | undefined = undefined;
+    let newName: string = '';
+    let customSizeVisible = false;
+    let customHeight = 1000;
+    let customWidth = 1000;
 
     let menu = prepareMenu(rotate, tilt, camera, select, $sceneStore);
     $: menu = prepareMenu(rotate, tilt, camera, select, $sceneStore);
@@ -66,11 +69,14 @@
         select = name;
         if (name.startsWith('#')) {
             if (name == '#map') {
-                selectedText = 'Mat';
+                selectedText = `Mat (${$sceneStore.mapWidth}mm x ${$sceneStore.mapHeight}mm)`;
                 selectedObject = undefined;
             } else if (name == '#robot') {
                 selectedText = 'Spike robot';
                 selectedObject = $sceneStore.robot;
+            } else if (name == '#all') {
+                selectedText = '';
+                selectedObject = undefined;
             } else {
                 selectedText = undefined;
                 selectedObject = undefined;
@@ -81,6 +87,84 @@
         }
     }
 
+    function updateSelectedText(scene: SceneStore) {
+        if (select == '#map') {
+            selectedText = `Mat (${scene.mapWidth}mm x ${scene.mapHeight}mm)`;
+        }
+    }
+
+    function setFirstLegoLeagueMatSize() {
+        sceneStore.update((old) => {
+            return {
+                ...old,
+                mapWidth: 2360,
+                mapHeight: 1140
+            };
+        });
+    }
+
+    function setWorldRoboticsOrganizationMatSize() {
+        sceneStore.update((old) => {
+            return {
+                ...old,
+                mapWidth: 2362,
+                mapHeight: 1143
+            };
+        });
+    }
+
+    function setCustomMapSize() {
+        customWidth = $sceneStore.mapWidth;
+        customHeight = $sceneStore.mapHeight;
+        renameObject = undefined;
+        customSizeVisible = true;
+    }
+
+    function setRenameObject(obj: SceneObject) {
+        customSizeVisible = false;
+        renameObject = obj;
+        newName = obj.name;
+    }
+
+    function hideRename() {
+        renameObject = undefined;
+    }
+
+    function doRenameObject() {
+        if (renameObject) {
+            const oldName = renameObject.name;
+            renameObject.name = newName;
+            renameObject = undefined;
+            menu = prepareMenu(rotate, tilt, camera, select, $sceneStore);
+            if (select == oldName) {
+                selectedText = `Object: ${newName}`;
+            }
+        }
+    }
+
+    function hideCustomSize() {
+        customSizeVisible = false;
+    }
+
+    function setCustomSize() {
+        customSizeVisible = false;
+        customWidth = +customWidth;
+        customHeight = +customHeight;
+        if (customWidth < 200) {
+            customWidth = 200;
+        }
+        if (customHeight < 200) {
+            customHeight = 200;
+        }
+        sceneStore.update((old) => {
+            return {
+                ...old,
+                mapWidth: +customWidth,
+                mapHeight: +customHeight
+            };
+        });
+    }
+
     function prepareMenu(
         rotate: boolean,
         tilt: boolean,
@@ -89,6 +173,17 @@
         scene: SceneStore
     ) {
         let menu: MenuEntry[] = [];
+        menu.push({
+            name: 'Mat Size',
+            actions: [
+                { name: 'FLL (2360mm x 1140mm)', action: () => setFirstLegoLeagueMatSize() },
+                {
+                    name: 'WRO (2362mm x 1143mm)',
+                    action: () => setWorldRoboticsOrganizationMatSize()
+                },
+                { name: 'Custom', action: () => setCustomMapSize() }
+            ]
+        });
         menu.push({
             name: 'Load',
             actions: [
@@ -155,6 +250,13 @@
         let selectMenu: MenuAction[] = [];
         if (scene.map) {
             selectMenu.push({
+                name: 'All',
+                action: () => {
+                    setSelected('#all');
+                },
+                radio: select == '#all'
+            });
+            selectMenu.push({
                 name: 'Mat',
                 action: () => {
                     setSelected('#map');
@@ -202,7 +304,9 @@
         for (const obj of scene.objects) {
             rename.push({
                 name: obj.name,
-                action: () => {},
+                action: () => {
+                    setRenameObject(obj);
+                },
                 icon: EditOutline
             });
         }
@@ -472,6 +576,8 @@
     onDestroy(() => {
         window.removeEventListener('keyup', moveObjectWithKey);
     });
+
+    $: updateSelectedText($sceneStore);
 </script>
 
 {#key numberOfLoads}
@@ -493,7 +599,7 @@
         type="file"
         id="load_scene_file"
         class="hidden"
-        accept=".zip"
+        accept=".spk"
         on:change={loadSceneFromFile}
     />
 {/key}
@@ -507,53 +613,98 @@
     <div class="flex flex-col gap-1 h-[80dvh] relative">
         <Menu {menu} class="absolute z-50" />
         <div class="flex flex-row flex-1 relative">
-            <div class="flex-1 h-full">
+            <div class="flex-1 h-full relative">
                 {#if selectedText}
                     <div class="absolute right-0 top-0 text-white mx-2 my-1">{selectedText}</div>
                 {/if}
-                <button
-                    class="absolute bottom-[70px] right-[60px] text-white"
-                    on:click={moveObjectUp}
-                >
-                    <img alt="Move up" width="32" height="32" src="icons/MoveUp.svg" />
-                </button>
-                <button
-                    class="absolute bottom-[20px] right-[60px] text-white"
-                    on:click={moveObjectDown}
-                >
-                    <img alt="Move down" width="32" height="32" src="icons/MoveDown.svg" />
-                </button>
-                <button
-                    class="absolute bottom-[45px] right-[90px] text-white"
-                    on:click={moveObjectLeft}
-                >
-                    <img alt="Move left" width="32" height="32" src="icons/MoveLeft.svg" />
-                </button>
-                <button
-                    class="absolute bottom-[45px] right-[30px] text-white"
-                    on:click={moveObjectRight}
-                >
-                    <img alt="Move right" width="32" height="32" src="icons/MoveRight.svg" />
-                </button>
-                <button
-                    class="absolute bottom-[65px] right-[130px] text-white"
-                    on:click={rotateObjectAntiClockwise}
-                >
-                    <img
-                        alt="Rotate anti-clockwise"
-                        width="32"
-                        height="32"
-                        src="icons/FieldAcw.svg"
-                    />
-                </button>
-                <button
-                    class="absolute bottom-[25px] right-[130px] text-white"
-                    on:click={rotateObjectClockwise}
-                >
-                    <img alt="Rotate clockwise" width="32" height="32" src="icons/FieldCw.svg" />
-                </button>
+                <div class="absolute left-0 top-0 h-full w-full" hidden={!renameObject}>
+                    {#if renameObject}
+                        <div class="flex flex-row justify-around items-center h-full">
+                            <div class="bg-white rounded-xl p-3 flex flex-col shadow gap-2">
+                                <h2>Rename object: {renameObject.name}</h2>
+                                <hr />
+                                <div class="flex flex-row w-96 gap-2 items-center">
+                                    <span class="w-28">New name: </span><Input
+                                        bind:value={newName}
+                                    />
+                                </div>
+                                <div class="flex flex-row justify-center gap-2">
+                                    <Button on:click={hideRename}>CANCEL</Button>
+                                    <Button on:click={doRenameObject} color="green">OK</Button>
+                                </div>
+                            </div>
+                        </div>
+                    {/if}
+                </div>
+                <div class="absolute left-0 top-0 h-full w-full" hidden={!customSizeVisible}>
+                    <div class="flex flex-row justify-around items-center h-full">
+                        <div class="bg-white rounded-xl p-3 flex flex-col shadow gap-2">
+                            <h2>Custom Mat Size</h2>
+                            <hr />
+                            <div class="flex flex-row w-96 gap-2 items-center">
+                                <span class="w-20">Width: </span><Input bind:value={customWidth} />
+                            </div>
+                            <div class="flex flex-row w-96 gap-2 items-center">
+                                <span class="w-20">Height: </span><Input
+                                    bind:value={customHeight}
+                                />
+                            </div>
+                            <div class="flex flex-row justify-center gap-2">
+                                <Button on:click={hideCustomSize}>CANCEL</Button>
+                                <Button on:click={setCustomSize} color="green">OK</Button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {#if select && select !== '#map' && select !== '#all'}
+                    <button
+                        class="absolute bottom-[70px] right-[60px] text-white"
+                        on:click={moveObjectUp}
+                    >
+                        <img alt="Move up" width="32" height="32" src="icons/MoveUp.svg" />
+                    </button>
+                    <button
+                        class="absolute bottom-[20px] right-[60px] text-white"
+                        on:click={moveObjectDown}
+                    >
+                        <img alt="Move down" width="32" height="32" src="icons/MoveDown.svg" />
+                    </button>
+                    <button
+                        class="absolute bottom-[45px] right-[90px] text-white"
+                        on:click={moveObjectLeft}
+                    >
+                        <img alt="Move left" width="32" height="32" src="icons/MoveLeft.svg" />
+                    </button>
+                    <button
+                        class="absolute bottom-[45px] right-[30px] text-white"
+                        on:click={moveObjectRight}
+                    >
+                        <img alt="Move right" width="32" height="32" src="icons/MoveRight.svg" />
+                    </button>
+                    <button
+                        class="absolute bottom-[65px] right-[130px] text-white"
+                        on:click={rotateObjectAntiClockwise}
+                    >
+                        <img
+                            alt="Rotate anti-clockwise"
+                            width="32"
+                            height="32"
+                            src="icons/FieldAcw.svg"
+                        />
+                    </button>
+                    <button
+                        class="absolute bottom-[25px] right-[130px] text-white"
+                        on:click={rotateObjectClockwise}
+                    >
+                        <img
+                            alt="Rotate clockwise"
+                            width="32"
+                            height="32"
+                            src="icons/FieldCw.svg"
+                        />
+                    </button>
+                {/if}
                 <ScenePreview
-                    <ScenePreview
                     id="scene_preview"
                     scene={$sceneStore}
                     class="h-full w-full"
@@ -562,8 +713,6 @@
                     {camera}
                     {tilt}
                     {select}
-                    bind:mapWidth
-                    bind:mapHeight
                 />
             </div>
         </div>

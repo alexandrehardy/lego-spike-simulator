@@ -23,8 +23,10 @@
         UltraSoundSensor,
         ForceSensor
     } from '$lib/spike/vm';
+    import { sceneStore } from '$lib/spike/scene';
     import HubWidget from '$components/HubWidget.svelte';
     import RobotPreview from '$components/RobotPreview.svelte';
+    import ScenePreview from '$components/ScenePreview.svelte';
     import JSZip from 'jszip';
 
     export let runSimulation: boolean = false;
@@ -207,18 +209,19 @@
         />
         <input type="file" id="load_library" class="hidden" accept=".zip" on:change={loadLibrary} />
     {/key}
-    {#if !compiledRobot}
+    {#if !compiledRobot && !runSimulation}
         <div class="m-2">
-            Use LeoCad to create a model for your robot (<a
-                href="https://www.leocad.org/"
-                target="_blank">https://www.leocad.org/</a
+            Use LeoCad (<a href="https://www.leocad.org/" target="_blank">https://www.leocad.org/</a
+            >) to create a model for your robot or Bricklink Studio (<a
+                href="https://www.bricklink.com/v3/studio/download.page"
+                target="_blank">https://www.bricklink.com/v3/studio/download.page</a
             >). Then upload the robot.
         </div>
         <div class="m-2">
             <span
                 >Load the robot by clicking the
                 <img class="inline mx-2" alt="robot" width="32" height="32" src="icons/Robot.svg" />
-                icon. Then load the scene to run the robot in by clicking on the
+                icon. Then setup or load the scene to run the robot in by clicking on the
                 <img class="inline mx-2" alt="scene" width="32" height="32" src="icons/Scene.svg" />
                 icon.</span
             >
@@ -238,7 +241,7 @@
         </div>
     {/if}
 
-    <div class="w-full flex-1 relative" hidden={!compiledRobot}>
+    <div class="w-full flex-1 relative" hidden={!compiledRobot && !runSimulation}>
         <div class="flex flex-row w-full h-full">
             <div class="m-3 h-min">
                 <HubWidget
@@ -250,13 +253,26 @@
                     on:rightRelease={hubRightRelease}
                 />
             </div>
-            <RobotPreview
-                id="robot_preview"
-                class="flex-1 w-full h-full"
-                robotModel={$componentStore.robotModel}
-                bind:compiledRobot
-                enabled={!connectorOpen && !sceneOpen}
-            />
+            {#if runSimulation}
+                <ScenePreview
+                    id="scene_preview"
+                    scene={$sceneStore}
+                    class="h-full w-full"
+                    map={$sceneStore.map}
+                    rotate={false}
+                    camera="front"
+                    tilt={true}
+                    select="#all"
+                />
+            {:else}
+                <RobotPreview
+                    id="robot_preview"
+                    class="flex-1 w-full h-full"
+                    robotModel={$componentStore.robotModel}
+                    bind:compiledRobot
+                    enabled={!connectorOpen && !sceneOpen}
+                />
+            {/if}
         </div>
     </div>
 </div>

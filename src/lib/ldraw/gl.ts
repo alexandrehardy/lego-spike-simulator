@@ -1571,7 +1571,8 @@ export class WebGL {
         if (!this.mapPipeline) {
             return;
         }
-        const aspect = texture.height / texture.width;
+        const w = texture.width / 2;
+        const h = texture.height / 2;
         this.gl.useProgram(this.mapPipeline.program);
         this.gl.activeTexture(this.gl.TEXTURE0);
         this.gl.bindTexture(this.gl.TEXTURE_2D, texture.texture);
@@ -1589,40 +1590,40 @@ export class WebGL {
         }
         const vertices: number[] = [];
         const texcoords: number[] = [];
-        vertices.push(-1.0);
+        vertices.push(-w);
         vertices.push(0.0);
-        vertices.push(aspect);
+        vertices.push(h);
         vertices.push(1.0);
         texcoords.push(0.0);
         texcoords.push(0.0);
-        vertices.push(1.0);
+        vertices.push(w);
         vertices.push(0.0);
-        vertices.push(aspect);
+        vertices.push(h);
         vertices.push(1.0);
         texcoords.push(1.0);
         texcoords.push(0.0);
-        vertices.push(-1.0);
+        vertices.push(-w);
         vertices.push(0.0);
-        vertices.push(-aspect);
+        vertices.push(-h);
         vertices.push(1.0);
         texcoords.push(0.0);
         texcoords.push(1.0);
 
-        vertices.push(-1.0);
+        vertices.push(-w);
         vertices.push(0.0);
-        vertices.push(-aspect);
+        vertices.push(-h);
         vertices.push(1.0);
         texcoords.push(0.0);
         texcoords.push(1.0);
-        vertices.push(1.0);
+        vertices.push(w);
         vertices.push(0.0);
-        vertices.push(aspect);
+        vertices.push(h);
         vertices.push(1.0);
         texcoords.push(1.0);
         texcoords.push(0.0);
-        vertices.push(1.0);
+        vertices.push(w);
         vertices.push(0.0);
-        vertices.push(-aspect);
+        vertices.push(-h);
         vertices.push(1.0);
         texcoords.push(1.0);
         texcoords.push(1.0);
