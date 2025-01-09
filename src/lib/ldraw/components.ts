@@ -1,5 +1,6 @@
 import { ldrawColourMap, studioColourMap } from '$lib/ldraw/colours';
 import { writable } from 'svelte/store';
+import * as m4 from '$lib/ldraw/m4';
 import JSZip from 'jszip';
 
 let studioMode = false;
@@ -668,6 +669,43 @@ export function findParts(model: Model | undefined, partList: string[]): PartMat
         }
     }
     return result;
+}
+
+export function makeInverse(m: m4.Matrix4) {
+    // Simple inverse, for only rotations and translations.
+    // We invert the rotation by a transpose of the 3x3 matrix
+    // and negate the translation
+    //return m4.inverse(m);
+    return [  m[0],   m[4],   m[8],  0,
+              m[1],   m[5],   m[9],  0,
+              m[2],   m[6],   m[10], 0,
+             -m[12], -m[13], -m[14], 1 ];
+}
+
+export interface PartTransform {
+    forward: m4.Matrix4;
+    inverse: m4.Matrix4;
+    model: Model;
+}
+
+export function findPartTransform(model: Model | undefined, id: number): PartTransform | undefined {
+    if (!model) {
+        return undefined;
+    }
+    for (const subpart of model.subparts) {
+        if (subpart.id == id) {
+            return { forward: subpart.matrix, inverse: makeInverse(subpart.matrix), model: subpart.model };
+        } else {
+            if (subpart.model) {
+                const result = findPartTransform(subpart.model, id);
+                if (result) {
+                    const matrix = m4.multiply(subpart.matrix, result.forward);
+                    return { forward: matrix, inverse: makeInverse(matrix), model: result.model };
+                }
+            }
+        }
+    }
+    return undefined;
 }
 
 export function clearPorts(model: Model | undefined) {

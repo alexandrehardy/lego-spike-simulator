@@ -27,6 +27,7 @@
     import HubWidget from '$components/HubWidget.svelte';
     import RobotPreview from '$components/RobotPreview.svelte';
     import ScenePreview from '$components/ScenePreview.svelte';
+    import SensorView from '$components/SensorView.svelte';
     import JSZip from 'jszip';
 
     export let runSimulation: boolean = false;
@@ -40,6 +41,7 @@
     let hubImage = '0000000000000000000000000';
     let hubCentreButtonColour = '#ffffff';
     let compiledRobot: CompiledModel | undefined = undefined;
+    let lightSensorId: number | 'none' = 'none';
 
     const partNames: Record<string, string> = {
         '54696': 'motor',
@@ -145,6 +147,19 @@
             }
             hub.setEventHandler(handleHubEvent);
             hub.reset();
+            if (hub.ports.A.type == 'light') {
+                lightSensorId = hub.ports.A.id();
+            } else if (hub.ports.B.type == 'light') {
+                lightSensorId = hub.ports.B.id();
+            } else if (hub.ports.C.type == 'light') {
+                lightSensorId = hub.ports.C.id();
+            } else if (hub.ports.D.type == 'light') {
+                lightSensorId = hub.ports.D.id();
+            } else if (hub.ports.E.type == 'light') {
+                lightSensorId = hub.ports.E.id();
+            } else if (hub.ports.F.type == 'light') {
+                lightSensorId = hub.ports.F.id();
+            }
             const globals: Namespace = {};
             if (workspace) {
                 let variables = workspace.getVariablesOfType('Number');
@@ -164,6 +179,7 @@
                 hubImage = '0000000000000000000000000';
                 hubCentreButtonColour = '#ffffff';
             }
+            lightSensorId = 'none';
         }
     }
 
@@ -243,6 +259,7 @@
 
     <div class="w-full flex-1 relative" hidden={!compiledRobot && !runSimulation}>
         <div class="flex flex-row w-full h-full">
+            <div class="flex flex-col">
             <div class="m-3 h-min">
                 <HubWidget
                     image={hubImage}
@@ -252,6 +269,16 @@
                     on:leftRelease={hubLeftRelease}
                     on:rightRelease={hubRightRelease}
                 />
+            </div>
+            {#if runSimulation}
+                <SensorView
+                    id="sensor_view"
+                    scene={$sceneStore}
+                    class="h-28 w-28"
+                    map={$sceneStore.map}
+                    {lightSensorId}
+                    />
+{/if}
             </div>
             {#if runSimulation}
                 <ScenePreview

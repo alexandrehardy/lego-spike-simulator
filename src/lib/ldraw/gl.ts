@@ -29,6 +29,7 @@ export interface CompiledModel {
     triangleOffset: number;
     triangles: number;
     bbox: BBox;
+    recenter: Vector;
 }
 
 export interface CompileOptions {
@@ -75,6 +76,9 @@ export class WebGL {
     compiledLines: number;
     compiledTriangles: number;
     brightness: number;
+    perspectiveAngle: number;
+    mindist: number;
+    maxdist: number;
 
     static create(canvas: HTMLCanvasElement): WebGL | undefined {
         const gl = canvas.getContext('webgl');
@@ -107,6 +111,9 @@ export class WebGL {
         this.compiledLines = 0;
         this.compiledTriangles = 0;
         this.brightness = 1.0;
+        this.perspectiveAngle = 45;
+        this.mindist = 0.1;
+        this.maxdist = 1000.0;
         this.setupPipeline();
     }
 
@@ -1412,6 +1419,7 @@ export class WebGL {
         const maxDepth = options?.maxDepth ?? 1000;
         const wireframe = options?.wireframe ?? false;
         const selected = options?.select;
+        let roffset: Vector = {x:0, y:0, z:0};
         this.compiledLines = 0;
         this.compiledTriangles = 0;
         this.compileColours = [];
@@ -1471,6 +1479,7 @@ export class WebGL {
                 maxx -= midx;
                 maxy -= midy;
                 maxz -= midz;
+                roffset = {x: -midx, y: -midy, z: -midz};
             }
             if (rescale) {
                 let maxsize = maxx - minx;
@@ -1514,7 +1523,8 @@ export class WebGL {
             lines: this.compiledLines,
             triangleOffset: triangleOffset / 4,
             triangles: this.compiledTriangles,
-            bbox: { min: { x: minx, y: miny, z: minz }, max: { x: maxx, y: maxy, z: maxz } }
+            bbox: { min: { x: minx, y: miny, z: minz }, max: { x: maxx, y: maxy, z: maxz } },
+            recenter: roffset,
         };
         this.compileMatrix = m4.identity();
         this.compileColours = [];
@@ -1657,7 +1667,7 @@ export class WebGL {
         this.resizeCanvasToDisplaySize();
         this.gl.viewport(0, 0, this.canvas.width, this.canvas.height);
         const aspect = this.canvas.width / this.canvas.height;
-        this.setPerspective(45.0, aspect, 0.1, 1000.0);
+        this.setPerspective(this.perspectiveAngle, aspect, this.mindist, this.maxdist);
     }
 
     setupPipeline() {

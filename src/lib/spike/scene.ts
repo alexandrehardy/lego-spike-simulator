@@ -33,5 +33,25 @@ export const sceneStore = writable<SceneStore>({
     mapHeight: 1140
 });
 
+function copyObject(obj: SceneObject): SceneObject {
+    return {
+        anchored: obj.anchored,
+        bricks: obj.bricks,
+        position: obj.position ? { ...obj.position } : { x: 0, y: 0, z: 0 },
+        rotation: obj.rotation ?? 0,
+        name: obj.name
+    };
+}
+
+export function copyScene(scene: SceneStore): SceneStore {
+    return {
+        robot: copyObject(scene.robot),
+        objects: scene.objects.map((x) => copyObject(x)),
+        map: scene.map,
+        mapWidth: scene.mapWidth,
+        mapHeight: scene.mapHeight
+    };
+}
+
 // FLL table is 2434mm x 1145mm
 // Mat is 2360mm x 1140mm
