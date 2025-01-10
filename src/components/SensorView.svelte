@@ -3,7 +3,7 @@
     import { WebGL, type MapTexture } from '$lib/ldraw/gl';
     import { type SceneStore, type SceneObject } from '$lib/spike/scene';
     import * as m4 from '$lib/ldraw/m4';
-    import { findPartTransform } from '$lib/ldraw/components';
+    import { componentStore, findPartTransform, type Model } from '$lib/ldraw/components';
 
     export let id: string;
     export let scene: SceneStore;
@@ -15,7 +15,7 @@
     let droppedFrames = 0;
     let lastFrame: number = 0;
     let mapTexture: MapTexture | null = null;
-    let cameraMatrix: m4.Matrix4 = getCameraMatrix(lightSensorId);
+    let cameraMatrix: m4.Matrix4 = getCameraMatrix(lightSensorId, $componentStore.robotModel);
 
     function doRender(timestamp: number) {
         const frameTime = timestamp - lastFrame;
@@ -46,25 +46,26 @@
         gl.setModelIdentity();
         if (scene.robot) {
             const obj = scene.robot;
-            // Small offsets to place sensor view correctly
-            gl.translate(-26, 0, 51);
+            // Offset so the sensor isn't in view
+            gl.translate(0, 0, 17);
             gl.rotate(180.0, 0.0, 1.0, 0.0);
             gl.rotate(180.0, 1.0, 0.0, 0.0);
             const s = 1.0 / 0.4;
+            // Map back again to mm
             gl.scale(0.4);
             gl.multMatrix(cameraMatrix);
             // Map from mm to ldraw units
             gl.scale(s);
             gl.rotate(-180.0, 1.0, 0.0, 0.0);
+            if (obj.compiled) {
+                // The object may be recentered, adjust for that
+                gl.translate(-obj.compiled.recenter.x, -obj.compiled.recenter.y, -obj.compiled.recenter.z);
+            }
             if (obj.rotation) {
                 gl.rotate(-obj.rotation, 0.0, 1.0, 0.0);
             }
             if (obj.position) {
                 gl.translate(-obj.position.x, -obj.position.y, -obj.position.z);
-            }
-            if (obj.compiled) {
-                // The object may be recentered, adjust for that
-                gl.translate(-obj.compiled.recenter.x, -obj.compiled.recenter.y, -obj.compiled.recenter.z);
             }
         }
         gl.clearColour(0.0, 0.0, 0.0);
@@ -231,21 +232,24 @@
         }
     }
 
-    function getCameraMatrix(id: number | 'none'): m4.Matrix4 {
+    function getCameraMatrix(id: number | 'none', robot: Model | undefined): m4.Matrix4 {
         if (id === 'none') {
+            console.log('No id');
             return [1, 0, 0, 0,
                    0, 1, 0, 0,
                    0, 0, 1, 0,
                    0, 0, 0, 1];
         }
-        if (!scene.robot.bricks) {
+        if (!robot) {
+            console.log('No robot');
             return [1, 0, 0, 0,
                    0, 1, 0, 0,
                    0, 0, 1, 0,
                    0, 0, 0, 1];
         }
-        const result = findPartTransform(scene.robot.bricks, id);
+        const result = findPartTransform(robot, id);
         if (!result) {
+            console.log('Not found');
             return [1, 0, 0, 0,
                    0, 1, 0, 0,
                    0, 0, 1, 0,
@@ -254,7 +258,7 @@
         return result.inverse;
     }
 
-    $: cameraMatrix = getCameraMatrix(lightSensorId);
+    $: cameraMatrix = getCameraMatrix(lightSensorId, $componentStore.robotModel);
     $: resizeGL(scene);
     $: checkEnabled(enabled);
     $: loadMapTexture(scene.map);

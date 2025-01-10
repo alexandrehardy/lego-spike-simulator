@@ -675,11 +675,15 @@ export function makeInverse(m: m4.Matrix4) {
     // Simple inverse, for only rotations and translations.
     // We invert the rotation by a transpose of the 3x3 matrix
     // and negate the translation
-    //return m4.inverse(m);
-    return [  m[0],   m[4],   m[8],  0,
-              m[1],   m[5],   m[9],  0,
-              m[2],   m[6],   m[10], 0,
-             -m[12], -m[13], -m[14], 1 ];
+    const rotate = [ m[0],   m[4],   m[8],  0,
+                     m[1],   m[5],   m[9],  0,
+                     m[2],   m[6],   m[10], 0,
+                     0,      0,      0,     1];
+    const translate = [1,      0,      0,      0,
+                       0,      1,      0,      0,
+                       0,      0,      1,      0,
+                       -m[12], -m[13], -m[14], 1];
+    return m4.multiply(rotate, translate);
 }
 
 export interface PartTransform {
