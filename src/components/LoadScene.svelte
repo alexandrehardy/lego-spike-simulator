@@ -57,6 +57,7 @@
         });
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     function updateObjectsFromLibrary(unresolved: string[]) {
         sceneStore.update((old) => {
             const objects = Array.from(old.objects);

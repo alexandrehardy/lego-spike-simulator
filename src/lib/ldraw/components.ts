@@ -702,11 +702,13 @@ export function findPartTransform(model: Model | undefined, id: number): PartTra
     }
     for (const subpart of model.subparts) {
         if (subpart.id == id) {
-            return {
-                forward: subpart.matrix,
-                inverse: makeInverse(subpart.matrix),
-                model: subpart.model
-            };
+            if (subpart.model) {
+                return {
+                    forward: subpart.matrix,
+                    inverse: makeInverse(subpart.matrix),
+                    model: subpart.model
+                };
+            }
         } else {
             if (subpart.model) {
                 const result = findPartTransform(subpart.model, id);

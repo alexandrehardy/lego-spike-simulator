@@ -2,6 +2,7 @@
     import { onDestroy, onMount } from 'svelte';
     import { WebGL, type MapTexture } from '$lib/ldraw/gl';
     import { type SceneStore, type SceneObject } from '$lib/spike/scene';
+    import { Hub, type PortType } from '$lib/spike/vm';
     import * as m4 from '$lib/ldraw/m4';
     import { componentStore, findPartTransform, type Model } from '$lib/ldraw/components';
 
@@ -9,6 +10,8 @@
     export let scene: SceneStore;
     export let enabled = true;
     export let lightSensorId: number | 'none' = 'none';
+    export let port: 'A' | 'B' | 'C' | 'D' | 'E' | 'F';
+    export let hub: Hub;
 
     let canRender = false;
     let gl: WebGL | undefined;

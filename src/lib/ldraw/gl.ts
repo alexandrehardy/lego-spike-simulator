@@ -29,7 +29,7 @@ export interface CompiledModel {
     triangleOffset: number;
     triangles: number;
     bbox: BBox;
-    recenter: Vector;
+    recenter: Vertex;
 }
 
 export interface CompileOptions {
@@ -1419,7 +1419,7 @@ export class WebGL {
         const maxDepth = options?.maxDepth ?? 1000;
         const wireframe = options?.wireframe ?? false;
         const selected = options?.select;
-        let roffset: Vector = { x: 0, y: 0, z: 0 };
+        let roffset: Vertex = { x: 0, y: 0, z: 0 };
         this.compiledLines = 0;
         this.compiledTriangles = 0;
         this.compileColours = [];

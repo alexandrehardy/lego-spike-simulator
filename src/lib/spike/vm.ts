@@ -886,15 +886,27 @@ export class ForceSensor {
     }
 }
 
+export interface Measure {
+    force: number;
+    distance: number;
+    colour: string;
+}
+
 export class Port {
     type: 'none' | 'force' | 'distance' | 'light' | 'motor';
     motor?: Motor;
     light?: LightSensor;
     ultra?: UltraSoundSensor;
     force?: ForceSensor;
+    measure: Measure;
 
     constructor(type: 'none' | 'force' | 'distance' | 'light' | 'motor') {
         this.type = type;
+        this.measure = { colour: '#000000', distance: 10000.0, force: 0.0 };
+    }
+
+    reset() {
+        this.measure = { colour: '#000000', distance: 10000.0, force: 0.0 };
     }
 
     id(): number | 'none' {
@@ -957,6 +969,12 @@ export class Hub {
         this.screen = '0000000000000000000000000';
         this.screenBrightness = 0;
         this.buttonColour = '#ffffff';
+        this.ports.A.reset();
+        this.ports.B.reset();
+        this.ports.C.reset();
+        this.ports.D.reset();
+        this.ports.E.reset();
+        this.ports.F.reset();
     }
 
     constructor() {
@@ -995,6 +1013,18 @@ export class Hub {
         if (this.eventHandler) {
             this.eventHandler('hubButtonColour', colour);
         }
+    }
+
+    measureColour(port: PortType, colour: string) {
+        this.ports[port].measure.colour = colour;
+    }
+
+    measureDistance(port: PortType, distance: number) {
+        this.ports[port].measure.distance = distance;
+    }
+
+    measureForce(port: PortType, force: number) {
+        this.ports[port].measure.force = force;
     }
 }
 
