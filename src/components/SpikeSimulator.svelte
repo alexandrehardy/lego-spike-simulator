@@ -260,25 +260,25 @@
     <div class="w-full flex-1 relative" hidden={!compiledRobot && !runSimulation}>
         <div class="flex flex-row w-full h-full">
             <div class="flex flex-col">
-            <div class="m-3 h-min">
-                <HubWidget
-                    image={hubImage}
-                    centreButtonColour={hubCentreButtonColour}
-                    on:leftPress={hubLeftPress}
-                    on:rightPress={hubRightPress}
-                    on:leftRelease={hubLeftRelease}
-                    on:rightRelease={hubRightRelease}
-                />
-            </div>
-            {#if runSimulation}
-                <SensorView
-                    id="sensor_view"
-                    scene={$sceneStore}
-                    class="h-28 w-28"
-                    map={$sceneStore.map}
-                    {lightSensorId}
+                <div class="m-3 h-min">
+                    <HubWidget
+                        image={hubImage}
+                        centreButtonColour={hubCentreButtonColour}
+                        on:leftPress={hubLeftPress}
+                        on:rightPress={hubRightPress}
+                        on:leftRelease={hubLeftRelease}
+                        on:rightRelease={hubRightRelease}
                     />
-{/if}
+                </div>
+                {#if runSimulation}
+                    <SensorView
+                        id="sensor_view"
+                        scene={$sceneStore}
+                        class="h-28 w-28"
+                        map={$sceneStore.map}
+                        {lightSensorId}
+                    />
+                {/if}
             </div>
             {#if runSimulation}
                 <ScenePreview

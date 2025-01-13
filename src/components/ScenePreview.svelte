@@ -10,6 +10,7 @@
     export let camera: 'top' | 'left' | 'right' | 'front' | 'back';
     export let tilt = true;
     export let rotate = false;
+    export let unresolved: string[] = [];
 
     let canRender = false;
     let gl: WebGL | undefined;
@@ -177,8 +178,11 @@
         }
     }
 
-    function loadRobot(robot: SceneObject, forceCompile: boolean) {
+    function loadRobot(robot: SceneObject, forceCompile: boolean, unresolved: string[]) {
         if (!gl) {
+            return;
+        }
+        if (unresolved.length > 0) {
             return;
         }
         const obj = robot;
@@ -196,8 +200,11 @@
         }
     }
 
-    function loadSceneItems(objects: SceneObject[], forceCompile: boolean) {
+    function loadSceneItems(objects: SceneObject[], forceCompile: boolean, unresolved: string[]) {
         if (!gl) {
+            return;
+        }
+        if (unresolved.length > 0) {
             return;
         }
         for (const obj of objects) {
@@ -218,8 +225,8 @@
             gl = WebGL.create(canvas as HTMLCanvasElement);
             if (gl) {
                 resizeGL(scene);
-                loadSceneItems(scene.objects, true);
-                loadRobot(scene.robot, true);
+                loadSceneItems(scene.objects, true, unresolved);
+                loadRobot(scene.robot, true, unresolved);
                 loadMapTexture(scene.map);
             }
             canRender = true;
@@ -250,8 +257,8 @@
     $: checkEnabled(enabled);
     $: loadMapTexture(scene.map);
     $: setMapSize(scene);
-    $: loadSceneItems(scene.objects, false);
-    $: loadRobot(scene.robot, false);
+    $: loadSceneItems(scene.objects, false, unresolved);
+    $: loadRobot(scene.robot, false, unresolved);
 </script>
 
 <canvas {id} class={$$props.class}></canvas>

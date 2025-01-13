@@ -1419,7 +1419,7 @@ export class WebGL {
         const maxDepth = options?.maxDepth ?? 1000;
         const wireframe = options?.wireframe ?? false;
         const selected = options?.select;
-        let roffset: Vector = {x:0, y:0, z:0};
+        let roffset: Vector = { x: 0, y: 0, z: 0 };
         this.compiledLines = 0;
         this.compiledTriangles = 0;
         this.compileColours = [];
@@ -1479,7 +1479,7 @@ export class WebGL {
                 maxx -= midx;
                 maxy -= midy;
                 maxz -= midz;
-                roffset = {x: -midx, y: -midy, z: -midz};
+                roffset = { x: -midx, y: -midy, z: -midz };
             }
             if (rescale) {
                 let maxsize = maxx - minx;
@@ -1524,7 +1524,7 @@ export class WebGL {
             triangleOffset: triangleOffset / 4,
             triangles: this.compiledTriangles,
             bbox: { min: { x: minx, y: miny, z: minz }, max: { x: maxx, y: maxy, z: maxz } },
-            recenter: roffset,
+            recenter: roffset
         };
         this.compileMatrix = m4.identity();
         this.compileColours = [];

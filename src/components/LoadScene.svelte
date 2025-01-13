@@ -1,7 +1,13 @@
 <script lang="ts">
     import { onDestroy, onMount } from 'svelte';
     import { Button, Input, Modal } from 'flowbite-svelte';
-    import { type Model, loadModel, setStudioMode, componentStore } from '$lib/ldraw/components';
+    import {
+        type Model,
+        loadModel,
+        setStudioMode,
+        componentStore,
+        updateUnresolvedParts
+    } from '$lib/ldraw/components';
     import { sceneStore, type SceneStore, type SceneObject } from '$lib/spike/scene';
     import { EditOutline, TrashBinOutline } from 'flowbite-svelte-icons';
     import ScenePreview from '$components/ScenePreview.svelte';
@@ -27,6 +33,7 @@
     let menu = prepareMenu(rotate, tilt, camera, select, $sceneStore);
     $: menu = prepareMenu(rotate, tilt, camera, select, $sceneStore);
     $: setRobotModel($componentStore.robotModel);
+    $: updateObjectsFromLibrary($componentStore.unresolved);
 
     function toggleRotate() {
         rotate = !rotate;
@@ -46,6 +53,16 @@
             return {
                 ...old,
                 robot: newRobot
+            };
+        });
+    }
+
+    function updateObjectsFromLibrary(unresolved: string[]) {
+        sceneStore.update((old) => {
+            const objects = Array.from(old.objects);
+            return {
+                ...old,
+                objects: objects
             };
         });
     }
@@ -165,6 +182,13 @@
         });
     }
 
+    function loadLibrary() {
+        const element = document.getElementById('load_library');
+        if (element) {
+            element.click();
+        }
+    }
+
     function prepareMenu(
         rotate: boolean,
         tilt: boolean,
@@ -189,7 +213,8 @@
             actions: [
                 { name: 'Load mat', action: () => loadBackgroundMap() },
                 { name: 'Load object', action: () => loadObject() },
-                { name: 'Load full scene', action: () => loadScene() }
+                { name: 'Load full scene', action: () => loadScene() },
+                { name: 'Load missing parts', action: () => loadLibrary() }
             ]
         });
         menu.push({
@@ -394,6 +419,7 @@
                     if (objFile) {
                         const content = await objFile.async('string');
                         const model = loadModel(obj.name, content);
+                        updateUnresolvedParts();
                         objects.push({
                             anchored: obj.anchored,
                             position: obj.position,
@@ -440,6 +466,7 @@
                             try {
                                 setStudioMode(true);
                                 const model = loadModel(first.name, content);
+                                updateUnresolvedParts();
                                 sceneStore.update((old) => {
                                     return {
                                         ...old,
@@ -459,6 +486,7 @@
                         }
                     } else {
                         const model = loadModel(first.name, await first.text());
+                        updateUnresolvedParts();
                         sceneStore.update((old) => {
                             return {
                                 ...old,
@@ -614,8 +642,13 @@
         <Menu {menu} class="absolute z-50" />
         <div class="flex flex-row flex-1 relative">
             <div class="flex-1 h-full relative">
-                {#if selectedText}
+                {#if selectedText && $componentStore.unresolved.length == 0}
                     <div class="absolute right-0 top-0 text-white mx-2 my-1">{selectedText}</div>
+                {/if}
+                {#if $componentStore.unresolved.length > 0}
+                    <div class="absolute right-0 top-0 text-red-600 bg-white px-2 mx-2 my-1">
+                        Missing parts: {$componentStore.unresolved.length}
+                    </div>
                 {/if}
                 <div class="absolute left-0 top-0 h-full w-full" hidden={!renameObject}>
                     {#if renameObject}
@@ -706,6 +739,7 @@
                 {/if}
                 <ScenePreview
                     id="scene_preview"
+                    unresolved={$componentStore.unresolved}
                     scene={$sceneStore}
                     class="h-full w-full"
                     map={mapFile}

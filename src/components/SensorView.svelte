@@ -59,7 +59,11 @@
             gl.rotate(-180.0, 1.0, 0.0, 0.0);
             if (obj.compiled) {
                 // The object may be recentered, adjust for that
-                gl.translate(-obj.compiled.recenter.x, -obj.compiled.recenter.y, -obj.compiled.recenter.z);
+                gl.translate(
+                    -obj.compiled.recenter.x,
+                    -obj.compiled.recenter.y,
+                    -obj.compiled.recenter.z
+                );
             }
             if (obj.rotation) {
                 gl.rotate(-obj.rotation, 0.0, 1.0, 0.0);
@@ -234,26 +238,14 @@
 
     function getCameraMatrix(id: number | 'none', robot: Model | undefined): m4.Matrix4 {
         if (id === 'none') {
-            console.log('No id');
-            return [1, 0, 0, 0,
-                   0, 1, 0, 0,
-                   0, 0, 1, 0,
-                   0, 0, 0, 1];
+            return [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
         }
         if (!robot) {
-            console.log('No robot');
-            return [1, 0, 0, 0,
-                   0, 1, 0, 0,
-                   0, 0, 1, 0,
-                   0, 0, 0, 1];
+            return [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
         }
         const result = findPartTransform(robot, id);
         if (!result) {
-            console.log('Not found');
-            return [1, 0, 0, 0,
-                   0, 1, 0, 0,
-                   0, 0, 1, 0,
-                   0, 0, 0, 1];
+            return [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
         }
         return result.inverse;
     }
