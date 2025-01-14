@@ -37,7 +37,7 @@
     export let hub = new Hub();
 
     interface SensorView {
-        id: string;
+        id: number | 'none';
         port: PortType;
         type: string;
     }

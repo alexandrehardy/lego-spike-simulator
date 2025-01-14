@@ -1,5 +1,5 @@
 import * as Blockly from 'blockly/core';
-import { selectedAudio, type AudioDialog } from '$lib/blockly/audio';
+import { selectAudio, selectedAudio, type AudioDialog } from '$lib/blockly/audio';
 
 export type MenuOption = [string, string];
 
@@ -19,6 +19,22 @@ export class FieldSound extends Blockly.FieldDropdown {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars,@typescript-eslint/no-explicit-any
     static fromJson(config: Record<string, any>) {
         return new this();
+    }
+
+    protected override doClassValidation_(newValue: string): string | null | undefined;
+    protected override doClassValidation_(newValue?: string): string | null;
+    protected override doClassValidation_(newValue?: string): string | null | undefined {
+        if (newValue) {
+            const source = JSON.parse(newValue);
+            if (!source?.name) {
+                return;
+            }
+            selectAudio(source.name);
+        }
+        // Regenerate options
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const options = this.getOptions(false);
+        return newValue;
     }
 
     protected onItemSelected_(menu: Blockly.Menu, menuItem: Blockly.MenuItem) {

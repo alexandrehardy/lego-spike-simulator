@@ -1904,13 +1904,13 @@ export class WebGL {
 
     getColourBuffer() {
         const pixels = new Uint8Array(this.gl.drawingBufferWidth * this.gl.drawingBufferHeight * 4);
-        gl.readPixels(
+        this.gl.readPixels(
             0,
             0,
-            gl.drawingBufferWidth,
-            gl.drawingBufferHeight,
-            gl.RGBA,
-            gl.UNSIGNED_BYTE,
+            this.gl.drawingBufferWidth,
+            this.gl.drawingBufferHeight,
+            this.gl.RGBA,
+            this.gl.UNSIGNED_BYTE,
             pixels
         );
         return pixels;
