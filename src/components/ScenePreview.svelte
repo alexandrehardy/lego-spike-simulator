@@ -7,7 +7,7 @@
     export let scene: SceneStore;
     export let enabled = true;
     export let select: string | undefined = undefined;
-    export let camera: 'top' | 'left' | 'right' | 'front' | 'back';
+    export let camera: 'top' | 'left' | 'right' | 'front' | 'back' | 'adaptive';
     export let tilt = true;
     export let rotate = false;
     export let unresolved: string[] = [];
@@ -54,7 +54,13 @@
         if (tilt) {
             gl.rotate(45, 1.0, 0.0, 0.0);
         }
-        if (camera == 'top') {
+        if (camera == 'adaptive') {
+            if (gl.getCanvasAspect() >= 1.0) {
+                gl.rotate(0, 0.0, 1.0, 0.0);
+            } else {
+                gl.rotate(90, 0.0, 1.0, 0.0);
+            }
+        } else if (camera == 'top') {
             gl.rotate(90, 1.0, 0.0, 0.0);
         } else if (camera == 'left') {
             gl.rotate(90, 0.0, 1.0, 0.0);

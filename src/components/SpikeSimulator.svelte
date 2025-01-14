@@ -27,7 +27,7 @@
     import HubWidget from '$components/HubWidget.svelte';
     import RobotPreview from '$components/RobotPreview.svelte';
     import ScenePreview from '$components/ScenePreview.svelte';
-    import SensorView from '$components/SensorView.svelte';
+    import ColourSensor from '$components/ColourSensor.svelte';
     import JSZip from 'jszip';
 
     export let runSimulation: boolean = false;
@@ -36,11 +36,18 @@
     export let sceneOpen = false;
     export let hub = new Hub();
 
+    interface SensorView {
+        id: string;
+        port: PortType;
+        type: string;
+    }
+
     let numberOfLoads = 0;
     let vm: VM | undefined;
     let hubImage = '0000000000000000000000000';
     let hubCentreButtonColour = '#ffffff';
     let compiledRobot: CompiledModel | undefined = undefined;
+    let sensors: SensorView[] = [];
     let lightSensorId: number | 'none' = 'none';
     let lightSensorPort: PortType = 'A';
 
@@ -148,6 +155,26 @@
             }
             hub.setEventHandler(handleHubEvent);
             hub.reset();
+            let sensorList: SensorView[] = [];
+            if (hub.ports.A.type != 'none') {
+                sensorList.push({ id: hub.ports.A.id(), port: 'A', type: hub.ports.A.type });
+            }
+            if (hub.ports.B.type != 'none') {
+                sensorList.push({ id: hub.ports.B.id(), port: 'B', type: hub.ports.B.type });
+            }
+            if (hub.ports.C.type != 'none') {
+                sensorList.push({ id: hub.ports.C.id(), port: 'C', type: hub.ports.C.type });
+            }
+            if (hub.ports.D.type != 'none') {
+                sensorList.push({ id: hub.ports.D.id(), port: 'D', type: hub.ports.D.type });
+            }
+            if (hub.ports.E.type != 'none') {
+                sensorList.push({ id: hub.ports.E.id(), port: 'E', type: hub.ports.E.type });
+            }
+            if (hub.ports.F.type != 'none') {
+                sensorList.push({ id: hub.ports.F.id(), port: 'F', type: hub.ports.F.type });
+            }
+            sensors = sensorList;
             if (hub.ports.A.type == 'light') {
                 lightSensorId = hub.ports.A.id();
                 lightSensorPort = 'A';
@@ -278,15 +305,24 @@
                     />
                 </div>
                 {#if runSimulation}
-                    <SensorView
-                        id="sensor_view"
-                        scene={$sceneStore}
-                        class="h-28 w-28"
-                        map={$sceneStore.map}
-                        {lightSensorId}
-                        {hub}
-                        port={lightSensorPort}
-                    />
+                    {#each sensors as sensor}
+                        {#if sensor.type == 'light'}
+                            Port {sensor.port}: Colour sensor
+                            <ColourSensor
+                                id={`sensor_view_${sensor.port}`}
+                                scene={$sceneStore}
+                                class="h-28 w-28"
+                                map={$sceneStore.map}
+                                lightSensorId={sensor.id}
+                                {hub}
+                                port={sensor.port}
+                            />
+                        {:else if sensor.type == 'force'}
+                            Port {sensor.port}: Force sensor
+                        {:else if sensor.type == 'distance'}
+                            Port {sensor.port}: Distance sensor
+                        {/if}
+                    {/each}
                 {/if}
             </div>
             {#if runSimulation}
@@ -296,7 +332,7 @@
                     class="h-full w-full"
                     map={$sceneStore.map}
                     rotate={false}
-                    camera="front"
+                    camera="adaptive"
                     tilt={true}
                     select="#all"
                 />

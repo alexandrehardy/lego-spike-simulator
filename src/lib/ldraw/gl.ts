@@ -1901,4 +1901,30 @@ export class WebGL {
     deleteTexture(t: WebGLTexture) {
         this.gl.deleteTexture(t);
     }
+
+    getColourBuffer() {
+        const pixels = new Uint8Array(this.gl.drawingBufferWidth * this.gl.drawingBufferHeight * 4);
+        gl.readPixels(
+            0,
+            0,
+            gl.drawingBufferWidth,
+            gl.drawingBufferHeight,
+            gl.RGBA,
+            gl.UNSIGNED_BYTE,
+            pixels
+        );
+        return pixels;
+    }
+
+    getCanvasWidth() {
+        return this.canvas.width;
+    }
+
+    getCanvasHeight() {
+        return this.canvas.height;
+    }
+
+    getCanvasAspect() {
+        return this.canvas.width / this.canvas.height;
+    }
 }
