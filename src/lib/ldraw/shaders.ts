@@ -26,7 +26,7 @@ export const lego_fragment_shader = `
       void main() {
         // gl_FragColor is a special variable a fragment shader
         // is responsible for setting
-        gl_FragColor = v_colour;
+        gl_FragColor = vec4(v_colour.rgb, gl_FragCoord.z);
         // gl_FragDepth is used to specify the depth value
         // it is taken from gl_FragCoord.z by default
       }
@@ -62,6 +62,7 @@ export const map_fragment_shader = `
         // gl_FragColor is a special variable a fragment shader
         // is responsible for setting
         vec4 colour = texture2D(sampler, v_texture);
-        gl_FragColor = vec4(colour.rgb * brightness, colour.a);
+        // store the depth in the alpha channel
+        gl_FragColor = vec4(colour.rgb * brightness, gl_FragCoord.z);
       }
 `;
