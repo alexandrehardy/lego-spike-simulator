@@ -20,6 +20,42 @@
     let mapTexture: MapTexture | null = null;
     let cameraMatrix: m4.Matrix4 = getCameraMatrix(lightSensorId, $componentStore.robotModel);
 
+    interface HistogramEntry {
+        k: string;
+        v: number;
+    }
+
+    function reportSensor(gl: WebGL) {
+        const buffer = gl.getColourBuffer();
+        const histogram = new Map<string, number>();
+        for (let i = 0; i < buffer.length; i += 4) {
+            const r = buffer[i + 0];
+            const g = buffer[i + 1];
+            const b = buffer[i + 2];
+            const a = buffer[i + 3];
+            if (r == 51 && g == 0 && b == 51) {
+                // Background colour (0.2, 0.0, 0.2)
+                continue;
+            }
+            const c = (r << 16) + (g << 8) + b;
+            const h = '#' + c.toString(16);
+            histogram.set(h, (histogram.get(h) ?? 0) + 1);
+        }
+
+        const histogramArray: HistogramEntry[] = [];
+        for (const [key, value] of histogram) {
+            histogramArray.push({ k: key, v: value });
+        }
+        histogramArray.sort((a, b) => b.v - a.v);
+        if (histogramArray.length > 0) {
+            const sense = histogramArray[0].k;
+            hub.measureColour(port, sense);
+        } else {
+            const sense = '#330033';
+            hub.measureColour(port, sense);
+        }
+    }
+
     function doRender(timestamp: number) {
         const frameTime = timestamp - lastFrame;
         // Aim for 30 fps
@@ -30,6 +66,9 @@
         }
         lastFrame = timestamp;
         renderScene();
+        if (gl) {
+            reportSensor(gl);
+        }
         if (canRender && enabled) {
             requestAnimationFrame(doRender);
         }
@@ -75,9 +114,9 @@
                 gl.translate(-obj.position.x, -obj.position.y, -obj.position.z);
             }
         }
-        gl.clearColour(0.0, 0.0, 0.0);
+        // Use an odd background colour to make it easy to recognise
+        gl.clearColour(0.2, 0.0, 0.2);
         gl.clear();
-        // Make unit meters
         if (mapTexture) {
             gl.setBrightness(1.0);
             gl.pushMatrix();

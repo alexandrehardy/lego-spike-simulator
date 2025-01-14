@@ -9,6 +9,19 @@ export const fontEmbedsSpace = false;
 let stepSleep = 1000;
 let timeFactor = 1.0;
 
+let colours = {
+    '1': '#e700a7',
+    '3': '#0090f5',
+    '4': '#77e8ff',
+    '6': '#00a845',
+    //'7': '#f5da5d',
+    '7': '#ffec6c', // We don't have the same colour...
+    '9': '#ff000c',
+    '10': '#ffffff',
+    '0': '#000000',
+    '-1': '#330033'
+};
+
 export interface CompiledCode {
     events: Map<string, EventStatement>;
     procedures: Map<string, ProcedureBlock>;
@@ -446,7 +459,17 @@ export class EventStatement extends Statement {
             }
             return false;
         } else if (this.opcode == 'flipperevents_whenColor') {
-            console.log(`Need code ${this.opcode}`);
+            const portString = this.arguments[0].evaluate(thread).getString();
+            const value = this.arguments[1].evaluate(thread).getString();
+            const port = portString as 'A' | 'B' | 'C' | 'D' | 'E' | 'F';
+            const attachment = thread.vm.hub.ports[port];
+            if (attachment && attachment.type == 'light') {
+                // Correct sensor on the correct port
+                if (colours[value] === attachment.measure.colour) {
+                    return true;
+                }
+            }
+            return false;
         } else if (this.opcode == 'flipperevents_whenCondition') {
             console.log(`Need code ${this.opcode}`);
         } else if (this.opcode == 'flipperevents_whenDistance') {
@@ -701,10 +724,9 @@ export class FunctionExpression extends Expression {
             const attachment = thread.vm.hub.ports[port];
             if (attachment && attachment.type == 'light') {
                 // Correct sensor on the correct port
-                // Get the sensor from the robot model
-                // And cast some rays into the scene to sample
-                // for the colour.
-                console.log('GOOD TO GO');
+                if (colours[value] === attachment.measure.colour) {
+                    return new BooleanValue(true);
+                }
             }
             return new BooleanValue(false);
         } else {
@@ -819,7 +841,7 @@ export class ControlStatement extends Statement {
                 return;
             }
             let condition = this.condition.evaluate(thread);
-            while (condition.getBoolean()) {
+            while (!condition.getBoolean()) {
                 // give things time to change
                 // and avoid a very tight loop
                 await sleep(50);

@@ -49,6 +49,8 @@ export interface PipeLine {
     modelMatrixUniform: WebGLUniformLocation | null;
     samplerUniform: WebGLUniformLocation | null;
     brightnessUniform: WebGLUniformLocation | null;
+    nearUniform: WebGLUniformLocation | null;
+    farUniform: WebGLUniformLocation | null;
 }
 
 export interface MapTexture {
@@ -131,6 +133,12 @@ export class WebGL {
                 this.projectionMatrix
             );
         }
+        if (this.brickPipeline?.nearUniform) {
+            this.gl.uniform1f(this.brickPipeline.nearUniform, near);
+        }
+        if (this.brickPipeline?.farUniform) {
+            this.gl.uniform1f(this.brickPipeline.farUniform, far);
+        }
     }
 
     setFrustum(
@@ -149,6 +157,12 @@ export class WebGL {
                 this.projectionMatrix
             );
         }
+        if (this.brickPipeline?.nearUniform) {
+            this.gl.uniform1f(this.brickPipeline.nearUniform, near);
+        }
+        if (this.brickPipeline?.farUniform) {
+            this.gl.uniform1f(this.brickPipeline.farUniform, far);
+        }
     }
 
     setOrtho(left: number, right: number, bottom: number, top: number, near: number, far: number) {
@@ -159,6 +173,12 @@ export class WebGL {
                 false,
                 this.projectionMatrix
             );
+        }
+        if (this.brickPipeline?.nearUniform) {
+            this.gl.uniform1f(this.brickPipeline.nearUniform, near);
+        }
+        if (this.brickPipeline?.farUniform) {
+            this.gl.uniform1f(this.brickPipeline.farUniform, far);
         }
     }
 
@@ -255,6 +275,10 @@ export class WebGL {
 
     flush() {
         this.gl.flush();
+    }
+
+    finish() {
+        this.gl.finish();
     }
 
     setBrightness(brightness: number) {
@@ -1690,6 +1714,8 @@ export class WebGL {
                     legoProgram,
                     'projection_matrix'
                 );
+                const nearUniform = this.gl.getUniformLocation(legoProgram, 'near');
+                const farUniform = this.gl.getUniformLocation(legoProgram, 'far');
                 this.brickPipeline = {
                     program: legoProgram,
                     vertexAttribute: vertexAttribute,
@@ -1698,7 +1724,9 @@ export class WebGL {
                     projectionMatrixUniform: projectionMatrixUniform,
                     modelMatrixUniform: modelMatrixUniform,
                     samplerUniform: null,
-                    brightnessUniform: brightnessUniform
+                    brightnessUniform: brightnessUniform,
+                    nearUniform: nearUniform,
+                    farUniform: farUniform
                 };
                 this.pipeline = this.brickPipeline;
                 if (modelMatrixUniform) {
@@ -1748,7 +1776,9 @@ export class WebGL {
                     projectionMatrixUniform: projectionMatrixUniform,
                     modelMatrixUniform: modelMatrixUniform,
                     samplerUniform: samplerUniform,
-                    brightnessUniform: brightnessUniform
+                    brightnessUniform: brightnessUniform,
+                    nearUniform: null,
+                    farUniform: null
                 };
                 if (modelMatrixUniform) {
                     this.gl.uniformMatrix4fv(modelMatrixUniform, false, this.modelMatrix);
