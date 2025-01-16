@@ -2,7 +2,7 @@
     import { onDestroy, onMount } from 'svelte';
     import { WebGL, type MapTexture } from '$lib/ldraw/gl';
     import { type SceneStore, type SceneObject } from '$lib/spike/scene';
-    import { Hub, type PortType } from '$lib/spike/vm';
+    import { Hub, type PortType, VM } from '$lib/spike/vm';
     import * as m4 from '$lib/ldraw/m4';
     import { componentStore, findPartTransform, type Model } from '$lib/ldraw/components';
 
@@ -10,8 +10,9 @@
     export let scene: SceneStore;
     export let enabled = true;
     export let lightSensorId: number | 'none' = 'none';
-    export let port: 'A' | 'B' | 'C' | 'D' | 'E' | 'F';
+    export let port: PortType;
     export let hub: Hub;
+    export let vm: VM | undefined;
 
     let canRender = false;
     let gl: WebGL | undefined;
@@ -19,6 +20,7 @@
     let lastFrame: number = 0;
     let mapTexture: MapTexture | null = null;
     let cameraMatrix: m4.Matrix4 = getCameraMatrix(lightSensorId, $componentStore.robotModel);
+    let lastColour = '#330033';
 
     interface HistogramEntry {
         k: string;
@@ -32,7 +34,6 @@
             const r = buffer[i + 0];
             const g = buffer[i + 1];
             const b = buffer[i + 2];
-            const a = buffer[i + 3];
             if (r == 51 && g == 0 && b == 51) {
                 // Background colour (0.2, 0.0, 0.2)
                 continue;
@@ -49,10 +50,22 @@
         histogramArray.sort((a, b) => b.v - a.v);
         if (histogramArray.length > 0) {
             const sense = histogramArray[0].k;
-            hub.measureColour(port, sense);
+            if (lastColour != sense) {
+                hub.measureColour(port, sense);
+                lastColour = sense;
+                if (vm) {
+                    vm.runThreads();
+                }
+            }
         } else {
             const sense = '#330033';
-            hub.measureColour(port, sense);
+            if (lastColour != sense) {
+                hub.measureColour(port, sense);
+                lastColour = sense;
+                if (vm) {
+                    vm.runThreads();
+                }
+            }
         }
     }
 

@@ -217,7 +217,7 @@ spikeGenerator.forBlock['flipperlight_menu_orientation'] = function (block) {
 spikeGenerator.forBlock['flippermoremotor_menu_acceleration'] = function (block) {
     const selected = block.getFieldValue('field_flippermoremotor_menu_acceleration')!;
     const id = newId();
-    nodes.set(id, new Value('orient', block.id, selected));
+    nodes.set(id, new Value('accel', block.id, selected));
     return id;
 };
 spikeGenerator.forBlock['flippermoremotor_multiple-port-selector'] = function (block) {

@@ -48,8 +48,6 @@
     let hubCentreButtonColour = '#ffffff';
     let compiledRobot: CompiledModel | undefined = undefined;
     let sensors: SensorView[] = [];
-    let lightSensorId: number | 'none' = 'none';
-    let lightSensorPort: PortType = 'A';
 
     const partNames: Record<string, string> = {
         '54696': 'motor',
@@ -175,25 +173,6 @@
                 sensorList.push({ id: hub.ports.F.id(), port: 'F', type: hub.ports.F.type });
             }
             sensors = sensorList;
-            if (hub.ports.A.type == 'light') {
-                lightSensorId = hub.ports.A.id();
-                lightSensorPort = 'A';
-            } else if (hub.ports.B.type == 'light') {
-                lightSensorId = hub.ports.B.id();
-                lightSensorPort = 'B';
-            } else if (hub.ports.C.type == 'light') {
-                lightSensorId = hub.ports.C.id();
-                lightSensorPort = 'C';
-            } else if (hub.ports.D.type == 'light') {
-                lightSensorId = hub.ports.D.id();
-                lightSensorPort = 'D';
-            } else if (hub.ports.E.type == 'light') {
-                lightSensorId = hub.ports.E.id();
-                lightSensorPort = 'E';
-            } else if (hub.ports.F.type == 'light') {
-                lightSensorId = hub.ports.F.id();
-                lightSensorPort = 'F';
-            }
             const globals: Namespace = {};
             if (workspace) {
                 let variables = workspace.getVariablesOfType('Number');
@@ -213,7 +192,6 @@
                 hubImage = '0000000000000000000000000';
                 hubCentreButtonColour = '#ffffff';
             }
-            lightSensorId = 'none';
         }
     }
 
@@ -315,6 +293,7 @@
                                 map={$sceneStore.map}
                                 lightSensorId={sensor.id}
                                 {hub}
+                                {vm}
                                 port={sensor.port}
                             />
                         {:else if sensor.type == 'force'}

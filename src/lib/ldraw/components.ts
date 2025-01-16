@@ -107,7 +107,7 @@ function nextSubpartId() {
     return subpartId;
 }
 
-function hexColor(hex: string) {
+export function hexColor(hex: string) {
     const bigint = parseInt(hex.substring(1), 16);
     const r = (bigint >> 16) & 255;
     const g = (bigint >> 8) & 255;

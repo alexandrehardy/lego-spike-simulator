@@ -2,6 +2,8 @@ import * as Blockly from 'blockly/core';
 import { writable } from 'svelte/store';
 import { mbitfont } from '$lib/spike/font';
 import { SoundLibrary } from '$lib/blockly/audio';
+import { ldrawColours } from '$lib/ldraw/colours';
+import { hexColor } from '$lib/ldraw/components';
 
 export type PortType = 'A' | 'B' | 'C' | 'D' | 'E' | 'F';
 export const allPorts: PortType[] = ['A', 'B', 'C', 'D', 'E', 'F'];
@@ -9,16 +11,37 @@ export const fontEmbedsSpace = false;
 let stepSleep = 1000;
 let timeFactor = 1.0;
 
-let colours = {
-    '1': '#e700a7',
-    '3': '#0090f5',
-    '4': '#77e8ff',
-    '6': '#00a845',
-    //'7': '#f5da5d',
-    '7': '#ffec6c', // We don't have the same colour...
-    '9': '#ff000c',
-    '10': '#ffffff',
-    '0': '#000000',
+function getLdrawColour(hex: string): string {
+    const base = hexColor(hex);
+    let minError = 100.0;
+    let selected = hex;
+
+    for (const lColour of ldrawColours) {
+        const colour = hexColor(lColour.VALUE);
+        const error =
+            (colour.r - base.r) * (colour.r - base.r) +
+            (colour.g - base.g) * (colour.g - base.g) +
+            (colour.b - base.b) * (colour.b - base.b);
+        if (error < minError) {
+            minError = error;
+            selected = lColour.VALUE;
+        }
+    }
+
+    return selected.toLowerCase();
+}
+
+//TODO: All the colours need to be mapped to ldraw colours.
+// They don't exist in ldraw
+let colours: Record<string, string> = {
+    '1': getLdrawColour('#e700a7'),
+    '3': getLdrawColour('#0090f5'),
+    '4': getLdrawColour('#77e8ff'),
+    '6': getLdrawColour('#00a845'),
+    '7': getLdrawColour('#f5da5d'), //'#ffec6c', //'#f5da5d', // We don't have the same colour...
+    '9': getLdrawColour('#ff000c'),
+    '10': getLdrawColour('#ffffff'),
+    '0': getLdrawColour('#000000'),
     '-1': '#330033'
 };
 
@@ -59,6 +82,9 @@ export class Statement extends Node {
             // We should do a callback, but this should be rare
             // so we poll at 50ms interval
             await sleep(50);
+        }
+        if (thread.state == 'stopped') {
+            return;
         }
         try {
             this.highlight(thread);
@@ -182,9 +208,13 @@ export class ActionStatement extends Statement {
         return super._execute(thread);
     }
     async execute_flippercontrol(thread: Thread, op: string) {
-        return super._execute(thread);
-    }
-    async execute_flipperevents(thread: Thread, op: string) {
+        if (op == 'stop') {
+            thread.stop();
+            return;
+        } else if (op == 'stopOtherStacks') {
+            thread.vm.stopAllThreadsExcept(thread.id);
+            return;
+        }
         return super._execute(thread);
     }
     async execute_flipperlight(thread: Thread, op: string) {
@@ -251,7 +281,15 @@ export class ActionStatement extends Statement {
                 thread.vm.hub.setScreen(screen);
                 await thread.cancellable(vmSleep(200));
             }
+        } else if (op == 'lightDisplaySetBrightness') {
+            return super._execute(thread);
+        } else if (op == 'lightDisplaySetOrientation') {
+            return super._execute(thread);
         } else if (op == 'lightDisplayRotate') {
+            return super._execute(thread);
+        } else if (op == 'lightDisplaySetPixel') {
+            return super._execute(thread);
+        } else if (op == 'ultrasonicLightUp') {
             return super._execute(thread);
         } else if (op == 'centerButtonLight') {
             const colourIndex = this.arguments[0].evaluate(thread).getString();
@@ -278,6 +316,11 @@ export class ActionStatement extends Statement {
         }
     }
     async execute_flippermoremotor(thread: Thread, op: string) {
+        if (op == 'motorGoToRelativePosition') {
+        } else if (op == 'motorSetAcceleration') {
+        } else if (op == 'motorSetStopMethod') {
+        } else if (op == 'motorStartPower') {
+        }
         return super._execute(thread);
     }
     async execute_flippermoremove(thread: Thread, op: string) {
@@ -287,21 +330,34 @@ export class ActionStatement extends Statement {
         return super._execute(thread);
     }
     async execute_flippermotor(thread: Thread, op: string) {
+        if (op == 'motorGoDirectionToPosition') {
+        } else if (op == 'motorSetSpeed') {
+        } else if (op == 'motorStartDirection') {
+        } else if (op == 'motorStop') {
+        } else if (op == 'motorTurnForDirection') {
+        }
         return super._execute(thread);
     }
     async execute_flippermove(thread: Thread, op: string) {
+        if (op == 'move') {
+        } else if (op == 'movementSpeed') {
+        } else if (op == 'setDistance') {
+        } else if (op == 'setMovementPair') {
+        } else if (op == 'startMove') {
+        } else if (op == 'stopMove') {
+        } else if (op == 'startSteer') {
+        } else if (op == 'steer') {
+        }
         return super._execute(thread);
     }
     async execute_flippermusic(thread: Thread, op: string) {
-        return super._execute(thread);
-    }
-    async execute_flipperoperator(thread: Thread, op: string) {
         return super._execute(thread);
     }
     async execute_flippersensors(thread: Thread, op: string) {
         if (op == 'resetTimer') {
             thread.vm.resetTimer();
             return;
+        } else if (op == 'resetYaw') {
         }
         return super._execute(thread);
     }
@@ -364,6 +420,12 @@ export class ActionStatement extends Statement {
         return super._execute(thread);
     }
     async execute_sound(thread: Thread, op: string) {
+        if (op == 'changeeffectby') {
+        } else if (op == 'changevolumeby') {
+        } else if (op == 'cleareffects') {
+        } else if (op == 'seteffectto') {
+        } else if (op == 'setvolumeto') {
+        }
         return super._execute(thread);
     }
     async execute_weather(thread: Thread, op: string) {
@@ -388,8 +450,6 @@ export class ActionStatement extends Statement {
             await this.execute_event(thread, op);
         } else if (module == 'flippercontrol') {
             await this.execute_flippercontrol(thread, op);
-        } else if (module == 'flipperevents') {
-            await this.execute_flipperevents(thread, op);
         } else if (module == 'flipperlight') {
             await this.execute_flipperlight(thread, op);
         } else if (module == 'flippermoremotor') {
@@ -404,8 +464,6 @@ export class ActionStatement extends Statement {
             await this.execute_flippermove(thread, op);
         } else if (module == 'flippermusic') {
             await this.execute_flippermusic(thread, op);
-        } else if (module == 'flipperoperator') {
-            await this.execute_flipperoperator(thread, op);
         } else if (module == 'flippersensors') {
             await this.execute_flippersensors(thread, op);
         } else if (module == 'flippersound') {
@@ -471,7 +529,8 @@ export class EventStatement extends Statement {
             }
             return false;
         } else if (this.opcode == 'flipperevents_whenCondition') {
-            console.log(`Need code ${this.opcode}`);
+            const condition = this.arguments[0].evaluate(thread).getBoolean();
+            return condition;
         } else if (this.opcode == 'flipperevents_whenDistance') {
             console.log(`Need code ${this.opcode}`);
         } else if (this.opcode == 'flipperevents_whenGesture') {
@@ -512,7 +571,6 @@ export class CallStatement extends ActionStatement {
         thread.locals = {};
         for (let i = 0; i < this.arguments.length; i++) {
             const argName = procedureBlock.arguments[i].name;
-            console.log(this.arguments[i]);
             const value = this.arguments[i].evaluate(thread);
             thread.locals[argName] = value;
         }
@@ -729,6 +787,48 @@ export class FunctionExpression extends Expression {
                 }
             }
             return new BooleanValue(false);
+        } else if (this.opcode == 'flipperoperator_isInBetween') {
+            const value = this.arguments[0].evaluate(thread).getNumber();
+            const low = this.arguments[1].evaluate(thread).getNumber();
+            const high = this.arguments[2].evaluate(thread).getNumber();
+            // TODO: Include or exclude?
+            return new BooleanValue(low < value && value < high);
+        } else if (this.opcode == 'flippersensors_color') {
+            return super.evaluate(thread);
+        } else if (this.opcode == 'flippersensors_distance') {
+            return super.evaluate(thread);
+        } else if (this.opcode == 'flippersensors_force') {
+            return super.evaluate(thread);
+        } else if (this.opcode == 'flippersensors_isDistance') {
+            return super.evaluate(thread);
+        } else if (this.opcode == 'flippersensors_isPressed') {
+            return super.evaluate(thread);
+        } else if (this.opcode == 'flippersensors_isReflectivity') {
+            return super.evaluate(thread);
+        } else if (this.opcode == 'flippersensors_isTilted') {
+            return super.evaluate(thread);
+        } else if (this.opcode == 'flippersensors_ismotion') {
+            return super.evaluate(thread);
+        } else if (this.opcode == 'flippersensors_isorientation') {
+            return super.evaluate(thread);
+        } else if (this.opcode == 'flippersensors_orientationAxis') {
+            return super.evaluate(thread);
+        } else if (this.opcode == 'flippersensors_reflectivity') {
+            return super.evaluate(thread);
+        } else if (this.opcode == 'flippermoresensors_acceleration') {
+            return super.evaluate(thread);
+        } else if (this.opcode == 'flippermoresensors_angularVelocity') {
+            return super.evaluate(thread);
+        } else if (this.opcode == 'flippermoresensors_orientation') {
+            return super.evaluate(thread);
+        } else if (this.opcode == 'flippermoresensors_rawColor') {
+            return super.evaluate(thread);
+        } else if (this.opcode == 'flippermotor_absolutePosition') {
+            return super.evaluate(thread);
+        } else if (this.opcode == 'flippermotor_speed') {
+            return super.evaluate(thread);
+        } else if (this.opcode == 'sound_volume') {
+            return super.evaluate(thread);
         } else {
             return super.evaluate(thread);
         }
@@ -776,6 +876,9 @@ export class StatementBlock extends Statement {
     override async _execute(thread: Thread) {
         this.removeHighlight(thread);
         for (const statement of this.statements) {
+            if (thread.state == 'stopped') {
+                return;
+            }
             await statement.execute(thread);
         }
     }
@@ -815,6 +918,9 @@ export class ControlStatement extends Statement {
         if (this.opcode == 'while') {
             let condition = this.condition.evaluate(thread);
             while (condition.getBoolean()) {
+                if (thread.state == 'stopped') {
+                    return;
+                }
                 await this.statement.execute(thread);
                 // give things time to change
                 // and avoid a very tight loop
@@ -844,6 +950,9 @@ export class ControlStatement extends Statement {
             while (!condition.getBoolean()) {
                 // give things time to change
                 // and avoid a very tight loop
+                if (thread.state == 'stopped') {
+                    return;
+                }
                 await sleep(50);
                 condition = this.condition.evaluate(thread);
             }
@@ -866,6 +975,9 @@ export class RepeatStatement extends Statement {
         if (this.opcode == 'repeat') {
             const times = this.times.evaluate(thread);
             for (let i = 0; i < times.getNumber(); i++) {
+                if (thread.state == 'stopped') {
+                    return;
+                }
                 await this.statements.execute(thread);
             }
         } else {
@@ -1177,6 +1289,7 @@ export type Canceller = (obj: object) => void;
 export class ThreadStopped extends Error {}
 
 export class Thread {
+    id: string;
     vm: VM;
     globals: Namespace;
     locals: Namespace;
@@ -1186,7 +1299,8 @@ export class Thread {
     event: EventStatement;
     paused: boolean;
 
-    constructor(vm: VM, event: EventStatement, globals: Namespace) {
+    constructor(id: string, vm: VM, event: EventStatement, globals: Namespace) {
+        this.id = id;
         this.vm = vm;
         this.globals = globals;
         this.locals = {};
@@ -1341,7 +1455,7 @@ export class VM {
         for (const entry of Array.from(events.entries())) {
             const key = entry[0];
             const event = entry[1];
-            this.threads.set(key, new Thread(this, event, this.globals));
+            this.threads.set(key, new Thread(key, this, event, this.globals));
         }
     }
 
@@ -1360,6 +1474,15 @@ export class VM {
             thread.checkConditionAndExecute();
         }
         this.first = false;
+    }
+
+    stopAllThreadsExcept(key: string) {
+        for (const entry of Array.from(this.threads.entries())) {
+            const thread = entry[1];
+            if (thread.id !== key) {
+                thread.stop();
+            }
+        }
     }
 
     startNote(frequency: number, duration: number) {
