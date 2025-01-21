@@ -232,7 +232,10 @@ const substituteParts: Record<string, string> = {
     '37316c01.dat': '37316.dat',
     '54696c01.dat': '54696.dat',
     '54675c01.dat': '54675.dat',
-    '68488c01.dat': '68488.dat'
+    '68488c01.dat': '68488.dat',
+    '39367pb01.dat': '39367p01.dat', // wheel
+    '49295pb01.dat': '49295p01.dat', // wheel
+    '49295c01.dat': '49295p01.dat' // wheel
 };
 
 export function resolveSubpart(subpart: Subpart) {
