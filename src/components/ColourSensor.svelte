@@ -5,6 +5,7 @@
     import { type SceneStore, type SceneObject } from '$lib/spike/scene';
     import { Hub, type PortType, VM } from '$lib/spike/vm';
     import * as m4 from '$lib/ldraw/m4';
+    import { hexColor } from '$lib/ldraw/components';
     import { componentStore, findPartTransform, type Model } from '$lib/ldraw/components';
 
     export let id: string;
@@ -64,6 +65,9 @@
         if (override != 'none') {
             const sense = override;
             if (lastColour != sense) {
+                const c = hexColor(sense);
+                const r = Math.sqrt(c.r * c.r + c.g * c.g + c.b * c.b);
+                hub.measureReflected(port, r);
                 hub.measureColour(port, sense);
                 lastColour = sense;
                 if (vm) {
@@ -75,6 +79,8 @@
 
         const buffer = gl.getColourBuffer();
         const histogram = new Map<string, number>();
+        let avg = 0.0;
+        let count = 0;
         for (let i = 0; i < buffer.length; i += 4) {
             const r = buffer[i + 0];
             const g = buffer[i + 1];
@@ -83,10 +89,16 @@
                 // Background colour (0.2, 0.0, 0.2)
                 continue;
             }
-            const c = (r << 16) + (g << 8) + b;
-            const h = '#' + c.toString(16);
+            const ch = (r << 16) + (g << 8) + b;
+            const h = '#' + ch.toString(16);
+            const c = hexColor(h);
+            const reflect = Math.sqrt(c.r * c.r + c.g * c.g + c.b * c.b);
+            avg += reflect;
+            count++;
             histogram.set(h, (histogram.get(h) ?? 0) + 1);
         }
+        avg = avg / count;
+        hub.measureReflected(port, avg);
 
         const histogramArray: HistogramEntry[] = [];
         for (const [key, value] of histogram) {

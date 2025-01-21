@@ -2,7 +2,6 @@ import * as Blockly from 'blockly/core';
 import { writable } from 'svelte/store';
 import { mbitfont } from '$lib/spike/font';
 import { SoundLibrary } from '$lib/blockly/audio';
-import { ldrawColours } from '$lib/ldraw/colours';
 import { hexColor } from '$lib/ldraw/components';
 
 export type PortType = 'A' | 'B' | 'C' | 'D' | 'E' | 'F';
@@ -11,29 +10,7 @@ export const fontEmbedsSpace = false;
 let stepSleep = 1000;
 let timeFactor = 1.0;
 
-function getLdrawColour(hex: string): string {
-    const base = hexColor(hex);
-    let minError = 100.0;
-    let selected = hex;
-
-    for (const lColour of ldrawColours) {
-        const colour = hexColor(lColour.VALUE);
-        const error =
-            (colour.r - base.r) * (colour.r - base.r) +
-            (colour.g - base.g) * (colour.g - base.g) +
-            (colour.b - base.b) * (colour.b - base.b);
-        if (error < minError) {
-            minError = error;
-            selected = lColour.VALUE;
-        }
-    }
-
-    return selected.toLowerCase();
-}
-
-//TODO: All the colours need to be mapped to ldraw colours.
-// They don't exist in ldraw
-let colours: Record<string, string> = {
+const colours: Record<string, string> = {
     '1': '#901f76', // Bright reddish violet // Magenta
     '3': '#1e5aa8', // Blue
     '4': '#68c3e2', // Medium Azure
@@ -44,6 +21,16 @@ let colours: Record<string, string> = {
     '0': '#000000', // Black
     '-1': '#330033'
 };
+
+const coloursRev: Record<string, string> = {};
+coloursRev[colours['1']] = '1';
+coloursRev[colours['3']] = '3';
+coloursRev[colours['4']] = '4';
+coloursRev[colours['6']] = '6';
+coloursRev[colours['7']] = '7';
+coloursRev[colours['9']] = '9';
+coloursRev[colours['10']] = '10';
+coloursRev[colours['0']] = '0';
 
 export interface CompiledCode {
     events: Map<string, EventStatement>;
@@ -61,6 +48,24 @@ function sleep(ms: number): Promise<void> {
 
 function vmSleep(ms: number): Promise<void> {
     return sleep(Math.round(ms * timeFactor));
+}
+
+function setStepSleep(time: number) {
+    if (time > 0) {
+        stepSleep = time;
+    } else {
+        stepSleep = 0;
+    }
+}
+
+function setTimeFactor(factor: number) {
+    if (factor < 0.001) {
+        timeFactor = 0.001;
+    } else if (factor > 10) {
+        timeFactor = 10;
+    } else {
+        timeFactor = factor;
+    }
 }
 
 export class Node {
@@ -794,7 +799,15 @@ export class FunctionExpression extends Expression {
             // TODO: Include or exclude?
             return new BooleanValue(low < value && value < high);
         } else if (this.opcode == 'flippersensors_color') {
-            return super.evaluate(thread);
+            const portString = this.arguments[0].evaluate(thread).getString();
+            const port = portString as PortType;
+            const attachment = thread.vm.hub.ports[port];
+            const colour = coloursRev[attachment.measure.colour];
+            if (colour) {
+                return new StringValue(colour);
+            } else {
+                return new StringValue('-1');
+            }
         } else if (this.opcode == 'flippersensors_distance') {
             return super.evaluate(thread);
         } else if (this.opcode == 'flippersensors_force') {
@@ -804,7 +817,22 @@ export class FunctionExpression extends Expression {
         } else if (this.opcode == 'flippersensors_isPressed') {
             return super.evaluate(thread);
         } else if (this.opcode == 'flippersensors_isReflectivity') {
-            return super.evaluate(thread);
+            const portString = this.arguments[0].evaluate(thread).getString();
+            const compare = this.arguments[1].evaluate(thread).getString();
+            const value = this.arguments[2].evaluate(thread).getNumber();
+            const port = portString as PortType;
+            const attachment = thread.vm.hub.ports[port];
+            if (compare == '<') {
+                return new BooleanValue(attachment.measure.reflected * 100 < value);
+            } else if (compare == '>') {
+                return new BooleanValue(attachment.measure.reflected * 100 > value);
+            } else if (compare == '=') {
+                return new BooleanValue(
+                    Math.round(attachment.measure.reflected * 100) == Math.round(value)
+                );
+            } else {
+                return new BooleanValue(false);
+            }
         } else if (this.opcode == 'flippersensors_isTilted') {
             return super.evaluate(thread);
         } else if (this.opcode == 'flippersensors_ismotion') {
@@ -814,7 +842,10 @@ export class FunctionExpression extends Expression {
         } else if (this.opcode == 'flippersensors_orientationAxis') {
             return super.evaluate(thread);
         } else if (this.opcode == 'flippersensors_reflectivity') {
-            return super.evaluate(thread);
+            const portString = this.arguments[0].evaluate(thread).getString();
+            const port = portString as PortType;
+            const attachment = thread.vm.hub.ports[port];
+            return new NumberValue(attachment.measure.reflected * 100);
         } else if (this.opcode == 'flippermoresensors_acceleration') {
             return super.evaluate(thread);
         } else if (this.opcode == 'flippermoresensors_angularVelocity') {
@@ -1038,6 +1069,7 @@ export interface Measure {
     force: number;
     distance: number;
     colour: string;
+    reflected: number;
 }
 
 export class Port {
@@ -1050,11 +1082,11 @@ export class Port {
 
     constructor(type: 'none' | 'force' | 'distance' | 'light' | 'motor') {
         this.type = type;
-        this.measure = { colour: '#000000', distance: 10000.0, force: 0.0 };
+        this.measure = { colour: '#000000', distance: 10000.0, force: 0.0, reflected: 0.0 };
     }
 
     reset() {
-        this.measure = { colour: '#000000', distance: 10000.0, force: 0.0 };
+        this.measure = { colour: '#000000', distance: 10000.0, force: 0.0, reflected: 0.0 };
     }
 
     id(): number | 'none' {
@@ -1165,6 +1197,10 @@ export class Hub {
 
     measureColour(port: PortType, colour: string) {
         this.ports[port].measure.colour = colour;
+    }
+
+    measureReflected(port: PortType, reflected: number) {
+        this.ports[port].measure.reflected = reflected;
     }
 
     measureDistance(port: PortType, distance: number) {
