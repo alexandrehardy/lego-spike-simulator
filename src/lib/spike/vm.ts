@@ -34,14 +34,14 @@ function getLdrawColour(hex: string): string {
 //TODO: All the colours need to be mapped to ldraw colours.
 // They don't exist in ldraw
 let colours: Record<string, string> = {
-    '1': getLdrawColour('#e700a7'),
-    '3': getLdrawColour('#0090f5'),
-    '4': getLdrawColour('#77e8ff'),
-    '6': getLdrawColour('#00a845'),
-    '7': getLdrawColour('#f5da5d'), //'#ffec6c', //'#f5da5d', // We don't have the same colour...
-    '9': getLdrawColour('#ff000c'),
-    '10': getLdrawColour('#ffffff'),
-    '0': getLdrawColour('#000000'),
+    '1': '#901f76', // Bright reddish violet // Magenta
+    '3': '#1e5aa8', // Blue
+    '4': '#68c3e2', // Medium Azure
+    '6': '#00852b', // Green
+    '7': '#fac80a', // Yellow
+    '9': '#b40000', // Red
+    '10': '#f4f4f4', // White
+    '0': '#000000', // Black
     '-1': '#330033'
 };
 
@@ -519,7 +519,7 @@ export class EventStatement extends Statement {
         } else if (this.opcode == 'flipperevents_whenColor') {
             const portString = this.arguments[0].evaluate(thread).getString();
             const value = this.arguments[1].evaluate(thread).getString();
-            const port = portString as 'A' | 'B' | 'C' | 'D' | 'E' | 'F';
+            const port = portString as PortType;
             const attachment = thread.vm.hub.ports[port];
             if (attachment && attachment.type == 'light') {
                 // Correct sensor on the correct port
@@ -778,7 +778,7 @@ export class FunctionExpression extends Expression {
         } else if (this.opcode == 'flippersensors_isColor') {
             const portString = this.arguments[0].evaluate(thread).getString();
             const value = this.arguments[1].evaluate(thread).getString();
-            const port = portString as 'A' | 'B' | 'C' | 'D' | 'E' | 'F';
+            const port = portString as PortType;
             const attachment = thread.vm.hub.ports[port];
             if (attachment && attachment.type == 'light') {
                 // Correct sensor on the correct port
@@ -822,7 +822,21 @@ export class FunctionExpression extends Expression {
         } else if (this.opcode == 'flippermoresensors_orientation') {
             return super.evaluate(thread);
         } else if (this.opcode == 'flippermoresensors_rawColor') {
-            return super.evaluate(thread);
+            const portString = this.arguments[0].evaluate(thread).getString();
+            const channel = this.arguments[1].evaluate(thread).getString();
+            const port = portString as PortType;
+            const attachment = thread.vm.hub.ports[port];
+            if (attachment && attachment.type == 'light') {
+                const colour = hexColor(attachment.measure.colour);
+                if (channel == 'red') {
+                    return new NumberValue(Math.round(colour.r * 255.0));
+                } else if (channel == 'blue') {
+                    return new NumberValue(Math.round(colour.b * 255.0));
+                } else if (channel == 'green') {
+                    return new NumberValue(Math.round(colour.g * 255.0));
+                }
+            }
+            return new NumberValue(0);
         } else if (this.opcode == 'flippermotor_absolutePosition') {
             return super.evaluate(thread);
         } else if (this.opcode == 'flippermotor_speed') {

@@ -1,5 +1,6 @@
 <script lang="ts">
     import { onDestroy, onMount } from 'svelte';
+    import { Button, Dropdown, DropdownItem } from 'flowbite-svelte';
     import { WebGL, type MapTexture } from '$lib/ldraw/gl';
     import { type SceneStore, type SceneObject } from '$lib/spike/scene';
     import { Hub, type PortType, VM } from '$lib/spike/vm';
@@ -21,6 +22,38 @@
     let mapTexture: MapTexture | null = null;
     let cameraMatrix: m4.Matrix4 = getCameraMatrix(lightSensorId, $componentStore.robotModel);
     let lastColour = '#330033';
+    let override = 'none';
+    let overrideOpen = false;
+    let colours = [
+        { value: '#901f76', name: 'Magenta', icon: 'colours/Circle0.svg' },
+        { value: '#1e5aa8', name: 'Blue', icon: 'colours/Circle2.svg' },
+        { value: '#68c3e2', name: 'Medium Azure', icon: 'colours/Circle3.svg' },
+        { value: '#00852b', name: 'Green', icon: 'colours/Circle5.svg' },
+        { value: '#fac80a', name: 'Yellow', icon: 'colours/Circle6.svg' },
+        { value: '#b40000', name: 'Red', icon: 'colours/Circle8.svg' },
+        { value: '#f4f4f4', name: 'White', icon: 'colours/Circle9.svg' },
+        { value: '#000000', name: 'Black', icon: 'colours/Circle10.svg' },
+        { value: '#330033', name: 'Background', icon: 'colours/CircleNone.svg' },
+        { value: 'none', name: 'Sensor', icon: 'icons/SensorLight.svg' }
+    ];
+
+    let colourGrid = computeGrid(colours, 4);
+
+    function computeGrid(a: any[], cols: number) {
+        let row = [];
+        const rows = [];
+        for (const item of a) {
+            row.push(item);
+            if (row.length >= cols) {
+                rows.push(row);
+                row = [];
+            }
+        }
+        if (row.length > 0) {
+            rows.push(row);
+        }
+        return rows;
+    }
 
     interface HistogramEntry {
         k: string;
@@ -28,6 +61,18 @@
     }
 
     function reportSensor(gl: WebGL) {
+        if (override != 'none') {
+            const sense = override;
+            if (lastColour != sense) {
+                hub.measureColour(port, sense);
+                lastColour = sense;
+                if (vm) {
+                    vm.runThreads();
+                }
+            }
+            return;
+        }
+
         const buffer = gl.getColourBuffer();
         const histogram = new Map<string, number>();
         for (let i = 0; i < buffer.length; i += 4) {
@@ -254,6 +299,11 @@
         }
     }
 
+    function setOverride(colour: string) {
+        override = colour;
+        overrideOpen = false;
+    }
+
     onMount(() => {
         const canvas = document.getElementById(id);
         if (canvas) {
@@ -314,4 +364,29 @@
     $: loadRobot(scene.robot, false);
 </script>
 
-<canvas {id} class={$$props.class}></canvas>
+<div class="flex flex-row">
+    <canvas {id} class={$$props.class}></canvas>
+    <Button class="bg-blue-300 w-16 h-16 m-0 p-0">
+        {#each colours as colour}
+            {#if override == colour.value}
+                <img class="w-8 h-8" src={colour.icon} alt={colour.name} />
+            {/if}
+        {/each}
+    </Button>
+    <Dropdown class="bg-blue-300 rounded-xl hover:bg-blue-300" bind:open={overrideOpen}>
+        {#each colourGrid as row}
+            <DropdownItem class="hover:bg-blue-300">
+                <div class="flex flex-row">
+                    {#each row as colour}
+                        <button
+                            class="hover:bg-blue-500 p-2"
+                            on:click={() => setOverride(colour.value)}
+                        >
+                            <img class="w-8 h-8" src={colour.icon} alt={colour.name} />
+                        </button>
+                    {/each}
+                </div>
+            </DropdownItem>
+        {/each}
+    </Dropdown>
+</div>
