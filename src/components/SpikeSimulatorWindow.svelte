@@ -1,9 +1,11 @@
 <script lang="ts">
     import * as Blockly from 'blockly/core';
+    import { CogOutline } from 'flowbite-svelte-icons';
     import { Button, CloseButton } from 'flowbite-svelte';
     import HubIcon from '$components/HubIcon.svelte';
     import SpikeSimulator from '$components/SpikeSimulator.svelte';
     import SaveSimulation from '$components/SaveSimulation.svelte';
+    import SimulatorSettings from '$components/SimulatorSettings.svelte';
     import PortConnector from '$components/PortConnector.svelte';
     import LoadScene from '$components/LoadScene.svelte';
     import { type LDrawStore, componentStore } from '$lib/ldraw/components';
@@ -23,6 +25,7 @@
     let connectorOpen = false;
     let saveOpen = false;
     let sceneOpen = false;
+    let settingsOpen = false;
     let robotButtonColour: 'light' | 'red' | 'green' = 'light';
     let libraryClass = '!p-2';
     let runSimulation = false;
@@ -93,12 +96,17 @@
         sceneOpen = true;
     }
 
+    function openSettings() {
+        settingsOpen = true;
+    }
+
     $: updateButtons($componentStore);
 </script>
 
 <PortConnector bind:modalOpen={connectorOpen} bind:hub />
 <SaveSimulation bind:modalOpen={saveOpen} bind:hub />
 <LoadScene bind:modalOpen={sceneOpen} />
+<SimulatorSettings bind:modalOpen={settingsOpen} />
 {#if modalOpen}
     <div class="flex-1 h-full">
         <div class="relative flex-1 h-full flex flex-col overflow-hidden">
@@ -120,6 +128,9 @@
                 </Button>
                 <Button color="light" class="!p-2" on:click={saveRobotOrScene}>
                     <img alt="save" width="32" height="32" src="icons/SaveMedium.svg" />
+                </Button>
+                <Button color="light" class="!p-2" on:click={openSettings}>
+                    <CogOutline class="w-8 h-8" />
                 </Button>
                 {#if runSimulation}
                     <Button color="light" class="!p-2" on:click={stopRobot}>

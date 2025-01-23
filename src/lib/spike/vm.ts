@@ -50,7 +50,7 @@ function vmSleep(ms: number): Promise<void> {
     return sleep(Math.round(ms * timeFactor));
 }
 
-function setStepSleep(time: number) {
+export function setStepSleep(time: number) {
     if (time > 0) {
         stepSleep = time;
     } else {
@@ -58,7 +58,7 @@ function setStepSleep(time: number) {
     }
 }
 
-function setTimeFactor(factor: number) {
+export function setTimeFactor(factor: number) {
     if (factor < 0.001) {
         timeFactor = 0.001;
     } else if (factor > 10) {
@@ -66,6 +66,14 @@ function setTimeFactor(factor: number) {
     } else {
         timeFactor = factor;
     }
+}
+
+export function getStepSleep() {
+    return stepSleep;
+}
+
+export function getTimeFactor() {
+    return timeFactor;
 }
 
 export class Node {
@@ -379,6 +387,7 @@ export class ActionStatement extends Statement {
             // TODO: Support recordings and sound embedded in save files.
             const id = SoundLibrary.get(source.name);
             thread.vm.audio.pause();
+            thread.vm.audio.defaultPlaybackRate = timeFactor;
             thread.vm.audio.src = `https://spike.legoeducation.com/sounds/${id}.mp3`;
             thread.vm.audio.play();
         } else if (op == 'playSoundUntilDone') {
@@ -393,6 +402,7 @@ export class ActionStatement extends Statement {
             // TODO: Support recordings and sound embedded in save files.
             const id = SoundLibrary.get(source.name);
             thread.vm.audio.pause();
+            thread.vm.audio.defaultPlaybackRate = timeFactor;
             thread.vm.audio.src = `https://spike.legoeducation.com/sounds/${id}.mp3`;
             thread.vm.audio.play();
             while (!thread.vm.audio.ended) {
@@ -403,7 +413,7 @@ export class ActionStatement extends Statement {
             const duration = this.arguments[1].evaluate(thread).getNumber();
             thread.vm.stopNote();
             const freq = Math.pow(2.0, (note - 69.0) / 12.0) * 440;
-            thread.vm.startNote(freq, duration);
+            thread.vm.startNote(freq, duration * timeFactor);
             try {
                 await thread.cancellable(vmSleep(duration * 1000));
             } finally {
