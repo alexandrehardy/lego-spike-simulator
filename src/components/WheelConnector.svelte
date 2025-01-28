@@ -23,14 +23,14 @@
     };
     let port: PortType | undefined;
     let parts: PartMatch[] = findParts($componentStore.robotModel, matchCodes);
-    let wheels: WheelMatch[] = getWheels(parts);
+    let wheels: WheelMatch[] = getWheels(parts, hub);
     let selectedWheel: number = -1;
     let selectedMotor: number = -1;
     let selected: number[] = [];
     let gearing = 1;
     let radius = 0;
 
-    function getWheels(parts: PartMatch[]) {
+    function getWheels(parts: PartMatch[], hub: Hub) {
         const wheels: WheelMatch[] = [];
         for (const part of parts) {
             const wheel = hub.wheels.find((w) => w.id == part.id);
@@ -114,7 +114,7 @@
     }
 
     $: parts = findParts($componentStore.robotModel, matchCodes);
-    $: wheels = getWheels(parts);
+    $: wheels = getWheels(parts, hub);
 </script>
 
 <Modal
@@ -141,42 +141,40 @@
                     drives the wheel, and enter gear ratio. A negative gear ratio will cause the
                     wheel to turn in reverse.</span
                 >
-                {#key port}
-                    {#each wheels as wheel}
-                        {#if selectedWheel == wheel.part.id}
-                            <button
-                                class="rounded-xl p-4 border border-gray-400 bg-green-100 flex flex-col items-start w-full h-32"
-                                on:click={() => select(wheel.part.id, wheel.part.part)}
+                {#each wheels as wheel}
+                    {#if selectedWheel == wheel.part.id}
+                        <button
+                            class="rounded-xl p-4 border border-gray-400 bg-green-100 flex flex-col items-start w-full h-32"
+                            on:click={() => select(wheel.part.id, wheel.part.part)}
+                        >
+                            <span>{partNames[wheel.part.part]}</span>
+                            <span class="ml-6 text-sm text-black"
+                                >Port: {wheel.wheel?.port ?? ''}</span
                             >
-                                <span>{partNames[wheel.part.part]}</span>
-                                <span class="ml-6 text-sm text-black"
-                                    >Port: {wheel.wheel?.port ?? ''}</span
-                                >
-                                <div class="pl-6 flex flex-row items-center gap-2 w-full">
-                                    <span class="text-sm text-black">Gear ratio:</span>
-                                    <Input
-                                        class="flex-1 my-0 py-2"
-                                        bind:value={gearing}
-                                        on:change={() => updateGearing()}
-                                    />
-                                </div>
-                            </button>
-                        {:else}
-                            <button
-                                class="rounded-xl p-4 border border-gray-400 flex flex-col items-start h-32"
-                                on:click={() => select(wheel.part.id, wheel.part.part)}
+                            <div class="pl-6 flex flex-row items-center gap-2 w-full">
+                                <span class="text-sm text-black">Gear ratio:</span>
+                                <Input
+                                    class="flex-1 my-0 py-2"
+                                    bind:value={gearing}
+                                    on:change={() => updateGearing()}
+                                />
+                            </div>
+                        </button>
+                    {:else}
+                        <button
+                            class="rounded-xl p-4 border border-gray-400 flex flex-col items-start h-32"
+                            on:click={() => select(wheel.part.id, wheel.part.part)}
+                        >
+                            <span>{partNames[wheel.part.part]}</span>
+                            <span class="ml-6 text-sm text-black"
+                                >Port: {wheel.wheel?.port ?? ''}</span
                             >
-                                <span>{partNames[wheel.part.part]}</span>
-                                <span class="ml-6 text-sm text-black"
-                                    >Port: {wheel.wheel?.port ?? ''}</span
-                                >
-                                <span class="ml-6 mt-0.5 text-sm text-black py-2"
-                                    >Gear ratio: {wheel.wheel?.gearing ?? ''}</span
-                                >
-                            </button>
-                        {/if}
-                    {/each}
-                {/key}
+                            <span class="ml-6 mt-0.5 text-sm text-black py-2"
+                                >Gear ratio: {wheel.wheel?.gearing ?? ''}</span
+                            >
+                        </button>
+                    {/if}
+                {/each}
             </div>
         </div>
         <RobotPreview
