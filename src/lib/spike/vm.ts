@@ -1640,4 +1640,10 @@ export class VM {
             this.unpause();
         }
     }
+
+    step() {
+        if (this.state == 'running') {
+            this.runThreads();
+        }
+    }
 }

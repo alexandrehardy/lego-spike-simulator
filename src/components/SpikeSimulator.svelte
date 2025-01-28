@@ -130,6 +130,7 @@
                                 setStudioMode(true);
                                 setRobotFromContent(content);
                                 hub.reload();
+                                hub = hub;
                             } finally {
                                 setStudioMode(false);
                             }
@@ -139,6 +140,7 @@
                         hub.reload();
                         connectPorts(hub, robot);
                         connectWheels(hub, robot);
+                        hub = hub;
                     }
                 }
             }
@@ -165,6 +167,16 @@
         }
         if (event == 'hubButtonColour') {
             hubCentreButtonColour = value;
+        }
+    }
+
+    function stepVM() {
+        if (!vm) {
+            return;
+        }
+        if (vm.state == 'running') {
+            vm.step();
+            requestAnimationFrame(stepVM);
         }
     }
 
@@ -212,8 +224,10 @@
                     globals[variables[i].name] = new ListValue([]);
                 }
             }
+            hub = hub;
             vm = new VM(hub, globals, $codeStore.events, $codeStore.procedures, workspace);
             vm.start();
+            requestAnimationFrame(stepVM);
         } else {
             if (vm) {
                 vm.stop();
@@ -226,28 +240,24 @@
     function hubLeftPress() {
         if (vm) {
             vm.hub.leftPressed = true;
-            vm.runThreads();
         }
     }
 
     function hubRightPress() {
         if (vm) {
             vm.hub.rightPressed = true;
-            vm.runThreads();
         }
     }
 
     function hubLeftRelease() {
         if (vm) {
             vm.hub.leftPressed = false;
-            vm.runThreads();
         }
     }
 
     function hubRightRelease() {
         if (vm) {
             vm.hub.rightPressed = false;
-            vm.runThreads();
         }
     }
 
@@ -321,7 +331,6 @@
                                 map={$sceneStore.map}
                                 lightSensorId={sensor.id}
                                 {hub}
-                                {vm}
                                 port={sensor.port}
                             />
                         {:else if sensor.type == 'force'}

@@ -14,7 +14,6 @@
     export let lightSensorId: number | 'none' = 'none';
     export let port: PortType;
     export let hub: Hub;
-    export let vm: VM | undefined;
 
     let canRender = false;
     let gl: WebGL | undefined;
@@ -70,9 +69,6 @@
                 hub.measureReflected(port, r);
                 hub.measureColour(port, sense);
                 lastColour = sense;
-                if (vm) {
-                    vm.runThreads();
-                }
             }
             return;
         }
@@ -110,18 +106,12 @@
             if (lastColour != sense) {
                 hub.measureColour(port, sense);
                 lastColour = sense;
-                if (vm) {
-                    vm.runThreads();
-                }
             }
         } else {
             const sense = '#330033';
             if (lastColour != sense) {
                 hub.measureColour(port, sense);
                 lastColour = sense;
-                if (vm) {
-                    vm.runThreads();
-                }
             }
         }
     }
