@@ -1,6 +1,11 @@
 <script lang="ts">
     import { Modal, Input } from 'flowbite-svelte';
-    import { componentStore, findParts, type PartMatch } from '$lib/ldraw/components';
+    import {
+        componentStore,
+        findParts,
+        findPartTransform,
+        type PartMatch
+    } from '$lib/ldraw/components';
     import { type PortType, Hub, Wheel } from '$lib/spike/vm';
     import HubWidget from '$components/HubWidget.svelte';
     import RobotPreview from '$components/RobotPreview.svelte';
@@ -79,8 +84,11 @@
             if (wheel) {
                 wheel.port = toPort;
             } else {
-                wheel = new Wheel(selectedWheel, radius, gearing, toPort);
-                hub.wheels.push(wheel);
+                const result = findPartTransform($componentStore.robotModel, selectedWheel);
+                if (result) {
+                    wheel = new Wheel(selectedWheel, radius, gearing, toPort, result.forward);
+                    hub.wheels.push(wheel);
+                }
             }
             const match = wheels.find((w) => w.part.id == selectedWheel);
             if (match) {

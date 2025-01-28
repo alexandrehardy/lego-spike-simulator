@@ -3,6 +3,7 @@
     import {
         type Model,
         componentStore,
+        findPartTransform,
         resolveFromZip,
         setRobotFromFile,
         setRobotFromContent,
@@ -104,7 +105,12 @@
                     if (type === 'wheel') {
                         const radius = partRadius[part] ?? 1;
                         const gearing = subpart.gear_ratio ?? 1;
-                        hub.wheels.push(new Wheel(subpart.id, radius, gearing, port));
+                        const result = findPartTransform(robot, subpart.id);
+                        if (result) {
+                            hub.wheels.push(
+                                new Wheel(subpart.id, radius, gearing, port, result.forward)
+                            );
+                        }
                     }
                 }
                 connectWheels(hub, subpart.model);

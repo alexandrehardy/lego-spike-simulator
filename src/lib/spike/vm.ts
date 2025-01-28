@@ -3,6 +3,7 @@ import { writable } from 'svelte/store';
 import { mbitfont } from '$lib/spike/font';
 import { SoundLibrary } from '$lib/blockly/audio';
 import { hexColor } from '$lib/ldraw/components';
+import * as m4 from '$lib/ldraw/m4';
 
 export type PortType = 'A' | 'B' | 'C' | 'D' | 'E' | 'F';
 export const allPorts: PortType[] = ['A', 'B', 'C', 'D', 'E', 'F'];
@@ -1046,11 +1047,20 @@ export class Wheel {
     radius: number;
     gearing: number;
     port: PortType;
-    constructor(id: number, radius: number, gearing: number, port: PortType) {
+    locationTransform: m4.Matrix4;
+
+    constructor(
+        id: number,
+        radius: number,
+        gearing: number,
+        port: PortType,
+        locationTransform: m4.Matrix4
+    ) {
         this.id = id;
         this.radius = radius;
         this.gearing = gearing;
         this.port = port;
+        this.locationTransform = locationTransform;
     }
 }
 
