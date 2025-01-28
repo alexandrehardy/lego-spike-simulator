@@ -1041,6 +1041,19 @@ export class RepeatStatement extends Statement {
     }
 }
 
+export class Wheel {
+    id: number;
+    radius: number;
+    gearing: number;
+    port: PortType;
+    constructor(id: number, radius: number, gearing: number, port: PortType) {
+        this.id = id;
+        this.radius = radius;
+        this.gearing = gearing;
+        this.port = port;
+    }
+}
+
 export class Motor {
     //54696 medium
     //68488 small
@@ -1136,6 +1149,7 @@ export class Hub {
     ports: HubPorts;
     eventHandler: HubEventHandler | undefined;
     buttonColour: string;
+    wheels: Wheel[];
 
     reload() {
         this.leftPressed = false;
@@ -1151,6 +1165,7 @@ export class Hub {
             E: new Port('none'),
             F: new Port('none')
         };
+        this.wheels = [];
     }
 
     reset() {
@@ -1181,6 +1196,7 @@ export class Hub {
             E: new Port('none'),
             F: new Port('none')
         };
+        this.wheels = [];
     }
 
     setEventHandler(eventHandler: HubEventHandler) {

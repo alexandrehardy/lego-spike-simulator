@@ -1,7 +1,13 @@
 <script lang="ts">
     import { Button, Modal } from 'flowbite-svelte';
     import FileSaver from 'file-saver';
-    import { componentStore, clearPorts, setPort, saveMPD } from '$lib/ldraw/components';
+    import {
+        componentStore,
+        clearPorts,
+        setPort,
+        setGearRatio,
+        saveMPD
+    } from '$lib/ldraw/components';
     import { allPorts, Hub } from '$lib/spike/vm';
     import { sceneStore } from '$lib/spike/scene';
     import JSZip from 'jszip';
@@ -18,6 +24,10 @@
                 if (id !== 'none') {
                     setPort(robot, 'main', port, id);
                 }
+            }
+            for (const wheel of hub.wheels) {
+                setPort(robot, 'main', wheel.port, wheel.id);
+                setGearRatio(robot, wheel.gearing, wheel.id);
             }
             const content = saveMPD(robot);
             const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });

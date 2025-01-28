@@ -7,7 +7,7 @@
     export let robotModel: Model | undefined;
     export let compiledRobot: CompiledModel | undefined = undefined;
     export let enabled = true;
-    export let select: number | undefined = undefined;
+    export let select: number[] | undefined = undefined;
 
     let canRender = false;
     let gl: WebGL | undefined;
@@ -16,7 +16,7 @@
     let angle = 0;
     let angle2 = 0;
 
-    function doCompile(robot: Model | undefined, select: number | undefined) {
+    function doCompile(robot: Model | undefined, select: number[] | undefined) {
         if (!robot) {
             return undefined;
         }

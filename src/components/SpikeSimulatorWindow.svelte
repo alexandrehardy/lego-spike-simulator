@@ -7,6 +7,7 @@
     import SaveSimulation from '$components/SaveSimulation.svelte';
     import SimulatorSettings from '$components/SimulatorSettings.svelte';
     import PortConnector from '$components/PortConnector.svelte';
+    import WheelConnector from '$components/WheelConnector.svelte';
     import LoadScene from '$components/LoadScene.svelte';
     import { type LDrawStore, componentStore } from '$lib/ldraw/components';
     import { Hub, codeStore } from '$lib/spike/vm';
@@ -23,6 +24,7 @@
     let hub = new Hub();
 
     let connectorOpen = false;
+    let wheelsOpen = false;
     let saveOpen = false;
     let sceneOpen = false;
     let settingsOpen = false;
@@ -92,6 +94,10 @@
         connectorOpen = true;
     }
 
+    function connectWheels() {
+        wheelsOpen = true;
+    }
+
     function loadScene() {
         sceneOpen = true;
     }
@@ -104,6 +110,7 @@
 </script>
 
 <PortConnector bind:modalOpen={connectorOpen} bind:hub />
+<WheelConnector bind:modalOpen={wheelsOpen} bind:hub />
 <SaveSimulation bind:modalOpen={saveOpen} bind:hub />
 <LoadScene bind:modalOpen={sceneOpen} />
 <SimulatorSettings bind:modalOpen={settingsOpen} />
@@ -119,6 +126,9 @@
                 </Button>
                 <Button color="light" class="!p-2" on:click={connectPorts}>
                     <HubIcon />
+                </Button>
+                <Button color="light" class="!p-2" on:click={connectWheels}>
+                    <img alt="scene" width="32" height="32" src="icons/wheel.svg" />
                 </Button>
                 <Button color="light" class="!p-2" on:click={loadScene}>
                     <img alt="scene" width="32" height="32" src="icons/Scene.svg" />
@@ -159,6 +169,7 @@
                         bind:connectorOpen
                         bind:hub
                         bind:sceneOpen
+                        bind:wheelsOpen
                     />
                 </div>
             {/key}

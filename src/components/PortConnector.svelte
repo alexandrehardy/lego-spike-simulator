@@ -129,7 +129,7 @@
             class="flex-1 w-full h-full"
             robotModel={$componentStore.robotModel}
             enabled={modalOpen}
-            select={selected}
+            select={[selected]}
         />
     </div>
 </Modal>

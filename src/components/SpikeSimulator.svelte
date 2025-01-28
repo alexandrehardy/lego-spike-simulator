@@ -21,7 +21,8 @@
         Motor,
         LightSensor,
         UltraSoundSensor,
-        ForceSensor
+        ForceSensor,
+        Wheel
     } from '$lib/spike/vm';
     import { sceneStore } from '$lib/spike/scene';
     import HubWidget from '$components/HubWidget.svelte';
@@ -34,6 +35,7 @@
     export let workspace: Blockly.WorkspaceSvg | undefined;
     export let connectorOpen = false;
     export let sceneOpen = false;
+    export let wheelsOpen = false;
     export let hub = new Hub();
 
     interface SensorView {
@@ -55,7 +57,13 @@
         '54675': 'motor',
         '37308': 'light',
         '37316': 'distance',
-        '37312': 'force'
+        '37312': 'force',
+        '39367p01': 'wheel', // Diameter 56mm
+        '49295p01': 'wheel' // Diameter 88mm
+    };
+    const partRadius: Record<string, number> = {
+        '39367p01': 28,
+        '49295p01': 44
     };
 
     function connectPorts(hub: Hub, robot: Model) {
@@ -81,6 +89,25 @@
                     }
                 }
                 connectPorts(hub, subpart.model);
+            }
+        }
+    }
+
+    function connectWheels(hub: Hub, robot: Model) {
+        for (const subpart of robot.subparts) {
+            if (subpart.model) {
+                if (subpart.port) {
+                    // Ignore the hub for the moment, we only have one
+                    const part = subpart.modelNumber.replace('.dat', '');
+                    const type = partNames[part];
+                    const port = subpart.port.port as PortType;
+                    if (type === 'wheel') {
+                        const radius = partRadius[part] ?? 1;
+                        const gearing = subpart.gear_ratio ?? 1;
+                        hub.wheels.push(new Wheel(subpart.id, radius, gearing, port));
+                    }
+                }
+                connectWheels(hub, subpart.model);
             }
         }
     }
@@ -111,6 +138,7 @@
                         const robot = await setRobotFromFile(first);
                         hub.reload();
                         connectPorts(hub, robot);
+                        connectWheels(hub, robot);
                     }
                 }
             }
@@ -321,7 +349,7 @@
                     class="flex-1 w-full h-full"
                     robotModel={$componentStore.robotModel}
                     bind:compiledRobot
-                    enabled={!connectorOpen && !sceneOpen}
+                    enabled={!connectorOpen && !sceneOpen && !wheelsOpen}
                 />
             {/if}
         </div>

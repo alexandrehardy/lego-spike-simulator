@@ -37,7 +37,7 @@ export interface CompileOptions {
     rescale?: boolean;
     maxDepth?: number;
     wireframe?: boolean;
-    select?: number;
+    select?: number[] | undefined;
 }
 
 export interface PipeLine {
@@ -1130,7 +1130,7 @@ export class WebGL {
         }
     }
 
-    compileSubModelQuads(model: Model, maxDepth: number, selected: number | undefined) {
+    compileSubModelQuads(model: Model, maxDepth: number, selected: number[] | undefined) {
         if (maxDepth <= 0) {
             // Only one subpart need do this.
             // We get triangles to do this
@@ -1146,7 +1146,7 @@ export class WebGL {
                 const oldMatrix = this.compileMatrix;
                 this.compileMatrix = m4.multiply(this.compileMatrix, subpart.matrix);
                 if (selected) {
-                    if (subpart.id == selected) {
+                    if (selected.find((id) => subpart.id == id)) {
                         this.compileSubModelQuads(subpart.model, maxDepth - 1, undefined);
                     } else {
                         this.compileSubModelQuads(subpart.model, maxDepth - 1, selected);
@@ -1187,7 +1187,7 @@ export class WebGL {
         this.compileVertices.push(v3[3]);
     }
 
-    compileSubModelTriangles(model: Model, maxDepth: number, selected: number | undefined) {
+    compileSubModelTriangles(model: Model, maxDepth: number, selected: number[] | undefined) {
         if (maxDepth <= 0) {
             const bbox = this.computeBoundingBox(model);
             if (!bbox) {
@@ -1262,7 +1262,7 @@ export class WebGL {
                 const oldMatrix = this.compileMatrix;
                 this.compileMatrix = m4.multiply(this.compileMatrix, subpart.matrix);
                 if (selected) {
-                    if (subpart.id == selected) {
+                    if (selected.find((id) => subpart.id == id)) {
                         this.compileSubModelTriangles(subpart.model, maxDepth - 1, undefined);
                     } else {
                         this.compileSubModelTriangles(subpart.model, maxDepth - 1, selected);
@@ -1276,7 +1276,7 @@ export class WebGL {
         }
     }
 
-    compileSubModelLines(model: Model, maxDepth: number, selected: number | undefined) {
+    compileSubModelLines(model: Model, maxDepth: number, selected: number[] | undefined) {
         if (maxDepth <= 0) {
             const bbox = this.computeBoundingBox(model);
             if (!bbox) {
@@ -1423,7 +1423,7 @@ export class WebGL {
                 const oldMatrix = this.compileMatrix;
                 this.compileMatrix = m4.multiply(this.compileMatrix, subpart.matrix);
                 if (selected) {
-                    if (subpart.id == selected) {
+                    if (selected.find((id) => subpart.id == id)) {
                         this.compileSubModelLines(subpart.model, maxDepth - 1, undefined);
                     } else {
                         this.compileSubModelLines(subpart.model, maxDepth - 1, selected);

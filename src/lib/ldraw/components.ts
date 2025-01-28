@@ -68,6 +68,7 @@ export interface PortConnection {
 export interface Subpart {
     colour: BrickColour;
     port?: PortConnection;
+    gear_ratio?: number;
     matrix: Matrix;
     model: Model | undefined;
     modelNumber: string;
@@ -390,6 +391,9 @@ export function saveMPD(model: Model) {
                 // Add main to support multiple hubs in the future
                 content.push(`0 !SPIKE_PORT ${subpart.port.hub} ${subpart.port.port}`);
             }
+            if (subpart.gear_ratio) {
+                content.push(`0 !SPIKE_GEARING ${subpart.gear_ratio}`);
+            }
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
             const [a, d, g, zero1, b, e, h, zero2, c, f, i, zero3, x, y, z, one] = subpart.matrix;
             const sname = subpart.modelNumber;
@@ -415,6 +419,7 @@ export function saveMPD(model: Model) {
 export function loadModel(name: string, content: string): Model {
     let lastPort: string | undefined = undefined;
     let lastHub: string | undefined = undefined;
+    let lastGearRatio: string | undefined = undefined;
     const model: Model = {
         name: name,
         subparts: [],
@@ -441,11 +446,16 @@ export function loadModel(name: string, content: string): Model {
         if (parts[0] == '0') {
             // comment or meta
             // we don't worry about meta, except spike ports
-            if (parts[1] !== '!SPIKE_PORT') {
+            if (!parts[1].startsWith('!SPIKE_')) {
                 continue;
             }
-            lastHub = parts[2];
-            lastPort = parts[3];
+            if (parts[1] == '!SPIKE_GEARING') {
+                lastGearRatio = parts[2];
+            }
+            if (parts[1] == '!SPIKE_PORT') {
+                lastHub = parts[2];
+                lastPort = parts[3];
+            }
         } else if (parts[0] == '1') {
             // subpart
             const colour = parts[1];
@@ -472,10 +482,14 @@ export function loadModel(name: string, content: string): Model {
             if (lastPort && lastHub) {
                 entry.port = { hub: lastHub, port: lastPort };
             }
+            if (lastGearRatio) {
+                entry.gear_ratio = +lastGearRatio;
+            }
             model.subparts.push(entry);
             resolveSubpart(entry);
             lastPort = undefined;
             lastHub = undefined;
+            lastGearRatio = undefined;
         } else if (parts[0] == '2') {
             // line
             const colour = parts[1];
@@ -492,6 +506,7 @@ export function loadModel(name: string, content: string): Model {
             });
             lastPort = undefined;
             lastHub = undefined;
+            lastGearRatio = undefined;
         } else if (parts[0] == '3') {
             // triangle
             const colour = parts[1];
@@ -512,6 +527,7 @@ export function loadModel(name: string, content: string): Model {
             });
             lastPort = undefined;
             lastHub = undefined;
+            lastGearRatio = undefined;
         } else if (parts[0] == '4') {
             // quad
             const colour = parts[1];
@@ -536,6 +552,7 @@ export function loadModel(name: string, content: string): Model {
             });
             lastPort = undefined;
             lastHub = undefined;
+            lastGearRatio = undefined;
         } else if (parts[0] == '5') {
             // optional line
             const colour = parts[1];
@@ -560,6 +577,7 @@ export function loadModel(name: string, content: string): Model {
             });
             lastPort = undefined;
             lastHub = undefined;
+            lastGearRatio = undefined;
         }
     }
     return model;
@@ -731,6 +749,7 @@ export function clearPorts(model: Model | undefined) {
     }
     for (const subpart of model.subparts) {
         subpart.port = undefined;
+        subpart.gear_ratio = undefined;
         clearPorts(subpart.model);
     }
 }
@@ -744,6 +763,45 @@ export function setPort(model: Model | undefined, hub: string, port: string, id:
             subpart.port = { hub: hub, port: port };
         } else {
             setPort(subpart.model, hub, port, id);
+        }
+    }
+}
+
+export function clearPort(model: Model | undefined, hub: string, id: number) {
+    if (!model) {
+        return;
+    }
+    for (const subpart of model.subparts) {
+        if (subpart.id === id) {
+            subpart.port = undefined;
+        } else {
+            clearPort(subpart.model, hub, id);
+        }
+    }
+}
+
+export function setGearRatio(model: Model | undefined, ratio: number, id: number) {
+    if (!model) {
+        return;
+    }
+    for (const subpart of model.subparts) {
+        if (subpart.id === id) {
+            subpart.gear_ratio = ratio;
+        } else {
+            setGearRatio(subpart.model, ratio, id);
+        }
+    }
+}
+
+export function clearGearRatio(model: Model | undefined, id: number) {
+    if (!model) {
+        return;
+    }
+    for (const subpart of model.subparts) {
+        if (subpart.id === id) {
+            subpart.gear_ratio = undefined;
+        } else {
+            clearGearRatio(subpart.model, id);
         }
     }
 }
