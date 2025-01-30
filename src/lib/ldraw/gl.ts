@@ -59,47 +59,15 @@ export interface MapTexture {
     texture: WebGLTexture;
 }
 
-export class WebGL {
-    gl: WebGLRenderingContext;
-    canvas: HTMLCanvasElement;
-    pipeline: PipeLine | undefined;
-    brickPipeline: PipeLine | undefined;
-    mapPipeline: PipeLine | undefined;
-    projectionMatrix: m4.Matrix4;
-    modelMatrix: m4.Matrix4;
-    matrixStack: m4.Matrix4[];
-    vertexBuffer: WebGLBuffer | null;
-    colourBuffer: WebGLBuffer | null;
-    texcoordBuffer: WebGLBuffer | null;
-    parentColour: BrickColour;
+export class WebGLCompiler {
     compileVertices: number[];
     compileColours: number[];
     compileMatrix: m4.Matrix4;
     compiledLines: number;
     compiledTriangles: number;
-    brightness: number;
-    perspectiveAngle: number;
-    mindist: number;
-    maxdist: number;
+    parentColour: BrickColour;
 
-    static create(canvas: HTMLCanvasElement): WebGL | undefined {
-        const gl = canvas.getContext('webgl');
-        if (!gl) {
-            console.log('No WebGL available');
-            return undefined;
-        }
-        return new WebGL(canvas, gl);
-    }
-
-    constructor(canvas: HTMLCanvasElement, gl: WebGLRenderingContext) {
-        this.canvas = canvas;
-        this.gl = gl;
-        this.matrixStack = [];
-        this.modelMatrix = m4.identity();
-        this.projectionMatrix = m4.identity();
-        this.vertexBuffer = null;
-        this.colourBuffer = null;
-        this.texcoordBuffer = null;
+    constructor() {
         this.parentColour = {
             code: '0',
             inheritSurface: false,
@@ -112,183 +80,6 @@ export class WebGL {
         this.compileVertices = [];
         this.compiledLines = 0;
         this.compiledTriangles = 0;
-        this.brightness = 1.0;
-        this.perspectiveAngle = 45;
-        this.mindist = 0.1;
-        this.maxdist = 1000.0;
-        this.setupPipeline();
-    }
-
-    setPerspective(fieldOfViewDegrees: number, aspect: number, near: number, far: number) {
-        this.projectionMatrix = m4.perspective(
-            (fieldOfViewDegrees * Math.PI) / 180.0,
-            aspect,
-            near,
-            far
-        );
-        if (this.brickPipeline?.projectionMatrixUniform) {
-            this.gl.uniformMatrix4fv(
-                this.brickPipeline.projectionMatrixUniform,
-                false,
-                this.projectionMatrix
-            );
-        }
-        if (this.brickPipeline?.nearUniform) {
-            this.gl.uniform1f(this.brickPipeline.nearUniform, near);
-        }
-        if (this.brickPipeline?.farUniform) {
-            this.gl.uniform1f(this.brickPipeline.farUniform, far);
-        }
-    }
-
-    setFrustum(
-        left: number,
-        right: number,
-        bottom: number,
-        top: number,
-        near: number,
-        far: number
-    ) {
-        this.projectionMatrix = m4.frustum(left, right, bottom, top, near, far);
-        if (this.brickPipeline?.projectionMatrixUniform) {
-            this.gl.uniformMatrix4fv(
-                this.brickPipeline.projectionMatrixUniform,
-                false,
-                this.projectionMatrix
-            );
-        }
-        if (this.brickPipeline?.nearUniform) {
-            this.gl.uniform1f(this.brickPipeline.nearUniform, near);
-        }
-        if (this.brickPipeline?.farUniform) {
-            this.gl.uniform1f(this.brickPipeline.farUniform, far);
-        }
-    }
-
-    setOrtho(left: number, right: number, bottom: number, top: number, near: number, far: number) {
-        this.projectionMatrix = m4.orthographic(left, right, bottom, top, near, far);
-        if (this.brickPipeline?.projectionMatrixUniform) {
-            this.gl.uniformMatrix4fv(
-                this.brickPipeline.projectionMatrixUniform,
-                false,
-                this.projectionMatrix
-            );
-        }
-        if (this.brickPipeline?.nearUniform) {
-            this.gl.uniform1f(this.brickPipeline.nearUniform, near);
-        }
-        if (this.brickPipeline?.farUniform) {
-            this.gl.uniform1f(this.brickPipeline.farUniform, far);
-        }
-    }
-
-    setProjectionIdentity() {
-        this.projectionMatrix = m4.identity();
-        if (this.brickPipeline?.projectionMatrixUniform) {
-            this.gl.uniformMatrix4fv(
-                this.brickPipeline.projectionMatrixUniform,
-                false,
-                this.projectionMatrix
-            );
-        }
-    }
-
-    setModelIdentity() {
-        this.modelMatrix = m4.identity();
-        if (this.brickPipeline?.modelMatrixUniform) {
-            this.gl.uniformMatrix4fv(
-                this.brickPipeline.modelMatrixUniform,
-                false,
-                this.modelMatrix
-            );
-        }
-    }
-
-    pushMatrix() {
-        this.matrixStack.push(m4.copy(this.modelMatrix));
-    }
-
-    popMatrix() {
-        this.modelMatrix = this.matrixStack.pop()!;
-        if (this.brickPipeline?.modelMatrixUniform) {
-            this.gl.uniformMatrix4fv(
-                this.brickPipeline.modelMatrixUniform,
-                false,
-                this.modelMatrix
-            );
-        }
-    }
-
-    translate(x: number, y: number, z: number) {
-        this.modelMatrix = m4.translate(this.modelMatrix, x, y, z);
-        if (this.brickPipeline?.modelMatrixUniform) {
-            this.gl.uniformMatrix4fv(
-                this.brickPipeline.modelMatrixUniform,
-                false,
-                this.modelMatrix
-            );
-        }
-    }
-
-    rotate(angle: number, x: number, y: number, z: number) {
-        const radians = (angle * Math.PI) / 180.0;
-        this.modelMatrix = m4.axisRotate(this.modelMatrix, [x, y, z], radians);
-        if (this.brickPipeline?.modelMatrixUniform) {
-            this.gl.uniformMatrix4fv(
-                this.brickPipeline.modelMatrixUniform,
-                false,
-                this.modelMatrix
-            );
-        }
-    }
-
-    scale(s: number) {
-        // The inverse is incorrect for non-unifor scaling
-        this.modelMatrix = m4.scale(this.modelMatrix, s, s, s);
-        if (this.brickPipeline?.modelMatrixUniform) {
-            this.gl.uniformMatrix4fv(
-                this.brickPipeline.modelMatrixUniform,
-                false,
-                this.modelMatrix
-            );
-        }
-    }
-
-    multMatrix(m: m4.Matrix4) {
-        this.modelMatrix = m4.multiply(this.modelMatrix, m);
-        if (this.brickPipeline?.modelMatrixUniform) {
-            this.gl.uniformMatrix4fv(
-                this.brickPipeline.modelMatrixUniform,
-                false,
-                this.modelMatrix
-            );
-        }
-    }
-
-    clearColour(r: number, g: number, b: number) {
-        this.gl.clearColor(r, g, b, 1.0);
-    }
-
-    clear() {
-        this.gl.clear(this.gl.COLOR_BUFFER_BIT);
-    }
-
-    flush() {
-        this.gl.flush();
-    }
-
-    finish() {
-        this.gl.finish();
-    }
-
-    setBrightness(brightness: number) {
-        if (brightness < 0.0) {
-            brightness = 0.0;
-        }
-        if (brightness > 1.0) {
-            brightness = 1.0;
-        }
-        this.brightness = brightness;
     }
 
     getColour(colour: BrickColour, edge: boolean): Colour {
@@ -314,571 +105,6 @@ export class WebGL {
             edge: inherit ? this.parentColour.edge : colour.edge,
             surface: inherit ? this.parentColour.surface : colour.surface
         };
-    }
-
-    drawBox(width: number, height: number, depth: number) {
-        if (!this.vertexBuffer) {
-            return;
-        }
-        if (!this.colourBuffer) {
-            return;
-        }
-        if (!this.brickPipeline) {
-            return;
-        }
-        const vertices: number[] = [];
-        const colours: number[] = [];
-        const w = width / 2;
-        const d = depth / 2;
-        const h = height;
-        let colour: Colour = { r: 1.0, g: 1.0, b: 1.0, a: 1.0 };
-        colours.push(colour.r);
-        colours.push(colour.g);
-        colours.push(colour.b);
-        colours.push(colour.a);
-        vertices.push(-w);
-        vertices.push(0);
-        vertices.push(d);
-        vertices.push(1.0);
-        colours.push(colour.r);
-        colours.push(colour.g);
-        colours.push(colour.b);
-        colours.push(colour.a);
-        vertices.push(w);
-        vertices.push(0);
-        vertices.push(d);
-        vertices.push(1.0);
-        colours.push(colour.r);
-        colours.push(colour.g);
-        colours.push(colour.b);
-        colours.push(colour.a);
-        vertices.push(-w);
-        vertices.push(h);
-        vertices.push(d);
-        vertices.push(1.0);
-        colours.push(colour.r);
-        colours.push(colour.g);
-        colours.push(colour.b);
-        colours.push(colour.a);
-        vertices.push(-w);
-        vertices.push(h);
-        vertices.push(d);
-        vertices.push(1.0);
-        colours.push(colour.r);
-        colours.push(colour.g);
-        colours.push(colour.b);
-        colours.push(colour.a);
-        vertices.push(w);
-        vertices.push(0);
-        vertices.push(d);
-        vertices.push(1.0);
-        colours.push(colour.r);
-        colours.push(colour.g);
-        colours.push(colour.b);
-        colours.push(colour.a);
-        vertices.push(w);
-        vertices.push(h);
-        vertices.push(d);
-        vertices.push(1.0);
-
-        colour = { r: 1.0, g: 0.0, b: 0.0, a: 1.0 };
-        colours.push(colour.r);
-        colours.push(colour.g);
-        colours.push(colour.b);
-        colours.push(colour.a);
-        vertices.push(-w);
-        vertices.push(0);
-        vertices.push(-d);
-        vertices.push(1.0);
-        colours.push(colour.r);
-        colours.push(colour.g);
-        colours.push(colour.b);
-        colours.push(colour.a);
-        vertices.push(w);
-        vertices.push(0);
-        vertices.push(-d);
-        vertices.push(1.0);
-        colours.push(colour.r);
-        colours.push(colour.g);
-        colours.push(colour.b);
-        colours.push(colour.a);
-        vertices.push(-w);
-        vertices.push(h);
-        vertices.push(-d);
-        vertices.push(1.0);
-        colours.push(colour.r);
-        colours.push(colour.g);
-        colours.push(colour.b);
-        colours.push(colour.a);
-        vertices.push(-w);
-        vertices.push(h);
-        vertices.push(-d);
-        vertices.push(1.0);
-        colours.push(colour.r);
-        colours.push(colour.g);
-        colours.push(colour.b);
-        colours.push(colour.a);
-        vertices.push(w);
-        vertices.push(0);
-        vertices.push(-d);
-        vertices.push(1.0);
-        colours.push(colour.r);
-        colours.push(colour.g);
-        colours.push(colour.b);
-        colours.push(colour.a);
-        vertices.push(w);
-        vertices.push(h);
-        vertices.push(-d);
-        vertices.push(1.0);
-
-        colour = { r: 0.0, g: 1.0, b: 0.0, a: 1.0 };
-        colours.push(colour.r);
-        colours.push(colour.g);
-        colours.push(colour.b);
-        colours.push(colour.a);
-        vertices.push(-w);
-        vertices.push(0);
-        vertices.push(-d);
-        vertices.push(1.0);
-        colours.push(colour.r);
-        colours.push(colour.g);
-        colours.push(colour.b);
-        colours.push(colour.a);
-        vertices.push(w);
-        vertices.push(0);
-        vertices.push(-d);
-        vertices.push(1.0);
-        colours.push(colour.r);
-        colours.push(colour.g);
-        colours.push(colour.b);
-        colours.push(colour.a);
-        vertices.push(-w);
-        vertices.push(0);
-        vertices.push(d);
-        vertices.push(1.0);
-        colours.push(colour.r);
-        colours.push(colour.g);
-        colours.push(colour.b);
-        colours.push(colour.a);
-        vertices.push(-w);
-        vertices.push(0);
-        vertices.push(d);
-        vertices.push(1.0);
-        colours.push(colour.r);
-        colours.push(colour.g);
-        colours.push(colour.b);
-        colours.push(colour.a);
-        vertices.push(w);
-        vertices.push(0);
-        vertices.push(-d);
-        vertices.push(1.0);
-        colours.push(colour.r);
-        colours.push(colour.g);
-        colours.push(colour.b);
-        colours.push(colour.a);
-        vertices.push(w);
-        vertices.push(0);
-        vertices.push(d);
-        vertices.push(1.0);
-
-        colour = { r: 0.0, g: 1.0, b: 0.0, a: 1.0 };
-        colours.push(colour.r);
-        colours.push(colour.g);
-        colours.push(colour.b);
-        colours.push(colour.a);
-        vertices.push(-w);
-        vertices.push(h);
-        vertices.push(-d);
-        vertices.push(1.0);
-        colours.push(colour.r);
-        colours.push(colour.g);
-        colours.push(colour.b);
-        colours.push(colour.a);
-        vertices.push(w);
-        vertices.push(h);
-        vertices.push(-d);
-        vertices.push(1.0);
-        colours.push(colour.r);
-        colours.push(colour.g);
-        colours.push(colour.b);
-        colours.push(colour.a);
-        vertices.push(-w);
-        vertices.push(h);
-        vertices.push(d);
-        vertices.push(1.0);
-        colours.push(colour.r);
-        colours.push(colour.g);
-        colours.push(colour.b);
-        colours.push(colour.a);
-        vertices.push(-w);
-        vertices.push(h);
-        vertices.push(d);
-        vertices.push(1.0);
-        colours.push(colour.r);
-        colours.push(colour.g);
-        colours.push(colour.b);
-        colours.push(colour.a);
-        vertices.push(w);
-        vertices.push(h);
-        vertices.push(-d);
-        vertices.push(1.0);
-        colours.push(colour.r);
-        colours.push(colour.g);
-        colours.push(colour.b);
-        colours.push(colour.a);
-        vertices.push(w);
-        vertices.push(h);
-        vertices.push(d);
-        vertices.push(1.0);
-
-        colour = { r: 0.0, g: 0.0, b: 1.0, a: 1.0 };
-        colours.push(colour.r);
-        colours.push(colour.g);
-        colours.push(colour.b);
-        colours.push(colour.a);
-        vertices.push(w);
-        vertices.push(0);
-        vertices.push(-d);
-        vertices.push(1.0);
-        colours.push(colour.r);
-        colours.push(colour.g);
-        colours.push(colour.b);
-        colours.push(colour.a);
-        vertices.push(w);
-        vertices.push(h);
-        vertices.push(-d);
-        vertices.push(1.0);
-        colours.push(colour.r);
-        colours.push(colour.g);
-        colours.push(colour.b);
-        colours.push(colour.a);
-        vertices.push(w);
-        vertices.push(0);
-        vertices.push(d);
-        vertices.push(1.0);
-        colours.push(colour.r);
-        colours.push(colour.g);
-        colours.push(colour.b);
-        colours.push(colour.a);
-        vertices.push(w);
-        vertices.push(0);
-        vertices.push(d);
-        vertices.push(1.0);
-        colours.push(colour.r);
-        colours.push(colour.g);
-        colours.push(colour.b);
-        colours.push(colour.a);
-        vertices.push(w);
-        vertices.push(h);
-        vertices.push(-d);
-        vertices.push(1.0);
-        colours.push(colour.r);
-        colours.push(colour.g);
-        colours.push(colour.b);
-        colours.push(colour.a);
-        vertices.push(w);
-        vertices.push(h);
-        vertices.push(d);
-        vertices.push(1.0);
-
-        colour = { r: 0.0, g: 0.0, b: 1.0, a: 1.0 };
-        colours.push(colour.r);
-        colours.push(colour.g);
-        colours.push(colour.b);
-        colours.push(colour.a);
-        vertices.push(-w);
-        vertices.push(0);
-        vertices.push(-d);
-        vertices.push(1.0);
-        colours.push(colour.r);
-        colours.push(colour.g);
-        colours.push(colour.b);
-        colours.push(colour.a);
-        vertices.push(-w);
-        vertices.push(h);
-        vertices.push(-d);
-        vertices.push(1.0);
-        colours.push(colour.r);
-        colours.push(colour.g);
-        colours.push(colour.b);
-        colours.push(colour.a);
-        vertices.push(-w);
-        vertices.push(0);
-        vertices.push(d);
-        vertices.push(1.0);
-        colours.push(colour.r);
-        colours.push(colour.g);
-        colours.push(colour.b);
-        colours.push(colour.a);
-        vertices.push(-w);
-        vertices.push(0);
-        vertices.push(d);
-        vertices.push(1.0);
-        colours.push(colour.r);
-        colours.push(colour.g);
-        colours.push(colour.b);
-        colours.push(colour.a);
-        vertices.push(-w);
-        vertices.push(h);
-        vertices.push(-d);
-        vertices.push(1.0);
-        colours.push(colour.r);
-        colours.push(colour.g);
-        colours.push(colour.b);
-        colours.push(colour.a);
-        vertices.push(-w);
-        vertices.push(h);
-        vertices.push(d);
-        vertices.push(1.0);
-
-        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.vertexBuffer);
-        this.gl.uniform1f(this.brickPipeline.brightnessUniform, this.brightness);
-        this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(vertices), this.gl.STATIC_DRAW);
-        this.gl.vertexAttribPointer(
-            this.brickPipeline.vertexAttribute,
-            4,
-            this.gl.FLOAT,
-            false,
-            0,
-            0
-        );
-        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.colourBuffer);
-        this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(colours), this.gl.STATIC_DRAW);
-        this.gl.vertexAttribPointer(
-            this.brickPipeline.colourAttribute,
-            4,
-            this.gl.FLOAT,
-            false,
-            0,
-            0
-        );
-        this.gl.drawArrays(this.gl.TRIANGLES, 0, 36);
-    }
-
-    drawTriangles(triangles: Triangle[]) {
-        if (!this.vertexBuffer) {
-            return;
-        }
-        if (!this.colourBuffer) {
-            return;
-        }
-        if (!this.brickPipeline) {
-            return;
-        }
-        const vertices: number[] = [];
-        const colours: number[] = [];
-        for (const t of triangles) {
-            const colour = this.getColour(t.colour, false);
-            colours.push(colour.r);
-            colours.push(colour.g);
-            colours.push(colour.b);
-            colours.push(colour.a);
-            vertices.push(t.p1.x);
-            vertices.push(t.p1.y);
-            vertices.push(t.p1.z);
-            vertices.push(1.0);
-            colours.push(colour.r);
-            colours.push(colour.g);
-            colours.push(colour.b);
-            colours.push(colour.a);
-            vertices.push(t.p2.x);
-            vertices.push(t.p2.y);
-            vertices.push(t.p2.z);
-            vertices.push(1.0);
-            colours.push(colour.r);
-            colours.push(colour.g);
-            colours.push(colour.b);
-            colours.push(colour.a);
-            vertices.push(t.p3.x);
-            vertices.push(t.p3.y);
-            vertices.push(t.p3.z);
-            vertices.push(1.0);
-        }
-        this.gl.uniform1f(this.brickPipeline.brightnessUniform, this.brightness);
-        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.vertexBuffer);
-        this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(vertices), this.gl.STATIC_DRAW);
-        this.gl.vertexAttribPointer(
-            this.brickPipeline.vertexAttribute,
-            4,
-            this.gl.FLOAT,
-            false,
-            0,
-            0
-        );
-        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.colourBuffer);
-        this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(colours), this.gl.STATIC_DRAW);
-        this.gl.vertexAttribPointer(
-            this.brickPipeline.colourAttribute,
-            4,
-            this.gl.FLOAT,
-            false,
-            0,
-            0
-        );
-        this.gl.drawArrays(this.gl.TRIANGLES, 0, triangles.length * 3);
-    }
-
-    drawLines(lines: Line[]) {
-        if (!this.vertexBuffer) {
-            return;
-        }
-        if (!this.colourBuffer) {
-            return;
-        }
-        if (!this.brickPipeline) {
-            return;
-        }
-        const vertices: number[] = [];
-        const colours: number[] = [];
-        for (const l of lines) {
-            const colour = this.getColour(l.colour, true);
-            colours.push(colour.r);
-            colours.push(colour.g);
-            colours.push(colour.b);
-            colours.push(colour.a);
-            vertices.push(l.p1.x);
-            vertices.push(l.p1.y);
-            vertices.push(l.p1.z);
-            vertices.push(1.0);
-            colours.push(colour.r);
-            colours.push(colour.g);
-            colours.push(colour.b);
-            colours.push(colour.a);
-            vertices.push(l.p2.x);
-            vertices.push(l.p2.y);
-            vertices.push(l.p2.z);
-            vertices.push(1.0);
-        }
-        this.gl.uniform1f(this.brickPipeline.brightnessUniform, this.brightness);
-        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.vertexBuffer);
-        this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(vertices), this.gl.STATIC_DRAW);
-        this.gl.vertexAttribPointer(
-            this.brickPipeline.vertexAttribute,
-            4,
-            this.gl.FLOAT,
-            false,
-            0,
-            0
-        );
-        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.colourBuffer);
-        this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(colours), this.gl.STATIC_DRAW);
-        this.gl.vertexAttribPointer(
-            this.brickPipeline.colourAttribute,
-            4,
-            this.gl.FLOAT,
-            false,
-            0,
-            0
-        );
-        this.gl.drawArrays(this.gl.LINES, 0, lines.length * 2);
-    }
-
-    drawQuads(quads: Quad[]) {
-        if (!this.vertexBuffer) {
-            return;
-        }
-        if (!this.colourBuffer) {
-            return;
-        }
-        if (!this.brickPipeline) {
-            return;
-        }
-        const vertices: number[] = [];
-        const colours: number[] = [];
-        for (const q of quads) {
-            const colour = this.getColour(q.colour, false);
-            colours.push(colour.r);
-            colours.push(colour.g);
-            colours.push(colour.b);
-            colours.push(colour.a);
-            vertices.push(q.p1.x);
-            vertices.push(q.p1.y);
-            vertices.push(q.p1.z);
-            vertices.push(1.0);
-            colours.push(colour.r);
-            colours.push(colour.g);
-            colours.push(colour.b);
-            colours.push(colour.a);
-            vertices.push(q.p2.x);
-            vertices.push(q.p2.y);
-            vertices.push(q.p2.z);
-            vertices.push(1.0);
-            colours.push(colour.r);
-            colours.push(colour.g);
-            colours.push(colour.b);
-            colours.push(colour.a);
-            vertices.push(q.p4.x);
-            vertices.push(q.p4.y);
-            vertices.push(q.p4.z);
-            vertices.push(1.0);
-            colours.push(colour.r);
-            colours.push(colour.g);
-            colours.push(colour.b);
-            colours.push(colour.a);
-            vertices.push(q.p4.x);
-            vertices.push(q.p4.y);
-            vertices.push(q.p4.z);
-            vertices.push(1.0);
-            colours.push(colour.r);
-            colours.push(colour.g);
-            colours.push(colour.b);
-            colours.push(colour.a);
-            vertices.push(q.p2.x);
-            vertices.push(q.p2.y);
-            vertices.push(q.p2.z);
-            vertices.push(1.0);
-            colours.push(colour.r);
-            colours.push(colour.g);
-            colours.push(colour.b);
-            colours.push(colour.a);
-            vertices.push(q.p3.x);
-            vertices.push(q.p3.y);
-            vertices.push(q.p3.z);
-            vertices.push(1.0);
-        }
-        this.gl.uniform1f(this.brickPipeline.brightnessUniform, this.brightness);
-        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.vertexBuffer);
-        this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(vertices), this.gl.STATIC_DRAW);
-        this.gl.vertexAttribPointer(
-            this.brickPipeline.vertexAttribute,
-            4,
-            this.gl.FLOAT,
-            false,
-            0,
-            0
-        );
-        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.colourBuffer);
-        this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(colours), this.gl.STATIC_DRAW);
-        this.gl.vertexAttribPointer(
-            this.brickPipeline.colourAttribute,
-            4,
-            this.gl.FLOAT,
-            false,
-            0,
-            0
-        );
-        this.gl.drawArrays(this.gl.TRIANGLES, 0, quads.length * 6);
-    }
-
-    drawModel(model: Model) {
-        if (!this.brickPipeline) {
-            return;
-        }
-        this.gl.useProgram(this.brickPipeline.program);
-        this.drawLines(model.lines);
-        this.drawTriangles(model.triangles);
-        this.drawQuads(model.quads);
-        const oldParent = this.parentColour;
-        for (const subpart of model.subparts) {
-            this.parentColour = this.getParentColour(subpart.colour);
-            if (subpart.model) {
-                this.pushMatrix();
-                this.multMatrix(subpart.matrix);
-                this.drawModel(subpart.model);
-                this.popMatrix();
-            }
-            this.parentColour = oldParent;
-        }
     }
 
     computeBoundingBox(model: Model): BBox | undefined {
@@ -1554,6 +780,787 @@ export class WebGL {
         this.compileColours = [];
         this.compileVertices = [];
         return compiledModel;
+    }
+}
+
+export class WebGL extends WebGLCompiler {
+    gl: WebGLRenderingContext;
+    canvas: HTMLCanvasElement;
+    pipeline: PipeLine | undefined;
+    brickPipeline: PipeLine | undefined;
+    mapPipeline: PipeLine | undefined;
+    projectionMatrix: m4.Matrix4;
+    modelMatrix: m4.Matrix4;
+    matrixStack: m4.Matrix4[];
+    vertexBuffer: WebGLBuffer | null;
+    colourBuffer: WebGLBuffer | null;
+    texcoordBuffer: WebGLBuffer | null;
+    brightness: number;
+    perspectiveAngle: number;
+    mindist: number;
+    maxdist: number;
+
+    static create(canvas: HTMLCanvasElement): WebGL | undefined {
+        const gl = canvas.getContext('webgl');
+        if (!gl) {
+            console.log('No WebGL available');
+            return undefined;
+        }
+        return new WebGL(canvas, gl);
+    }
+
+    constructor(canvas: HTMLCanvasElement, gl: WebGLRenderingContext) {
+        super();
+        this.canvas = canvas;
+        this.gl = gl;
+        this.matrixStack = [];
+        this.modelMatrix = m4.identity();
+        this.projectionMatrix = m4.identity();
+        this.vertexBuffer = null;
+        this.colourBuffer = null;
+        this.texcoordBuffer = null;
+        this.brightness = 1.0;
+        this.perspectiveAngle = 45;
+        this.mindist = 0.1;
+        this.maxdist = 1000.0;
+        this.setupPipeline();
+    }
+
+    setPerspective(fieldOfViewDegrees: number, aspect: number, near: number, far: number) {
+        this.projectionMatrix = m4.perspective(
+            (fieldOfViewDegrees * Math.PI) / 180.0,
+            aspect,
+            near,
+            far
+        );
+        if (this.brickPipeline?.projectionMatrixUniform) {
+            this.gl.uniformMatrix4fv(
+                this.brickPipeline.projectionMatrixUniform,
+                false,
+                this.projectionMatrix
+            );
+        }
+        if (this.brickPipeline?.nearUniform) {
+            this.gl.uniform1f(this.brickPipeline.nearUniform, near);
+        }
+        if (this.brickPipeline?.farUniform) {
+            this.gl.uniform1f(this.brickPipeline.farUniform, far);
+        }
+    }
+
+    setFrustum(
+        left: number,
+        right: number,
+        bottom: number,
+        top: number,
+        near: number,
+        far: number
+    ) {
+        this.projectionMatrix = m4.frustum(left, right, bottom, top, near, far);
+        if (this.brickPipeline?.projectionMatrixUniform) {
+            this.gl.uniformMatrix4fv(
+                this.brickPipeline.projectionMatrixUniform,
+                false,
+                this.projectionMatrix
+            );
+        }
+        if (this.brickPipeline?.nearUniform) {
+            this.gl.uniform1f(this.brickPipeline.nearUniform, near);
+        }
+        if (this.brickPipeline?.farUniform) {
+            this.gl.uniform1f(this.brickPipeline.farUniform, far);
+        }
+    }
+
+    setOrtho(left: number, right: number, bottom: number, top: number, near: number, far: number) {
+        this.projectionMatrix = m4.orthographic(left, right, bottom, top, near, far);
+        if (this.brickPipeline?.projectionMatrixUniform) {
+            this.gl.uniformMatrix4fv(
+                this.brickPipeline.projectionMatrixUniform,
+                false,
+                this.projectionMatrix
+            );
+        }
+        if (this.brickPipeline?.nearUniform) {
+            this.gl.uniform1f(this.brickPipeline.nearUniform, near);
+        }
+        if (this.brickPipeline?.farUniform) {
+            this.gl.uniform1f(this.brickPipeline.farUniform, far);
+        }
+    }
+
+    setProjectionIdentity() {
+        this.projectionMatrix = m4.identity();
+        if (this.brickPipeline?.projectionMatrixUniform) {
+            this.gl.uniformMatrix4fv(
+                this.brickPipeline.projectionMatrixUniform,
+                false,
+                this.projectionMatrix
+            );
+        }
+    }
+
+    setModelIdentity() {
+        this.modelMatrix = m4.identity();
+        if (this.brickPipeline?.modelMatrixUniform) {
+            this.gl.uniformMatrix4fv(
+                this.brickPipeline.modelMatrixUniform,
+                false,
+                this.modelMatrix
+            );
+        }
+    }
+
+    pushMatrix() {
+        this.matrixStack.push(m4.copy(this.modelMatrix));
+    }
+
+    popMatrix() {
+        this.modelMatrix = this.matrixStack.pop()!;
+        if (this.brickPipeline?.modelMatrixUniform) {
+            this.gl.uniformMatrix4fv(
+                this.brickPipeline.modelMatrixUniform,
+                false,
+                this.modelMatrix
+            );
+        }
+    }
+
+    translate(x: number, y: number, z: number) {
+        this.modelMatrix = m4.translate(this.modelMatrix, x, y, z);
+        if (this.brickPipeline?.modelMatrixUniform) {
+            this.gl.uniformMatrix4fv(
+                this.brickPipeline.modelMatrixUniform,
+                false,
+                this.modelMatrix
+            );
+        }
+    }
+
+    rotate(angle: number, x: number, y: number, z: number) {
+        const radians = (angle * Math.PI) / 180.0;
+        this.modelMatrix = m4.axisRotate(this.modelMatrix, [x, y, z], radians);
+        if (this.brickPipeline?.modelMatrixUniform) {
+            this.gl.uniformMatrix4fv(
+                this.brickPipeline.modelMatrixUniform,
+                false,
+                this.modelMatrix
+            );
+        }
+    }
+
+    scale(s: number) {
+        // The inverse is incorrect for non-unifor scaling
+        this.modelMatrix = m4.scale(this.modelMatrix, s, s, s);
+        if (this.brickPipeline?.modelMatrixUniform) {
+            this.gl.uniformMatrix4fv(
+                this.brickPipeline.modelMatrixUniform,
+                false,
+                this.modelMatrix
+            );
+        }
+    }
+
+    multMatrix(m: m4.Matrix4) {
+        this.modelMatrix = m4.multiply(this.modelMatrix, m);
+        if (this.brickPipeline?.modelMatrixUniform) {
+            this.gl.uniformMatrix4fv(
+                this.brickPipeline.modelMatrixUniform,
+                false,
+                this.modelMatrix
+            );
+        }
+    }
+
+    clearColour(r: number, g: number, b: number) {
+        this.gl.clearColor(r, g, b, 1.0);
+    }
+
+    clear() {
+        this.gl.clear(this.gl.COLOR_BUFFER_BIT);
+    }
+
+    flush() {
+        this.gl.flush();
+    }
+
+    finish() {
+        this.gl.finish();
+    }
+
+    setBrightness(brightness: number) {
+        if (brightness < 0.0) {
+            brightness = 0.0;
+        }
+        if (brightness > 1.0) {
+            brightness = 1.0;
+        }
+        this.brightness = brightness;
+    }
+
+    drawBox(width: number, height: number, depth: number) {
+        if (!this.vertexBuffer) {
+            return;
+        }
+        if (!this.colourBuffer) {
+            return;
+        }
+        if (!this.brickPipeline) {
+            return;
+        }
+        const vertices: number[] = [];
+        const colours: number[] = [];
+        const w = width / 2;
+        const d = depth / 2;
+        const h = height;
+        let colour: Colour = { r: 1.0, g: 1.0, b: 1.0, a: 1.0 };
+        colours.push(colour.r);
+        colours.push(colour.g);
+        colours.push(colour.b);
+        colours.push(colour.a);
+        vertices.push(-w);
+        vertices.push(0);
+        vertices.push(d);
+        vertices.push(1.0);
+        colours.push(colour.r);
+        colours.push(colour.g);
+        colours.push(colour.b);
+        colours.push(colour.a);
+        vertices.push(w);
+        vertices.push(0);
+        vertices.push(d);
+        vertices.push(1.0);
+        colours.push(colour.r);
+        colours.push(colour.g);
+        colours.push(colour.b);
+        colours.push(colour.a);
+        vertices.push(-w);
+        vertices.push(h);
+        vertices.push(d);
+        vertices.push(1.0);
+        colours.push(colour.r);
+        colours.push(colour.g);
+        colours.push(colour.b);
+        colours.push(colour.a);
+        vertices.push(-w);
+        vertices.push(h);
+        vertices.push(d);
+        vertices.push(1.0);
+        colours.push(colour.r);
+        colours.push(colour.g);
+        colours.push(colour.b);
+        colours.push(colour.a);
+        vertices.push(w);
+        vertices.push(0);
+        vertices.push(d);
+        vertices.push(1.0);
+        colours.push(colour.r);
+        colours.push(colour.g);
+        colours.push(colour.b);
+        colours.push(colour.a);
+        vertices.push(w);
+        vertices.push(h);
+        vertices.push(d);
+        vertices.push(1.0);
+
+        colour = { r: 1.0, g: 0.0, b: 0.0, a: 1.0 };
+        colours.push(colour.r);
+        colours.push(colour.g);
+        colours.push(colour.b);
+        colours.push(colour.a);
+        vertices.push(-w);
+        vertices.push(0);
+        vertices.push(-d);
+        vertices.push(1.0);
+        colours.push(colour.r);
+        colours.push(colour.g);
+        colours.push(colour.b);
+        colours.push(colour.a);
+        vertices.push(w);
+        vertices.push(0);
+        vertices.push(-d);
+        vertices.push(1.0);
+        colours.push(colour.r);
+        colours.push(colour.g);
+        colours.push(colour.b);
+        colours.push(colour.a);
+        vertices.push(-w);
+        vertices.push(h);
+        vertices.push(-d);
+        vertices.push(1.0);
+        colours.push(colour.r);
+        colours.push(colour.g);
+        colours.push(colour.b);
+        colours.push(colour.a);
+        vertices.push(-w);
+        vertices.push(h);
+        vertices.push(-d);
+        vertices.push(1.0);
+        colours.push(colour.r);
+        colours.push(colour.g);
+        colours.push(colour.b);
+        colours.push(colour.a);
+        vertices.push(w);
+        vertices.push(0);
+        vertices.push(-d);
+        vertices.push(1.0);
+        colours.push(colour.r);
+        colours.push(colour.g);
+        colours.push(colour.b);
+        colours.push(colour.a);
+        vertices.push(w);
+        vertices.push(h);
+        vertices.push(-d);
+        vertices.push(1.0);
+
+        colour = { r: 0.0, g: 1.0, b: 0.0, a: 1.0 };
+        colours.push(colour.r);
+        colours.push(colour.g);
+        colours.push(colour.b);
+        colours.push(colour.a);
+        vertices.push(-w);
+        vertices.push(0);
+        vertices.push(-d);
+        vertices.push(1.0);
+        colours.push(colour.r);
+        colours.push(colour.g);
+        colours.push(colour.b);
+        colours.push(colour.a);
+        vertices.push(w);
+        vertices.push(0);
+        vertices.push(-d);
+        vertices.push(1.0);
+        colours.push(colour.r);
+        colours.push(colour.g);
+        colours.push(colour.b);
+        colours.push(colour.a);
+        vertices.push(-w);
+        vertices.push(0);
+        vertices.push(d);
+        vertices.push(1.0);
+        colours.push(colour.r);
+        colours.push(colour.g);
+        colours.push(colour.b);
+        colours.push(colour.a);
+        vertices.push(-w);
+        vertices.push(0);
+        vertices.push(d);
+        vertices.push(1.0);
+        colours.push(colour.r);
+        colours.push(colour.g);
+        colours.push(colour.b);
+        colours.push(colour.a);
+        vertices.push(w);
+        vertices.push(0);
+        vertices.push(-d);
+        vertices.push(1.0);
+        colours.push(colour.r);
+        colours.push(colour.g);
+        colours.push(colour.b);
+        colours.push(colour.a);
+        vertices.push(w);
+        vertices.push(0);
+        vertices.push(d);
+        vertices.push(1.0);
+
+        colour = { r: 0.0, g: 1.0, b: 0.0, a: 1.0 };
+        colours.push(colour.r);
+        colours.push(colour.g);
+        colours.push(colour.b);
+        colours.push(colour.a);
+        vertices.push(-w);
+        vertices.push(h);
+        vertices.push(-d);
+        vertices.push(1.0);
+        colours.push(colour.r);
+        colours.push(colour.g);
+        colours.push(colour.b);
+        colours.push(colour.a);
+        vertices.push(w);
+        vertices.push(h);
+        vertices.push(-d);
+        vertices.push(1.0);
+        colours.push(colour.r);
+        colours.push(colour.g);
+        colours.push(colour.b);
+        colours.push(colour.a);
+        vertices.push(-w);
+        vertices.push(h);
+        vertices.push(d);
+        vertices.push(1.0);
+        colours.push(colour.r);
+        colours.push(colour.g);
+        colours.push(colour.b);
+        colours.push(colour.a);
+        vertices.push(-w);
+        vertices.push(h);
+        vertices.push(d);
+        vertices.push(1.0);
+        colours.push(colour.r);
+        colours.push(colour.g);
+        colours.push(colour.b);
+        colours.push(colour.a);
+        vertices.push(w);
+        vertices.push(h);
+        vertices.push(-d);
+        vertices.push(1.0);
+        colours.push(colour.r);
+        colours.push(colour.g);
+        colours.push(colour.b);
+        colours.push(colour.a);
+        vertices.push(w);
+        vertices.push(h);
+        vertices.push(d);
+        vertices.push(1.0);
+
+        colour = { r: 0.0, g: 0.0, b: 1.0, a: 1.0 };
+        colours.push(colour.r);
+        colours.push(colour.g);
+        colours.push(colour.b);
+        colours.push(colour.a);
+        vertices.push(w);
+        vertices.push(0);
+        vertices.push(-d);
+        vertices.push(1.0);
+        colours.push(colour.r);
+        colours.push(colour.g);
+        colours.push(colour.b);
+        colours.push(colour.a);
+        vertices.push(w);
+        vertices.push(h);
+        vertices.push(-d);
+        vertices.push(1.0);
+        colours.push(colour.r);
+        colours.push(colour.g);
+        colours.push(colour.b);
+        colours.push(colour.a);
+        vertices.push(w);
+        vertices.push(0);
+        vertices.push(d);
+        vertices.push(1.0);
+        colours.push(colour.r);
+        colours.push(colour.g);
+        colours.push(colour.b);
+        colours.push(colour.a);
+        vertices.push(w);
+        vertices.push(0);
+        vertices.push(d);
+        vertices.push(1.0);
+        colours.push(colour.r);
+        colours.push(colour.g);
+        colours.push(colour.b);
+        colours.push(colour.a);
+        vertices.push(w);
+        vertices.push(h);
+        vertices.push(-d);
+        vertices.push(1.0);
+        colours.push(colour.r);
+        colours.push(colour.g);
+        colours.push(colour.b);
+        colours.push(colour.a);
+        vertices.push(w);
+        vertices.push(h);
+        vertices.push(d);
+        vertices.push(1.0);
+
+        colour = { r: 0.0, g: 0.0, b: 1.0, a: 1.0 };
+        colours.push(colour.r);
+        colours.push(colour.g);
+        colours.push(colour.b);
+        colours.push(colour.a);
+        vertices.push(-w);
+        vertices.push(0);
+        vertices.push(-d);
+        vertices.push(1.0);
+        colours.push(colour.r);
+        colours.push(colour.g);
+        colours.push(colour.b);
+        colours.push(colour.a);
+        vertices.push(-w);
+        vertices.push(h);
+        vertices.push(-d);
+        vertices.push(1.0);
+        colours.push(colour.r);
+        colours.push(colour.g);
+        colours.push(colour.b);
+        colours.push(colour.a);
+        vertices.push(-w);
+        vertices.push(0);
+        vertices.push(d);
+        vertices.push(1.0);
+        colours.push(colour.r);
+        colours.push(colour.g);
+        colours.push(colour.b);
+        colours.push(colour.a);
+        vertices.push(-w);
+        vertices.push(0);
+        vertices.push(d);
+        vertices.push(1.0);
+        colours.push(colour.r);
+        colours.push(colour.g);
+        colours.push(colour.b);
+        colours.push(colour.a);
+        vertices.push(-w);
+        vertices.push(h);
+        vertices.push(-d);
+        vertices.push(1.0);
+        colours.push(colour.r);
+        colours.push(colour.g);
+        colours.push(colour.b);
+        colours.push(colour.a);
+        vertices.push(-w);
+        vertices.push(h);
+        vertices.push(d);
+        vertices.push(1.0);
+
+        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.vertexBuffer);
+        this.gl.uniform1f(this.brickPipeline.brightnessUniform, this.brightness);
+        this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(vertices), this.gl.STATIC_DRAW);
+        this.gl.vertexAttribPointer(
+            this.brickPipeline.vertexAttribute,
+            4,
+            this.gl.FLOAT,
+            false,
+            0,
+            0
+        );
+        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.colourBuffer);
+        this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(colours), this.gl.STATIC_DRAW);
+        this.gl.vertexAttribPointer(
+            this.brickPipeline.colourAttribute,
+            4,
+            this.gl.FLOAT,
+            false,
+            0,
+            0
+        );
+        this.gl.drawArrays(this.gl.TRIANGLES, 0, 36);
+    }
+
+    drawTriangles(triangles: Triangle[]) {
+        if (!this.vertexBuffer) {
+            return;
+        }
+        if (!this.colourBuffer) {
+            return;
+        }
+        if (!this.brickPipeline) {
+            return;
+        }
+        const vertices: number[] = [];
+        const colours: number[] = [];
+        for (const t of triangles) {
+            const colour = this.getColour(t.colour, false);
+            colours.push(colour.r);
+            colours.push(colour.g);
+            colours.push(colour.b);
+            colours.push(colour.a);
+            vertices.push(t.p1.x);
+            vertices.push(t.p1.y);
+            vertices.push(t.p1.z);
+            vertices.push(1.0);
+            colours.push(colour.r);
+            colours.push(colour.g);
+            colours.push(colour.b);
+            colours.push(colour.a);
+            vertices.push(t.p2.x);
+            vertices.push(t.p2.y);
+            vertices.push(t.p2.z);
+            vertices.push(1.0);
+            colours.push(colour.r);
+            colours.push(colour.g);
+            colours.push(colour.b);
+            colours.push(colour.a);
+            vertices.push(t.p3.x);
+            vertices.push(t.p3.y);
+            vertices.push(t.p3.z);
+            vertices.push(1.0);
+        }
+        this.gl.uniform1f(this.brickPipeline.brightnessUniform, this.brightness);
+        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.vertexBuffer);
+        this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(vertices), this.gl.STATIC_DRAW);
+        this.gl.vertexAttribPointer(
+            this.brickPipeline.vertexAttribute,
+            4,
+            this.gl.FLOAT,
+            false,
+            0,
+            0
+        );
+        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.colourBuffer);
+        this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(colours), this.gl.STATIC_DRAW);
+        this.gl.vertexAttribPointer(
+            this.brickPipeline.colourAttribute,
+            4,
+            this.gl.FLOAT,
+            false,
+            0,
+            0
+        );
+        this.gl.drawArrays(this.gl.TRIANGLES, 0, triangles.length * 3);
+    }
+
+    drawLines(lines: Line[]) {
+        if (!this.vertexBuffer) {
+            return;
+        }
+        if (!this.colourBuffer) {
+            return;
+        }
+        if (!this.brickPipeline) {
+            return;
+        }
+        const vertices: number[] = [];
+        const colours: number[] = [];
+        for (const l of lines) {
+            const colour = this.getColour(l.colour, true);
+            colours.push(colour.r);
+            colours.push(colour.g);
+            colours.push(colour.b);
+            colours.push(colour.a);
+            vertices.push(l.p1.x);
+            vertices.push(l.p1.y);
+            vertices.push(l.p1.z);
+            vertices.push(1.0);
+            colours.push(colour.r);
+            colours.push(colour.g);
+            colours.push(colour.b);
+            colours.push(colour.a);
+            vertices.push(l.p2.x);
+            vertices.push(l.p2.y);
+            vertices.push(l.p2.z);
+            vertices.push(1.0);
+        }
+        this.gl.uniform1f(this.brickPipeline.brightnessUniform, this.brightness);
+        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.vertexBuffer);
+        this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(vertices), this.gl.STATIC_DRAW);
+        this.gl.vertexAttribPointer(
+            this.brickPipeline.vertexAttribute,
+            4,
+            this.gl.FLOAT,
+            false,
+            0,
+            0
+        );
+        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.colourBuffer);
+        this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(colours), this.gl.STATIC_DRAW);
+        this.gl.vertexAttribPointer(
+            this.brickPipeline.colourAttribute,
+            4,
+            this.gl.FLOAT,
+            false,
+            0,
+            0
+        );
+        this.gl.drawArrays(this.gl.LINES, 0, lines.length * 2);
+    }
+
+    drawQuads(quads: Quad[]) {
+        if (!this.vertexBuffer) {
+            return;
+        }
+        if (!this.colourBuffer) {
+            return;
+        }
+        if (!this.brickPipeline) {
+            return;
+        }
+        const vertices: number[] = [];
+        const colours: number[] = [];
+        for (const q of quads) {
+            const colour = this.getColour(q.colour, false);
+            colours.push(colour.r);
+            colours.push(colour.g);
+            colours.push(colour.b);
+            colours.push(colour.a);
+            vertices.push(q.p1.x);
+            vertices.push(q.p1.y);
+            vertices.push(q.p1.z);
+            vertices.push(1.0);
+            colours.push(colour.r);
+            colours.push(colour.g);
+            colours.push(colour.b);
+            colours.push(colour.a);
+            vertices.push(q.p2.x);
+            vertices.push(q.p2.y);
+            vertices.push(q.p2.z);
+            vertices.push(1.0);
+            colours.push(colour.r);
+            colours.push(colour.g);
+            colours.push(colour.b);
+            colours.push(colour.a);
+            vertices.push(q.p4.x);
+            vertices.push(q.p4.y);
+            vertices.push(q.p4.z);
+            vertices.push(1.0);
+            colours.push(colour.r);
+            colours.push(colour.g);
+            colours.push(colour.b);
+            colours.push(colour.a);
+            vertices.push(q.p4.x);
+            vertices.push(q.p4.y);
+            vertices.push(q.p4.z);
+            vertices.push(1.0);
+            colours.push(colour.r);
+            colours.push(colour.g);
+            colours.push(colour.b);
+            colours.push(colour.a);
+            vertices.push(q.p2.x);
+            vertices.push(q.p2.y);
+            vertices.push(q.p2.z);
+            vertices.push(1.0);
+            colours.push(colour.r);
+            colours.push(colour.g);
+            colours.push(colour.b);
+            colours.push(colour.a);
+            vertices.push(q.p3.x);
+            vertices.push(q.p3.y);
+            vertices.push(q.p3.z);
+            vertices.push(1.0);
+        }
+        this.gl.uniform1f(this.brickPipeline.brightnessUniform, this.brightness);
+        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.vertexBuffer);
+        this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(vertices), this.gl.STATIC_DRAW);
+        this.gl.vertexAttribPointer(
+            this.brickPipeline.vertexAttribute,
+            4,
+            this.gl.FLOAT,
+            false,
+            0,
+            0
+        );
+        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.colourBuffer);
+        this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(colours), this.gl.STATIC_DRAW);
+        this.gl.vertexAttribPointer(
+            this.brickPipeline.colourAttribute,
+            4,
+            this.gl.FLOAT,
+            false,
+            0,
+            0
+        );
+        this.gl.drawArrays(this.gl.TRIANGLES, 0, quads.length * 6);
+    }
+
+    drawModel(model: Model) {
+        if (!this.brickPipeline) {
+            return;
+        }
+        this.gl.useProgram(this.brickPipeline.program);
+        this.drawLines(model.lines);
+        this.drawTriangles(model.triangles);
+        this.drawQuads(model.quads);
+        const oldParent = this.parentColour;
+        for (const subpart of model.subparts) {
+            this.parentColour = this.getParentColour(subpart.colour);
+            if (subpart.model) {
+                this.pushMatrix();
+                this.multMatrix(subpart.matrix);
+                this.drawModel(subpart.model);
+                this.popMatrix();
+            }
+            this.parentColour = oldParent;
+        }
     }
 
     drawCompiled(model: CompiledModel) {
