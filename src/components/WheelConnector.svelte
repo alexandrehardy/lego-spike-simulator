@@ -4,11 +4,14 @@
         componentStore,
         findParts,
         findPartTransform,
+        type Model,
         type PartMatch
     } from '$lib/ldraw/components';
     import { type PortType, Hub, Wheel } from '$lib/spike/vm';
+    import { type CompiledModel, WebGLCompiler } from '$lib/ldraw/gl';
     import HubWidget from '$components/HubWidget.svelte';
     import RobotPreview from '$components/RobotPreview.svelte';
+    import * as m4 from '$lib/ldraw/m4';
 
     interface WheelMatch {
         part: PartMatch;
@@ -26,6 +29,8 @@
         '39367p01': 28,
         '49295p01': 44
     };
+    let compiledRobot: CompiledModel | undefined = undefined;
+    let compiler = new WebGLCompiler();
     let port: PortType | undefined;
     let parts: PartMatch[] = findParts($componentStore.robotModel, matchCodes);
     let wheels: WheelMatch[] = getWheels(parts, hub);
@@ -86,7 +91,20 @@
             } else {
                 const result = findPartTransform($componentStore.robotModel, selectedWheel);
                 if (result) {
-                    wheel = new Wheel(selectedWheel, radius, gearing, toPort, result.forward);
+                    let matrix = m4.identity();
+                    if (compiledRobot) {
+                        matrix = m4.translate(matrix, 0.0, compiledRobot.bbox.min.y, 0.0);
+                        matrix = m4.translate(
+                            matrix,
+                            compiledRobot.recenter.x,
+                            compiledRobot.recenter.y,
+                            compiledRobot.recenter.z
+                        );
+                    }
+                    matrix = m4.axisRotate(matrix, [1.0, 0.0, 0.0], Math.PI);
+                    matrix = m4.scale(matrix, 0.4, 0.4, 0.4);
+                    matrix = m4.multiply(matrix, result.forward);
+                    wheel = new Wheel(selectedWheel, radius, gearing, toPort, matrix);
                     hub.wheels.push(wheel);
                 }
             }
@@ -124,8 +142,17 @@
         }
     }
 
+    function compileRobot(robot: Model | undefined) {
+        if (robot === undefined) {
+            return undefined;
+        }
+        const compiledRobot = compiler.compileModel(robot, { rescale: false });
+        return compiledRobot;
+    }
+
     $: parts = findParts($componentStore.robotModel, matchCodes);
     $: wheels = getWheels(parts, hub);
+    $: compiledRobot = compileRobot($componentStore.robotModel);
 </script>
 
 <Modal

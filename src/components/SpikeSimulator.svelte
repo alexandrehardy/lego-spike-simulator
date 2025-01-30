@@ -9,7 +9,7 @@
         setRobotFromContent,
         setStudioMode
     } from '$lib/ldraw/components';
-    import { type CompiledModel } from '$lib/ldraw/gl';
+    import { type CompiledModel, WebGLCompiler } from '$lib/ldraw/gl';
     import {
         VM,
         Hub,
@@ -39,6 +39,7 @@
     export let sceneOpen = false;
     export let wheelsOpen = false;
     export let hub = new Hub();
+    let compiler = new WebGLCompiler();
 
     interface SensorView {
         id: number | 'none';
@@ -120,7 +121,20 @@
         for (const wheel of hub.wheels) {
             const result = findPartTransform(robot, wheel.id);
             if (result) {
-                wheel.locationTransform = result.forward;
+                let matrix = m4.identity();
+                if (compiledRobot) {
+                    matrix = m4.translate(matrix, 0.0, compiledRobot.bbox.min.y, 0.0);
+                    matrix = m4.translate(
+                        matrix,
+                        compiledRobot.recenter.x,
+                        compiledRobot.recenter.y,
+                        compiledRobot.recenter.z
+                    );
+                }
+                matrix = m4.axisRotate(matrix, [1.0, 0.0, 0.0], Math.PI);
+                matrix = m4.scale(matrix, 0.4, 0.4, 0.4);
+                matrix = m4.multiply(matrix, result.forward);
+                wheel.locationTransform = matrix;
             } else {
                 console.log('Error');
             }
@@ -143,7 +157,8 @@
                             const content = await file.async('string');
                             try {
                                 setStudioMode(true);
-                                setRobotFromContent(content);
+                                const robot = setRobotFromContent(content);
+                                compiledRobot = compiler.compileModel(robot, { rescale: false });
                                 hub.reload();
                                 hub = hub;
                             } finally {
@@ -152,6 +167,7 @@
                         }
                     } else {
                         const robot = await setRobotFromFile(first);
+                        compiledRobot = compiler.compileModel(robot, { rescale: false });
                         hub.reload();
                         connectPorts(hub, robot);
                         connectWheels(hub, robot);
@@ -374,7 +390,7 @@
                     id="robot_preview"
                     class="flex-1 w-full h-full"
                     robotModel={$componentStore.robotModel}
-                    bind:compiledRobot
+                    {compiledRobot}
                     enabled={!connectorOpen && !sceneOpen && !wheelsOpen}
                 />
             {/if}
