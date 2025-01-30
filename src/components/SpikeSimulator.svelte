@@ -30,6 +30,7 @@
     import RobotPreview from '$components/RobotPreview.svelte';
     import ScenePreview from '$components/ScenePreview.svelte';
     import ColourSensor from '$components/ColourSensor.svelte';
+    import * as m4 from '$lib/ldraw/m4';
     import JSZip from 'jszip';
 
     export let runSimulation: boolean = false;
@@ -105,15 +106,23 @@
                     if (type === 'wheel') {
                         const radius = partRadius[part] ?? 1;
                         const gearing = subpart.gear_ratio ?? 1;
-                        const result = findPartTransform(robot, subpart.id);
-                        if (result) {
-                            hub.wheels.push(
-                                new Wheel(subpart.id, radius, gearing, port, result.forward)
-                            );
-                        }
+                        hub.wheels.push(
+                            new Wheel(subpart.id, radius, gearing, port, m4.identity())
+                        );
                     }
                 }
                 connectWheels(hub, subpart.model);
+            }
+        }
+    }
+
+    function loadWheelTransforms(hub: Hub, robot: Model) {
+        for (const wheel of hub.wheels) {
+            const result = findPartTransform(robot, wheel.id);
+            if (result) {
+                wheel.locationTransform = result.forward;
+            } else {
+                console.log('Error');
             }
         }
     }
@@ -146,6 +155,7 @@
                         hub.reload();
                         connectPorts(hub, robot);
                         connectWheels(hub, robot);
+                        loadWheelTransforms(hub, robot);
                         hub = hub;
                     }
                 }
@@ -357,6 +367,7 @@
                     camera="adaptive"
                     tilt={true}
                     select="#all"
+                    {hub}
                 />
             {:else}
                 <RobotPreview
