@@ -446,6 +446,9 @@ export function loadModel(name: string, content: string): Model {
         if (parts[0] == '0') {
             // comment or meta
             // we don't worry about meta, except spike ports
+            if (parts.length < 2) {
+                continue;
+            }
             if (!parts[1].startsWith('!SPIKE_')) {
                 continue;
             }

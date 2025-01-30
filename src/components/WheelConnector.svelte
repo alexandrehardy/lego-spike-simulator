@@ -93,7 +93,10 @@
             const match = wheels.find((w) => w.part.id == selectedWheel);
             if (match) {
                 match.wheel = wheel;
-                wheels = wheels;
+                // hub has been updated, so only update wheels in the next cycle
+                setTimeout(() => {
+                    wheels = wheels;
+                }, 0);
             }
             const portModel = hub.ports[port];
             if (portModel.type == 'motor') {
