@@ -328,7 +328,7 @@ export class ActionStatement extends Statement {
         } else if (op == 'lightDisplaySetPixel') {
             const x = this.arguments[0].evaluate(thread).getNumber();
             const y = this.arguments[1].evaluate(thread).getNumber();
-            let brightness = this.arguments[2].evaluate(thread).getNumber();
+            const brightness = this.arguments[2].evaluate(thread).getNumber();
             thread.vm.hub.setPixel(x - 1, y - 1, brightness);
         } else if (op == 'ultrasonicLightUp') {
             return super._execute(thread);
@@ -359,11 +359,16 @@ export class ActionStatement extends Statement {
 
     async execute_flippermoremotor(thread: Thread, op: string) {
         if (op == 'motorGoToRelativePosition') {
+            return super._execute(thread);
         } else if (op == 'motorSetAcceleration') {
+            return super._execute(thread);
         } else if (op == 'motorSetStopMethod') {
+            return super._execute(thread);
         } else if (op == 'motorStartPower') {
+            return super._execute(thread);
+        } else {
+            return super._execute(thread);
         }
-        return super._execute(thread);
     }
 
     async execute_flippermoremove(thread: Thread, op: string) {
@@ -376,25 +381,79 @@ export class ActionStatement extends Statement {
 
     async execute_flippermotor(thread: Thread, op: string) {
         if (op == 'motorGoDirectionToPosition') {
+            return super._execute(thread);
         } else if (op == 'motorSetSpeed') {
+            const ports = this.arguments[0].evaluate(thread).getString();
+            const speed = this.arguments[1].evaluate(thread).getNumber();
+            for (let i = 0; i < ports.length; i++) {
+                const portChar = ports.charAt(i);
+                const port = portChar as PortType;
+                const attachment = thread.vm.hub.ports[port];
+                if (attachment && attachment.type == 'motor') {
+                    // TODO: Other statements can ask for clockwise or
+                    // counter clockwise
+                    attachment.motor!.setSpeed(speed);
+                }
+            }
         } else if (op == 'motorStartDirection') {
+            const ports = this.arguments[0].evaluate(thread).getString();
+            const direction = this.arguments[1].evaluate(thread).getString();
+            for (let i = 0; i < ports.length; i++) {
+                const portChar = ports.charAt(i);
+                const port = portChar as PortType;
+                const attachment = thread.vm.hub.ports[port];
+                if (attachment && attachment.type == 'motor') {
+                    //TODO: Reverse direction if necessary
+                    if (direction == 'clockwise') {
+                        attachment.motor!.reverse = false;
+                    } else if (direction == 'counterclockwise') {
+                        attachment.motor!.reverse = true;
+                    }
+                    attachment.motor!.on = true;
+                }
+            }
         } else if (op == 'motorStop') {
+            const ports = this.arguments[0].evaluate(thread).getString();
+            for (let i = 0; i < ports.length; i++) {
+                const portChar = ports.charAt(i);
+                const port = portChar as PortType;
+                const attachment = thread.vm.hub.ports[port];
+                if (attachment && attachment.type == 'motor') {
+                    //TODO: Reverse direction if necessary
+                    attachment.motor!.on = false;
+                    attachment.motor!.reverse = false;
+                }
+            }
         } else if (op == 'motorTurnForDirection') {
+            const ports = this.arguments[0].evaluate(thread).getString();
+            const direction = this.arguments[1].evaluate(thread).getString();
+            const angle = this.arguments[2].evaluate(thread).getNumber();
+            return super._execute(thread);
+        } else {
+            return super._execute(thread);
         }
-        return super._execute(thread);
     }
 
     async execute_flippermove(thread: Thread, op: string) {
         if (op == 'move') {
+            return super._execute(thread);
         } else if (op == 'movementSpeed') {
+            return super._execute(thread);
         } else if (op == 'setDistance') {
+            return super._execute(thread);
         } else if (op == 'setMovementPair') {
+            return super._execute(thread);
         } else if (op == 'startMove') {
+            return super._execute(thread);
         } else if (op == 'stopMove') {
+            return super._execute(thread);
         } else if (op == 'startSteer') {
+            return super._execute(thread);
         } else if (op == 'steer') {
+            return super._execute(thread);
+        } else {
+            return super._execute(thread);
         }
-        return super._execute(thread);
     }
 
     async execute_flippermusic(thread: Thread, op: string) {
@@ -918,9 +977,21 @@ export class FunctionExpression extends Expression {
             }
             return new NumberValue(0);
         } else if (this.opcode == 'flippermotor_absolutePosition') {
-            return super.evaluate(thread);
+            const portString = this.arguments[0].evaluate(thread).getString();
+            const port = portString as PortType;
+            const attachment = thread.vm.hub.ports[port];
+            if (attachment && attachment.type == 'motor') {
+                return new NumberValue(attachment.motor!.position);
+            }
+            return new NumberValue(0);
         } else if (this.opcode == 'flippermotor_speed') {
-            return super.evaluate(thread);
+            const portString = this.arguments[0].evaluate(thread).getString();
+            const port = portString as PortType;
+            const attachment = thread.vm.hub.ports[port];
+            if (attachment && attachment.type == 'motor') {
+                return new NumberValue(attachment.motor!.speed);
+            }
+            return new NumberValue(0);
         } else if (this.opcode == 'sound_volume') {
             return super.evaluate(thread);
         } else {
@@ -1120,21 +1191,52 @@ export class Motor {
     //54675 large (135rpm)
     id: number;
     position: number;
+    speed: number;
     rpm: number;
+    on: boolean;
+    reverse: boolean;
     constructor(id: number) {
         this.id = id;
         this.position = 0;
-        this.rpm = 0;
+        this.speed = 0.75;
+        this.rpm = 135 * this.speed;
+        this.on = false;
+        this.reverse = false;
     }
 
     setSpeed(percent: number) {
+        if (percent > 100) {
+            percent = 100;
+        }
+        if (percent < -100) {
+            percent = -100;
+        }
+        this.speed = percent;
         this.rpm = percent * 135;
     }
 
     move(time: number): number {
-        const delta = (time * timeFactor * this.position * this.rpm) / 60.0;
-        this.position += delta;
-        return delta;
+        // time is in seconds
+        if (!this.on) {
+            return 0;
+        }
+        const delta = (time * timeFactor * this.rpm) / 60.0;
+        if (this.reverse) {
+            this.position -= delta * 360;
+        } else {
+            this.position += delta * 360;
+        }
+        while (this.position >= 360) {
+            this.position -= 360;
+        }
+        while (this.position < 0) {
+            this.position += 360;
+        }
+        if (this.reverse) {
+            return delta;
+        } else {
+            return -delta;
+        }
     }
 }
 
@@ -1186,7 +1288,10 @@ export class Port {
         this.measure = { colour: '#000000', distance: 10000.0, force: 0.0, reflected: 0.0 };
         if (this.motor) {
             this.motor.position = 0;
-            this.motor.rpm = 0;
+            this.motor.speed = 0.75;
+            this.motor.rpm = 135 * this.motor.speed;
+            this.motor.on = false;
+            this.motor.reverse = false;
         }
     }
 
@@ -1295,7 +1400,7 @@ export class Hub {
 
     notifyScreen(screen: string) {
         if (this.screenRotate == 1) {
-            let newScreen: string[] = [];
+            const newScreen: string[] = [];
             for (let x = 0; x < 5; x++) {
                 for (let y = 4; y >= 0; y--) {
                     const index = x + y * 5;
@@ -1304,7 +1409,7 @@ export class Hub {
             }
             screen = newScreen.join('');
         } else if (this.screenRotate == 2) {
-            let newScreen: string[] = [];
+            const newScreen: string[] = [];
             for (let y = 4; y >= 0; y--) {
                 for (let x = 4; x >= 0; x--) {
                     const index = x + y * 5;
@@ -1313,7 +1418,7 @@ export class Hub {
             }
             screen = newScreen.join('');
         } else if (this.screenRotate == 3) {
-            let newScreen: string[] = [];
+            const newScreen: string[] = [];
             for (let x = 4; x >= 0; x--) {
                 for (let y = 0; y < 5; y++) {
                     const index = x + y * 5;
