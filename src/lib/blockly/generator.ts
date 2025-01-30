@@ -432,7 +432,7 @@ spikeGenerator.forBlock['control_repeat_until'] = function (block, generator) {
     const statements = statementIds.split(',').map((x) => getStatement(x));
     const statementBlock = new StatementBlock(statements);
     const id = newId();
-    nodes.set(id, new ControlStatement('while', block.id, condition, statementBlock));
+    nodes.set(id, new ControlStatement('repeat_until', block.id, condition, statementBlock));
     return id;
 };
 spikeGenerator.forBlock['control_wait'] = function (block, generator) {

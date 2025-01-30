@@ -898,7 +898,7 @@ export const blocks = [
             {
                 type: 'input_value',
                 name: 'TIMES',
-                check: 'Number',
+                check: ['String', 'Number'],
                 shadow: {
                     type: 'math_whole_number',
                     fields: {
@@ -1931,7 +1931,7 @@ export const blocks = [
         args0: [
             {
                 type: 'input_value',
-                check: 'String',
+                check: ['String', 'Number'],
                 name: 'X',
                 shadow: {
                     type: 'flipperlight_matrix-pixel-index',
@@ -1942,7 +1942,7 @@ export const blocks = [
             },
             {
                 type: 'input_value',
-                check: 'String',
+                check: ['String', 'Number'],
                 name: 'Y',
                 shadow: {
                     type: 'flipperlight_matrix-pixel-index',

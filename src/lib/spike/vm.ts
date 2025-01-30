@@ -149,6 +149,7 @@ export class ActionStatement extends Statement {
     async execute_bargraphmonitor(thread: Thread, op: string) {
         return super._execute(thread);
     }
+
     async execute_data(thread: Thread, op: string) {
         if (op == 'setvariableto') {
             const variable = this.arguments[0] as Variable;
@@ -215,12 +216,15 @@ export class ActionStatement extends Statement {
             return super._execute(thread);
         }
     }
+
     async execute_displaymonitor(thread: Thread, op: string) {
         return super._execute(thread);
     }
+
     async execute_event(thread: Thread, op: string) {
         return super._execute(thread);
     }
+
     async execute_flippercontrol(thread: Thread, op: string) {
         if (op == 'stop') {
             thread.stop();
@@ -231,6 +235,7 @@ export class ActionStatement extends Statement {
         }
         return super._execute(thread);
     }
+
     async execute_flipperlight(thread: Thread, op: string) {
         if (op == 'lightDisplayImageOn') {
             const value = this.arguments[0].evaluate(thread);
@@ -296,13 +301,35 @@ export class ActionStatement extends Statement {
                 await thread.cancellable(vmSleep(200));
             }
         } else if (op == 'lightDisplaySetBrightness') {
-            return super._execute(thread);
+            const brightness = this.arguments[0].evaluate(thread).getNumber();
+            thread.vm.hub.screenBrightness = brightness;
         } else if (op == 'lightDisplaySetOrientation') {
-            return super._execute(thread);
+            const direction = this.arguments[0].evaluate(thread).getString();
+            if (direction == '1') {
+                //up
+                thread.vm.hub.setScreenOrientation(0);
+            } else if (direction == '2') {
+                //left
+                thread.vm.hub.setScreenOrientation(3);
+            } else if (direction == '3') {
+                //right
+                thread.vm.hub.setScreenOrientation(1);
+            } else if (direction == '4') {
+                //down
+                thread.vm.hub.setScreenOrientation(2);
+            }
         } else if (op == 'lightDisplayRotate') {
-            return super._execute(thread);
+            const direction = this.arguments[0].evaluate(thread).getString();
+            if (direction == 'clockwise') {
+                thread.vm.hub.rotateScreen(1);
+            } else if (direction == 'counterclockwise') {
+                thread.vm.hub.rotateScreen(-1);
+            }
         } else if (op == 'lightDisplaySetPixel') {
-            return super._execute(thread);
+            const x = this.arguments[0].evaluate(thread).getNumber();
+            const y = this.arguments[1].evaluate(thread).getNumber();
+            let brightness = this.arguments[2].evaluate(thread).getNumber();
+            thread.vm.hub.setPixel(x - 1, y - 1, brightness);
         } else if (op == 'ultrasonicLightUp') {
             return super._execute(thread);
         } else if (op == 'centerButtonLight') {
@@ -329,6 +356,7 @@ export class ActionStatement extends Statement {
             return super._execute(thread);
         }
     }
+
     async execute_flippermoremotor(thread: Thread, op: string) {
         if (op == 'motorGoToRelativePosition') {
         } else if (op == 'motorSetAcceleration') {
@@ -337,12 +365,15 @@ export class ActionStatement extends Statement {
         }
         return super._execute(thread);
     }
+
     async execute_flippermoremove(thread: Thread, op: string) {
         return super._execute(thread);
     }
+
     async execute_flippermoresensors(thread: Thread, op: string) {
         return super._execute(thread);
     }
+
     async execute_flippermotor(thread: Thread, op: string) {
         if (op == 'motorGoDirectionToPosition') {
         } else if (op == 'motorSetSpeed') {
@@ -352,6 +383,7 @@ export class ActionStatement extends Statement {
         }
         return super._execute(thread);
     }
+
     async execute_flippermove(thread: Thread, op: string) {
         if (op == 'move') {
         } else if (op == 'movementSpeed') {
@@ -364,9 +396,11 @@ export class ActionStatement extends Statement {
         }
         return super._execute(thread);
     }
+
     async execute_flippermusic(thread: Thread, op: string) {
         return super._execute(thread);
     }
+
     async execute_flippersensors(thread: Thread, op: string) {
         if (op == 'resetTimer') {
             thread.vm.resetTimer();
@@ -375,6 +409,7 @@ export class ActionStatement extends Statement {
         }
         return super._execute(thread);
     }
+
     async execute_flippersound(thread: Thread, op: string) {
         if (op == 'playSound') {
             const sourceString = this.arguments[0].evaluate(thread).getString();
@@ -432,9 +467,11 @@ export class ActionStatement extends Statement {
             return super._execute(thread);
         }
     }
+
     async execute_linegraphmonitor(thread: Thread, op: string) {
         return super._execute(thread);
     }
+
     async execute_sound(thread: Thread, op: string) {
         if (op == 'changeeffectby') {
         } else if (op == 'changevolumeby') {
@@ -444,6 +481,7 @@ export class ActionStatement extends Statement {
         }
         return super._execute(thread);
     }
+
     async execute_weather(thread: Thread, op: string) {
         return super._execute(thread);
     }
@@ -983,6 +1021,18 @@ export class ControlStatement extends Statement {
                 await sleep(50);
                 condition = this.condition.evaluate(thread);
             }
+        } else if (this.opcode == 'repeat_until') {
+            let condition = this.condition.evaluate(thread);
+            while (!condition.getBoolean()) {
+                if (thread.state == 'stopped') {
+                    return;
+                }
+                await this.statement.execute(thread);
+                // give things time to change
+                // and avoid a very tight loop
+                await sleep(50);
+                condition = this.condition.evaluate(thread);
+            }
         } else if (this.opcode == 'if') {
             const condition = this.condition.evaluate(thread);
             if (condition.getBoolean()) {
@@ -1065,12 +1115,26 @@ export class Wheel {
 }
 
 export class Motor {
-    //54696 medium
-    //68488 small
-    //54675 large
+    //54696 medium (135rpm)
+    //68488 small (85rpm)
+    //54675 large (135rpm)
     id: number;
+    position: number;
+    rpm: number;
     constructor(id: number) {
         this.id = id;
+        this.position = 0;
+        this.rpm = 0;
+    }
+
+    setSpeed(percent: number) {
+        this.rpm = percent * 135;
+    }
+
+    move(time: number): number {
+        const delta = (time * timeFactor * this.position * this.rpm) / 60.0;
+        this.position += delta;
+        return delta;
     }
 }
 
@@ -1120,6 +1184,10 @@ export class Port {
 
     reset() {
         this.measure = { colour: '#000000', distance: 10000.0, force: 0.0, reflected: 0.0 };
+        if (this.motor) {
+            this.motor.position = 0;
+            this.motor.rpm = 0;
+        }
     }
 
     id(): number | 'none' {
@@ -1156,16 +1224,18 @@ export class Hub {
     rightPressed: boolean;
     screen: string;
     screenBrightness: number;
+    screenRotate: number;
     ports: HubPorts;
     eventHandler: HubEventHandler | undefined;
     buttonColour: string;
     wheels: Wheel[];
+    moveSpeed: number;
 
     reload() {
         this.leftPressed = false;
         this.rightPressed = false;
         this.screen = '0000000000000000000000000';
-        this.screenBrightness = 0;
+        this.screenBrightness = 100;
         this.buttonColour = '#ffffff';
         this.ports = {
             A: new Port('none'),
@@ -1176,13 +1246,15 @@ export class Hub {
             F: new Port('none')
         };
         this.wheels = [];
+        this.moveSpeed = 0;
+        this.screenRotate = 0;
     }
 
     reset() {
         this.leftPressed = false;
         this.rightPressed = false;
         this.screen = '0000000000000000000000000';
-        this.screenBrightness = 0;
+        this.screenBrightness = 100;
         this.buttonColour = '#ffffff';
         this.ports.A.reset();
         this.ports.B.reset();
@@ -1190,13 +1262,15 @@ export class Hub {
         this.ports.D.reset();
         this.ports.E.reset();
         this.ports.F.reset();
+        this.moveSpeed = 0;
+        this.screenRotate = 0;
     }
 
     constructor() {
         this.leftPressed = false;
         this.rightPressed = false;
         this.screen = '0000000000000000000000000';
-        this.screenBrightness = 0;
+        this.screenBrightness = 100;
         this.buttonColour = '#ffffff';
         this.ports = {
             A: new Port('none'),
@@ -1207,6 +1281,8 @@ export class Hub {
             F: new Port('none')
         };
         this.wheels = [];
+        this.moveSpeed = 0;
+        this.screenRotate = 0;
     }
 
     setEventHandler(eventHandler: HubEventHandler) {
@@ -1217,11 +1293,82 @@ export class Hub {
         this.eventHandler = undefined;
     }
 
-    setScreen(screen: string) {
-        this.screen = screen;
+    notifyScreen(screen: string) {
+        if (this.screenRotate == 1) {
+            let newScreen: string[] = [];
+            for (let x = 0; x < 5; x++) {
+                for (let y = 4; y >= 0; y--) {
+                    const index = x + y * 5;
+                    newScreen.push(screen.charAt(index));
+                }
+            }
+            screen = newScreen.join('');
+        } else if (this.screenRotate == 2) {
+            let newScreen: string[] = [];
+            for (let y = 4; y >= 0; y--) {
+                for (let x = 4; x >= 0; x--) {
+                    const index = x + y * 5;
+                    newScreen.push(screen.charAt(index));
+                }
+            }
+            screen = newScreen.join('');
+        } else if (this.screenRotate == 3) {
+            let newScreen: string[] = [];
+            for (let x = 4; x >= 0; x--) {
+                for (let y = 0; y < 5; y++) {
+                    const index = x + y * 5;
+                    newScreen.push(screen.charAt(index));
+                }
+            }
+            screen = newScreen.join('');
+        }
         if (this.eventHandler) {
             this.eventHandler('screen', screen);
         }
+    }
+
+    setScreenOrientation(direction: number) {
+        this.screenRotate = direction;
+        while (this.screenRotate < 0) {
+            this.screenRotate += 4;
+        }
+        while (this.screenRotate > 3) {
+            this.screenRotate -= 4;
+        }
+    }
+
+    rotateScreen(direction: number) {
+        this.screenRotate += direction;
+        while (this.screenRotate < 0) {
+            this.screenRotate += 4;
+        }
+        while (this.screenRotate > 3) {
+            this.screenRotate -= 4;
+        }
+    }
+
+    setScreen(screen: string) {
+        this.screen = screen;
+        this.notifyScreen(screen);
+    }
+
+    setPixel(x: number, y: number, brightness: number) {
+        const index = x + y * 5;
+        if (index < 0) {
+            return;
+        }
+        if (index >= this.screen.length) {
+            return;
+        }
+        if (brightness < 0) {
+            brightness = 0;
+        }
+        if (brightness > 98) {
+            brightness = 90;
+        }
+        const b = Math.trunc(brightness / 10).toString();
+        this.screen = this.screen.substring(0, index) + b + this.screen.substring(index + 1);
+        this.notifyScreen(this.screen);
     }
 
     setButtonColour(colour: string) {
