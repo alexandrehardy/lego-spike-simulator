@@ -2,7 +2,8 @@ import * as Blockly from 'blockly/core';
 import { writable } from 'svelte/store';
 import { mbitfont } from '$lib/spike/font';
 import { SoundLibrary } from '$lib/blockly/audio';
-import { hexColor } from '$lib/ldraw/components';
+import { hexColor, type Vertex } from '$lib/ldraw/components';
+import { type SceneStore } from '$lib/spike/scene';
 import * as m4 from '$lib/ldraw/m4';
 
 export type PortType = 'A' | 'B' | 'C' | 'D' | 'E' | 'F';
@@ -989,7 +990,7 @@ export class FunctionExpression extends Expression {
             const port = portString as PortType;
             const attachment = thread.vm.hub.ports[port];
             if (attachment && attachment.type == 'motor') {
-                return new NumberValue(attachment.motor!.speed);
+                return new NumberValue(attachment.motor!.speed * 100);
             }
             return new NumberValue(0);
         } else if (this.opcode == 'sound_volume') {
@@ -1169,6 +1170,9 @@ export class Wheel {
     gearing: number;
     port: PortType;
     locationTransform: m4.Matrix4;
+    distanceMoved: number;
+    position: Vertex;
+    direction: Vertex;
 
     constructor(
         id: number,
@@ -1182,6 +1186,18 @@ export class Wheel {
         this.gearing = gearing;
         this.port = port;
         this.locationTransform = locationTransform;
+        this.distanceMoved = 0.0;
+        const position = m4.transformVector(this.locationTransform, [0.0, 0.0, 0.0, 1.0]);
+        const direction = m4.transformVector(this.locationTransform, [1.0, 0.0, 0.0, 0.0]);
+        this.position = { x: position[0], y: position[1], z: position[2] };
+        this.direction = { x: direction[0], y: direction[1], z: direction[2] };
+    }
+
+    applyTransform() {
+        const position = m4.transformVector(this.locationTransform, [0.0, 0.0, 0.0, 1.0]);
+        const direction = m4.transformVector(this.locationTransform, [1.0, 0.0, 0.0, 0.0]);
+        this.position = { x: position[0], y: position[1], z: position[2] };
+        this.direction = { x: direction[0], y: direction[1], z: direction[2] };
     }
 }
 
@@ -1211,6 +1227,7 @@ export class Motor {
         if (percent < -100) {
             percent = -100;
         }
+        percent = percent / 100.0;
         this.speed = percent;
         this.rpm = percent * 135;
     }
@@ -1233,9 +1250,9 @@ export class Motor {
             this.position += 360;
         }
         if (this.reverse) {
-            return delta;
-        } else {
             return -delta;
+        } else {
+            return delta;
         }
     }
 }
@@ -1753,6 +1770,40 @@ export class Thread {
     }
 }
 
+function dist(a: Vertex, b: Vertex) {
+    const dx = a.x - b.x;
+    const dy = a.y - b.y;
+    const dz = a.z - b.z;
+    return Math.sqrt(dx * dx + dy * dy + dz * dz);
+}
+
+function project(a: Vertex, p1: Vertex, p2: Vertex): Vertex {
+    const dx = p2.x - p1.x;
+    const dy = p2.y - p1.y;
+    const dz = p2.z - p1.z;
+    const d = Math.sqrt(dx * dx + dy * dy + dz * dz);
+    const ux = dx / d;
+    const uy = dy / d;
+    const uz = dz / d;
+    const ax = a.x - p1.x;
+    const ay = a.y - p1.y;
+    const az = a.z - p1.z;
+    const r = ax * ux + ay * uy + az * uz;
+    return { x: p1.x + r * ux, y: p1.y + r * uy, z: p1.z + r * uz };
+}
+
+function rotate(v: Vertex, c: Vertex, sint: number, cost: number) {
+    let x = v.x - c.x;
+    let y = v.y - c.y;
+    let xn = cost * x - sint * y;
+    let yn = cost * y + sint * x;
+    x = xn;
+    y = yn;
+    xn = cost * x - sint * y;
+    yn = cost * y + sint * x;
+    return { x: xn + c.x, y: yn + c.y, z: v.z };
+}
+
 export class VM {
     hub: Hub;
     audio: HTMLAudioElement;
@@ -1903,9 +1954,166 @@ export class VM {
         }
     }
 
-    step() {
+    step(seconds: number, scene: SceneStore) {
         if (this.state == 'running') {
             this.runThreads();
+            this.moveRobot(seconds, scene);
+        }
+    }
+
+    turnMotor(port: PortType, seconds: number): Wheel[] {
+        const wheelsMoved: Wheel[] = [];
+        const attachment = this.hub.ports[port];
+        if (attachment.type != 'motor') {
+            return wheelsMoved;
+        }
+        // angle is 0 for no movement to 1 for a full revolution
+        const angle = attachment.motor!.move(seconds);
+        for (const wheel of this.hub.wheels) {
+            if (wheel.port == port) {
+                wheel.distanceMoved = wheel.gearing * angle * (wheel.radius * 3.0 * Math.PI);
+                if (wheel.position.y <= 1e-5) {
+                    // This wheel is on the ground.
+                }
+                wheelsMoved.push(wheel);
+            }
+        }
+        return wheelsMoved;
+    }
+
+    moveRobot(seconds: number, scene: SceneStore) {
+        const wheelsMoved = [];
+        if (this.hub.wheels.length == 0) {
+            return;
+        }
+        for (const wheel of this.hub.wheels) {
+            wheel.distanceMoved = 0.0;
+        }
+        wheelsMoved.push(...this.turnMotor('A', seconds));
+        wheelsMoved.push(...this.turnMotor('B', seconds));
+        wheelsMoved.push(...this.turnMotor('C', seconds));
+        wheelsMoved.push(...this.turnMotor('D', seconds));
+        wheelsMoved.push(...this.turnMotor('E', seconds));
+        wheelsMoved.push(...this.turnMotor('F', seconds));
+        //TODO: Check if wheels are aligned, moving in the same direction
+        if (wheelsMoved.length == 1) {
+            const direction = m4.transformVector(
+                m4.yRotation((scene.robot.rotation! * Math.PI) / 180.0),
+                [
+                    wheelsMoved[0].direction.x,
+                    wheelsMoved[0].direction.y,
+                    wheelsMoved[0].direction.z,
+                    0.0
+                ]
+            );
+            scene.robot.position!.x += wheelsMoved[0].distanceMoved * direction[0];
+            scene.robot.position!.y += wheelsMoved[0].distanceMoved * direction[1];
+            scene.robot.position!.z += wheelsMoved[0].distanceMoved * direction[2];
+        } else if (wheelsMoved.length == 2) {
+            let d0 = wheelsMoved[0].distanceMoved;
+            let d1 = wheelsMoved[1].distanceMoved;
+            let p0 = wheelsMoved[0].position;
+            let p1 = wheelsMoved[1].position;
+            if (d0 * d1 > 0) {
+                // same direction find an extended line to the center
+                // and rotate
+                let reverse = d0 < 0;
+                d0 = Math.abs(d0);
+                d1 = Math.abs(d1);
+                if (d0 > d1) {
+                    const td = d0;
+                    d0 = d1;
+                    d1 = td;
+                    const tp = p0;
+                    p0 = p1;
+                    p1 = tp;
+                    reverse = !reverse;
+                }
+
+                if ((d1 - d0) * (d1 - d0) < 1e-3) {
+                    // Very close in distance, just move straight
+                    const direction = m4.transformVector(
+                        m4.yRotation((scene.robot.rotation! * Math.PI) / 180.0),
+                        [
+                            wheelsMoved[0].direction.x,
+                            wheelsMoved[0].direction.y,
+                            wheelsMoved[0].direction.z,
+                            0.0
+                        ]
+                    );
+                    scene.robot.position!.x += wheelsMoved[0].distanceMoved * direction[0];
+                    scene.robot.position!.y += wheelsMoved[0].distanceMoved * direction[1];
+                    scene.robot.position!.z += wheelsMoved[0].distanceMoved * direction[2];
+                } else {
+                    const r1 = dist(p0, p1);
+                    const r0 = (r1 * d0) / (d1 - d0);
+                    const t = r0 + r1;
+                    const c: Vertex = {
+                        x: (t * (p0.x - p1.x)) / r1,
+                        y: (t * (p0.y - p1.y)) / r1,
+                        z: (t * (p0.z - p1.z)) / r1
+                    };
+                    // c is the rotation point. The angle is given by rsin(a) = t, rcos(a) = d1;
+                    // But we can actually use arc length so that the angle a=d1/t (radians);
+                    const angle = reverse ? -d1 / t : d1 / t;
+                    let matrix = m4.translation(
+                        scene.robot.position!.x,
+                        scene.robot.position!.y,
+                        scene.robot.position!.z
+                    );
+                    matrix = m4.yRotate(matrix, (scene.robot.rotation! * Math.PI) / 180.0);
+                    matrix = m4.translate(matrix, +c.x, +c.y, +c.z);
+                    matrix = m4.yRotate(matrix, angle);
+                    matrix = m4.translate(matrix, -c.x, -c.y, -c.z);
+                    const position = m4.transformVector(matrix, [0, 0, 0, 1]);
+                    scene.robot.position!.x = position[0];
+                    scene.robot.position!.y = position[1];
+                    scene.robot.position!.z = position[2];
+                    scene.robot.rotation! += (angle * 180.0) / Math.PI;
+                }
+            } else {
+                // opposite directions.
+                // Compute a point c between the points to rotate around
+                const reverse = d0 < 0;
+                d0 = Math.abs(d0);
+                d1 = Math.abs(d1);
+                if (d0 + d1 < 1e-3) {
+                    return;
+                }
+                const t = dist(p0, p1);
+                const r0 = (t * d0) / (d0 + d1);
+                const r1 = t - r0;
+                const s = r0 / t;
+                const c: Vertex = {
+                    x: s * p0.x + (1.0 - s) * p1.x,
+                    y: s * p0.y + (1.0 - s) * p1.y,
+                    z: s * p0.z + (1.0 - s) * p1.z
+                };
+                // c is the rotation point. The angle to rotate is d0 /r0 or d1/r1
+                let angle = 0;
+                if (r0 > r1) {
+                    angle = d0 / r0;
+                } else {
+                    angle = d1 / r1;
+                }
+                if (reverse) {
+                    angle = -angle;
+                }
+                let matrix = m4.translation(
+                    scene.robot.position!.x,
+                    scene.robot.position!.y,
+                    scene.robot.position!.z
+                );
+                matrix = m4.yRotate(matrix, (scene.robot.rotation! * Math.PI) / 180.0);
+                matrix = m4.translate(matrix, +c.x, +c.y, +c.z);
+                matrix = m4.yRotate(matrix, angle);
+                matrix = m4.translate(matrix, -c.x, -c.y, -c.z);
+                const position = m4.transformVector(matrix, [0, 0, 0, 1]);
+                scene.robot.position!.x = position[0];
+                scene.robot.position!.y = position[1];
+                scene.robot.position!.z = position[2];
+                scene.robot.rotation! += (angle * 180.0) / Math.PI;
+            }
         }
     }
 }

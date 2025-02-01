@@ -25,7 +25,7 @@
         ForceSensor,
         Wheel
     } from '$lib/spike/vm';
-    import { sceneStore } from '$lib/spike/scene';
+    import { copyScene, sceneStore } from '$lib/spike/scene';
     import HubWidget from '$components/HubWidget.svelte';
     import RobotPreview from '$components/RobotPreview.svelte';
     import ScenePreview from '$components/ScenePreview.svelte';
@@ -53,6 +53,8 @@
     let hubCentreButtonColour = '#ffffff';
     let compiledRobot: CompiledModel | undefined = undefined;
     let sensors: SensorView[] = [];
+    let lastFrame: number = 0;
+    let scene = copyScene($sceneStore);
 
     const partNames: Record<string, string> = {
         '54696': 'motor',
@@ -135,6 +137,7 @@
                 matrix = m4.scale(matrix, 0.4, 0.4, 0.4);
                 matrix = m4.multiply(matrix, result.forward);
                 wheel.locationTransform = matrix;
+                wheel.applyTransform();
             } else {
                 console.log('Error');
             }
@@ -202,12 +205,18 @@
         }
     }
 
-    function stepVM() {
+    function stepVM(timestamp: number) {
         if (!vm) {
             return;
         }
+        const frameTime = timestamp - lastFrame;
+        lastFrame = timestamp;
         if (vm.state == 'running') {
-            vm.step();
+            if (lastFrame > 0) {
+                vm.step(frameTime / 1000.0, scene);
+            } else {
+                vm.step(0.0, scene);
+            }
             requestAnimationFrame(stepVM);
         }
     }
@@ -257,6 +266,7 @@
                 }
             }
             hub = hub;
+            scene = copyScene($sceneStore);
             vm = new VM(hub, globals, $codeStore.events, $codeStore.procedures, workspace);
             vm.start();
             requestAnimationFrame(stepVM);
@@ -376,7 +386,7 @@
             {#if runSimulation}
                 <ScenePreview
                     id="scene_preview"
-                    scene={$sceneStore}
+                    {scene}
                     class="h-full w-full"
                     map={$sceneStore.map}
                     rotate={false}

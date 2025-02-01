@@ -23,7 +23,7 @@
         const frameTime = timestamp - lastFrame;
         // Aim for 30 fps
         const frames = Math.round(frameTime / 33);
-        if (frames > 1) {
+        if (frames > 1 && lastFrame > 0) {
             droppedFrames++;
             // TODO: Drop the model detail
         }
@@ -31,6 +31,8 @@
         renderScene();
         if (canRender && enabled) {
             requestAnimationFrame(doRender);
+        } else {
+            lastFrame = 0;
         }
     }
 
