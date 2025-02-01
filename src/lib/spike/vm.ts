@@ -380,9 +380,73 @@ export class ActionStatement extends Statement {
         return super._execute(thread);
     }
 
+    async execute_movemotor(thread: Thread, port: PortType, duration: number) {
+        const attachment = thread.vm.hub.ports[port];
+        if (attachment && attachment.type == 'motor') {
+            attachment.motor!.on = true;
+            await thread.cancellable(vmSleep(duration));
+            attachment.motor!.on = false;
+            attachment.motor!.reverse = false;
+        }
+    }
+
     async execute_flippermotor(thread: Thread, op: string) {
         if (op == 'motorGoDirectionToPosition') {
-            return super._execute(thread);
+            const ports = this.arguments[0].evaluate(thread).getString();
+            const direction = this.arguments[1].evaluate(thread).getString();
+            let target = this.arguments[2].evaluate(thread).getNumber();
+            const promises: Promise<void>[] = [];
+            for (let i = 0; i < ports.length; i++) {
+                const portChar = ports.charAt(i);
+                const port = portChar as PortType;
+                const attachment = thread.vm.hub.ports[port];
+                if (attachment && attachment.type == 'motor') {
+                    let degrees = 0;
+                    let position = attachment.motor!.position;
+                    const rpm = attachment.motor!.rpm;
+                    if (direction == 'clockwise') {
+                        attachment.motor!.reverse = false;
+                        while (target < position) {
+                            target += 360.0;
+                        }
+                        degrees = target - position;
+                    } else if (direction == 'counterclockwise') {
+                        attachment.motor!.reverse = true;
+                        while (position < target) {
+                            position += 360.0;
+                        }
+                        degrees = position - target;
+                    } else if (direction == 'shortest') {
+                        let cw = 0;
+                        let ccw = 0;
+                        while (target < position) {
+                            target += 360.0;
+                        }
+                        cw = target - position;
+                        while (position < target) {
+                            position += 360.0;
+                        }
+                        ccw = position - target;
+                        if (cw < ccw) {
+                            attachment.motor!.reverse = false;
+                            degrees = cw;
+                        } else {
+                            attachment.motor!.reverse = true;
+                            degrees = ccw;
+                        }
+                    }
+                    // This is probably approximate
+                    const revolution_time = 60.0 / rpm;
+                    promises.push(
+                        this.execute_movemotor(
+                            thread,
+                            port,
+                            ((degrees * revolution_time) / 360.0) * 1000
+                        )
+                    );
+                }
+            }
+            await Promise.all(promises);
         } else if (op == 'motorSetSpeed') {
             const ports = this.arguments[0].evaluate(thread).getString();
             const speed = this.arguments[1].evaluate(thread).getNumber();
@@ -428,8 +492,43 @@ export class ActionStatement extends Statement {
         } else if (op == 'motorTurnForDirection') {
             const ports = this.arguments[0].evaluate(thread).getString();
             const direction = this.arguments[1].evaluate(thread).getString();
-            const angle = this.arguments[2].evaluate(thread).getNumber();
-            return super._execute(thread);
+            const amount = this.arguments[2].evaluate(thread).getNumber();
+            const unit = this.arguments[3].evaluate(thread).getString();
+            const promises: Promise<void>[] = [];
+            for (let i = 0; i < ports.length; i++) {
+                const portChar = ports.charAt(i);
+                const port = portChar as PortType;
+                const attachment = thread.vm.hub.ports[port];
+                if (attachment && attachment.type == 'motor') {
+                    //TODO: Reverse direction if necessary
+                    if (direction == 'clockwise') {
+                        attachment.motor!.reverse = false;
+                    } else if (direction == 'counterclockwise') {
+                        attachment.motor!.reverse = true;
+                    }
+                    const rpm = attachment.motor!.rpm;
+                    if (unit == 'rotations') {
+                        const revolution_time = 60.0 / rpm;
+                        promises.push(
+                            this.execute_movemotor(thread, port, amount * revolution_time * 1000)
+                        );
+                    } else if (unit == 'degrees') {
+                        // This is probably approximate
+                        const revolution_time = 60.0 / rpm;
+                        promises.push(
+                            this.execute_movemotor(
+                                thread,
+                                port,
+                                ((amount * revolution_time) / 360.0) * 1000
+                            )
+                        );
+                    } else if (unit == 'seconds') {
+                        await thread.cancellable(vmSleep(amount * 1000));
+                        promises.push(this.execute_movemotor(thread, port, amount * 1000));
+                    }
+                }
+            }
+            await Promise.all(promises);
         } else {
             return super._execute(thread);
         }
@@ -439,15 +538,60 @@ export class ActionStatement extends Statement {
         if (op == 'move') {
             return super._execute(thread);
         } else if (op == 'movementSpeed') {
-            return super._execute(thread);
+            const speed = this.arguments[0].evaluate(thread).getNumber();
+            thread.vm.hub.moveSpeed = speed;
         } else if (op == 'setDistance') {
-            return super._execute(thread);
+            const distance = this.arguments[0].evaluate(thread).getNumber();
+            const unit = this.arguments[1].evaluate(thread).getString();
+            if (unit == 'cm') {
+                thread.vm.hub.moveDistance = distance * 10.0;
+            } else if (unit == 'in') {
+                thread.vm.hub.moveDistance = distance * 25.4;
+            }
         } else if (op == 'setMovementPair') {
-            return super._execute(thread);
+            const pair = this.arguments[0].evaluate(thread).getString();
+            if (pair.length == 2) {
+                let portChar = pair.charAt(0);
+                let port = portChar as PortType;
+                thread.vm.hub.movePair1 = port;
+                portChar = pair.charAt(1);
+                port = portChar as PortType;
+                thread.vm.hub.movePair2 = port;
+            }
         } else if (op == 'startMove') {
-            return super._execute(thread);
+            let attachment = thread.vm.hub.ports[thread.vm.hub.movePair1];
+            if (attachment && attachment.type == 'motor') {
+                if (thread.vm.hub.moveSpeed < 0) {
+                    attachment.motor!.setSpeed(-thread.vm.hub.moveSpeed);
+                    attachment.motor!.reverse = true;
+                } else {
+                    attachment.motor!.setSpeed(thread.vm.hub.moveSpeed);
+                    attachment.motor!.reverse = false;
+                }
+                attachment.motor!.on = true;
+            }
+            attachment = thread.vm.hub.ports[thread.vm.hub.movePair2];
+            if (attachment && attachment.type == 'motor') {
+                if (thread.vm.hub.moveSpeed < 0) {
+                    attachment.motor!.setSpeed(-thread.vm.hub.moveSpeed);
+                    attachment.motor!.reverse = false;
+                } else {
+                    attachment.motor!.setSpeed(thread.vm.hub.moveSpeed);
+                    attachment.motor!.reverse = true;
+                }
+                attachment.motor!.on = true;
+            }
         } else if (op == 'stopMove') {
-            return super._execute(thread);
+            let attachment = thread.vm.hub.ports[thread.vm.hub.movePair1];
+            if (attachment && attachment.type == 'motor') {
+                attachment.motor!.reverse = false;
+                attachment.motor!.on = false;
+            }
+            attachment = thread.vm.hub.ports[thread.vm.hub.movePair2];
+            if (attachment && attachment.type == 'motor') {
+                attachment.motor!.reverse = false;
+                attachment.motor!.on = false;
+            }
         } else if (op == 'startSteer') {
             return super._execute(thread);
         } else if (op == 'steer') {
@@ -1352,6 +1496,9 @@ export class Hub {
     buttonColour: string;
     wheels: Wheel[];
     moveSpeed: number;
+    moveDistance: number; // in mm
+    movePair1: PortType;
+    movePair2: PortType;
 
     reload() {
         this.leftPressed = false;
@@ -1369,6 +1516,9 @@ export class Hub {
         };
         this.wheels = [];
         this.moveSpeed = 0;
+        this.moveDistance = 175;
+        this.movePair1 = 'A';
+        this.movePair2 = 'B';
         this.screenRotate = 0;
     }
 
@@ -1385,6 +1535,9 @@ export class Hub {
         this.ports.E.reset();
         this.ports.F.reset();
         this.moveSpeed = 0;
+        this.moveDistance = 175;
+        this.movePair1 = 'A';
+        this.movePair2 = 'B';
         this.screenRotate = 0;
     }
 
@@ -1404,6 +1557,9 @@ export class Hub {
         };
         this.wheels = [];
         this.moveSpeed = 0;
+        this.movePair1 = 'A';
+        this.movePair2 = 'B';
+        this.moveDistance = 175;
         this.screenRotate = 0;
     }
 
@@ -1777,33 +1933,6 @@ function dist(a: Vertex, b: Vertex) {
     return Math.sqrt(dx * dx + dy * dy + dz * dz);
 }
 
-function project(a: Vertex, p1: Vertex, p2: Vertex): Vertex {
-    const dx = p2.x - p1.x;
-    const dy = p2.y - p1.y;
-    const dz = p2.z - p1.z;
-    const d = Math.sqrt(dx * dx + dy * dy + dz * dz);
-    const ux = dx / d;
-    const uy = dy / d;
-    const uz = dz / d;
-    const ax = a.x - p1.x;
-    const ay = a.y - p1.y;
-    const az = a.z - p1.z;
-    const r = ax * ux + ay * uy + az * uz;
-    return { x: p1.x + r * ux, y: p1.y + r * uy, z: p1.z + r * uz };
-}
-
-function rotate(v: Vertex, c: Vertex, sint: number, cost: number) {
-    let x = v.x - c.x;
-    let y = v.y - c.y;
-    let xn = cost * x - sint * y;
-    let yn = cost * y + sint * x;
-    x = xn;
-    y = yn;
-    xn = cost * x - sint * y;
-    yn = cost * y + sint * x;
-    return { x: xn + c.x, y: yn + c.y, z: v.z };
-}
-
 export class VM {
     hub: Hub;
     audio: HTMLAudioElement;
@@ -1971,7 +2100,7 @@ export class VM {
         const angle = attachment.motor!.move(seconds);
         for (const wheel of this.hub.wheels) {
             if (wheel.port == port) {
-                wheel.distanceMoved = wheel.gearing * angle * (wheel.radius * 3.0 * Math.PI);
+                wheel.distanceMoved = wheel.gearing * angle * (wheel.radius * 2.0 * Math.PI);
                 if (wheel.position.y <= 1e-5) {
                     // This wheel is on the ground.
                 }
@@ -2070,6 +2199,12 @@ export class VM {
                     scene.robot.position!.y = position[1];
                     scene.robot.position!.z = position[2];
                     scene.robot.rotation! += (angle * 180.0) / Math.PI;
+                    while (scene.robot.rotation! >= 360.0) {
+                        scene.robot.rotation! -= 360.0;
+                    }
+                    while (scene.robot.rotation! < 0.0) {
+                        scene.robot.rotation! += 360.0;
+                    }
                 }
             } else {
                 // opposite directions.
@@ -2113,6 +2248,12 @@ export class VM {
                 scene.robot.position!.y = position[1];
                 scene.robot.position!.z = position[2];
                 scene.robot.rotation! += (angle * 180.0) / Math.PI;
+                while (scene.robot.rotation! >= 360.0) {
+                    scene.robot.rotation! -= 360.0;
+                }
+                while (scene.robot.rotation! < 0.0) {
+                    scene.robot.rotation! += 360.0;
+                }
             }
         }
     }
