@@ -523,7 +523,6 @@ export class ActionStatement extends Statement {
                             )
                         );
                     } else if (unit == 'seconds') {
-                        await thread.cancellable(vmSleep(amount * 1000));
                         promises.push(this.execute_movemotor(thread, port, amount * 1000));
                     }
                 }
@@ -536,7 +535,70 @@ export class ActionStatement extends Statement {
 
     async execute_flippermove(thread: Thread, op: string) {
         if (op == 'move') {
-            return super._execute(thread);
+            const direction = this.arguments[0].evaluate(thread).getString();
+            const amount = this.arguments[1].evaluate(thread).getNumber();
+            const unit = this.arguments[2].evaluate(thread).getString();
+            let moveSpeed = thread.vm.hub.moveSpeed;
+            if (direction == 'forward') {
+                moveSpeed = thread.vm.hub.moveSpeed;
+            } else if (direction == 'back') {
+                moveSpeed = -thread.vm.hub.moveSpeed;
+            }
+            let attachment = thread.vm.hub.ports[thread.vm.hub.movePair1];
+            let rpm = 0;
+            if (attachment && attachment.type == 'motor') {
+                if (moveSpeed < 0) {
+                    attachment.motor!.setSpeed(-moveSpeed);
+                    attachment.motor!.reverse = true;
+                } else {
+                    attachment.motor!.setSpeed(moveSpeed);
+                    attachment.motor!.reverse = false;
+                }
+                attachment.motor!.on = true;
+                rpm = attachment.motor!.rpm;
+            }
+            attachment = thread.vm.hub.ports[thread.vm.hub.movePair2];
+            if (attachment && attachment.type == 'motor') {
+                if (thread.vm.hub.moveSpeed < 0) {
+                    attachment.motor!.setSpeed(-moveSpeed);
+                    attachment.motor!.reverse = false;
+                } else {
+                    attachment.motor!.setSpeed(moveSpeed);
+                    attachment.motor!.reverse = true;
+                }
+                attachment.motor!.on = true;
+                if (attachment.motor!.rpm > rpm) {
+                    rpm = attachment.motor!.rpm;
+                }
+            }
+            if (unit == 'rotations') {
+                const revolution_time = 60.0 / rpm;
+                await thread.cancellable(vmSleep(amount * revolution_time * 1000));
+            } else if (unit == 'degrees') {
+                // This is probably approximate
+                const revolution_time = 60.0 / rpm;
+                await thread.cancellable(vmSleep(((amount * revolution_time) / 360.0) * 1000));
+            } else if (unit == 'seconds') {
+                await thread.cancellable(vmSleep(amount * 1000));
+            } else if (unit == 'cm') {
+                const revolution_time = 60.0 / rpm;
+                const revs = (amount * 10.0) / thread.vm.hub.moveDistance;
+                await thread.cancellable(vmSleep(revs * revolution_time * 1000));
+            } else if (unit == 'in') {
+                const revolution_time = 60.0 / rpm;
+                const revs = (amount * 25.4) / thread.vm.hub.moveDistance;
+                await thread.cancellable(vmSleep(revs * revolution_time * 1000));
+            }
+            attachment = thread.vm.hub.ports[thread.vm.hub.movePair1];
+            if (attachment && attachment.type == 'motor') {
+                attachment.motor!.reverse = false;
+                attachment.motor!.on = false;
+            }
+            attachment = thread.vm.hub.ports[thread.vm.hub.movePair2];
+            if (attachment && attachment.type == 'motor') {
+                attachment.motor!.reverse = false;
+                attachment.motor!.on = false;
+            }
         } else if (op == 'movementSpeed') {
             const speed = this.arguments[0].evaluate(thread).getNumber();
             thread.vm.hub.moveSpeed = speed;
@@ -593,9 +655,100 @@ export class ActionStatement extends Statement {
                 attachment.motor!.on = false;
             }
         } else if (op == 'startSteer') {
-            return super._execute(thread);
+            const steer = this.arguments[0].evaluate(thread).getNumber();
+            let left = 0;
+            let right = 0;
+
+            if (steer < 0) {
+                left = -steer / 100.0;
+                right = 1.0 - left;
+            } else {
+                right = steer / 100.0;
+                left = 1.0 - right;
+            }
+            let attachment = thread.vm.hub.ports[thread.vm.hub.movePair1];
+            if (attachment && attachment.type == 'motor') {
+                if (thread.vm.hub.moveSpeed < 0) {
+                    attachment.motor!.setSpeed(-thread.vm.hub.moveSpeed * left);
+                    attachment.motor!.reverse = true;
+                } else {
+                    attachment.motor!.setSpeed(thread.vm.hub.moveSpeed * left);
+                    attachment.motor!.reverse = false;
+                }
+                attachment.motor!.on = true;
+            }
+            attachment = thread.vm.hub.ports[thread.vm.hub.movePair2];
+            if (attachment && attachment.type == 'motor') {
+                if (thread.vm.hub.moveSpeed < 0) {
+                    attachment.motor!.setSpeed(-thread.vm.hub.moveSpeed * right);
+                    attachment.motor!.reverse = false;
+                } else {
+                    attachment.motor!.setSpeed(thread.vm.hub.moveSpeed * right);
+                    attachment.motor!.reverse = true;
+                }
+                attachment.motor!.on = true;
+            }
         } else if (op == 'steer') {
-            return super._execute(thread);
+            const steer = this.arguments[0].evaluate(thread).getNumber();
+            const amount = this.arguments[1].evaluate(thread).getNumber();
+            const unit = this.arguments[2].evaluate(thread).getString();
+            let left = 0;
+            let right = 0;
+
+            if (steer < 0) {
+                right = 0.5 - (steer / 100.0) * 0.5;
+                left = 0.5 + (steer / 100.0) * 0.5;
+            } else {
+                right = 0.5 - (steer / 100.0) * 0.5;
+                left = 0.5 + (steer / 100.0) * 0.5;
+            }
+            let attachment = thread.vm.hub.ports[thread.vm.hub.movePair1];
+            let rpm = 0;
+            if (attachment && attachment.type == 'motor') {
+                if (thread.vm.hub.moveSpeed < 0) {
+                    attachment.motor!.setSpeed(-thread.vm.hub.moveSpeed * left);
+                    attachment.motor!.reverse = true;
+                } else {
+                    attachment.motor!.setSpeed(thread.vm.hub.moveSpeed * left);
+                    attachment.motor!.reverse = false;
+                }
+                attachment.motor!.on = true;
+                rpm = attachment.motor!.rpm;
+            }
+            attachment = thread.vm.hub.ports[thread.vm.hub.movePair2];
+            if (attachment && attachment.type == 'motor') {
+                if (thread.vm.hub.moveSpeed < 0) {
+                    attachment.motor!.setSpeed(-thread.vm.hub.moveSpeed * right);
+                    attachment.motor!.reverse = false;
+                } else {
+                    attachment.motor!.setSpeed(thread.vm.hub.moveSpeed * right);
+                    attachment.motor!.reverse = true;
+                }
+                attachment.motor!.on = true;
+                if (attachment.motor!.rpm > rpm) {
+                    rpm = attachment.motor!.rpm;
+                }
+            }
+            if (unit == 'rotations') {
+                const revolution_time = 60.0 / rpm;
+                await thread.cancellable(vmSleep(amount * revolution_time * 1000));
+            } else if (unit == 'degrees') {
+                // This is probably approximate
+                const revolution_time = 60.0 / rpm;
+                await thread.cancellable(vmSleep(((amount * revolution_time) / 360.0) * 1000));
+            } else if (unit == 'seconds') {
+                await thread.cancellable(vmSleep(amount * 1000));
+            }
+            attachment = thread.vm.hub.ports[thread.vm.hub.movePair1];
+            if (attachment && attachment.type == 'motor') {
+                attachment.motor!.reverse = false;
+                attachment.motor!.on = false;
+            }
+            attachment = thread.vm.hub.ports[thread.vm.hub.movePair2];
+            if (attachment && attachment.type == 'motor') {
+                attachment.motor!.reverse = false;
+                attachment.motor!.on = false;
+            }
         } else {
             return super._execute(thread);
         }
@@ -2209,7 +2362,12 @@ export class VM {
             } else {
                 // opposite directions.
                 // Compute a point c between the points to rotate around
-                const reverse = d0 < 0;
+                let reverse = d0 > 0;
+                if (Math.abs(d0) > Math.abs(d1)) {
+                    reverse = d0 > 0;
+                } else {
+                    reverse = d1 < 0;
+                }
                 d0 = Math.abs(d0);
                 d1 = Math.abs(d1);
                 if (d0 + d1 < 1e-3) {
@@ -2218,7 +2376,7 @@ export class VM {
                 const t = dist(p0, p1);
                 const r0 = (t * d0) / (d0 + d1);
                 const r1 = t - r0;
-                const s = r0 / t;
+                const s = 1.0 - r0 / t;
                 const c: Vertex = {
                     x: s * p0.x + (1.0 - s) * p1.x,
                     y: s * p0.y + (1.0 - s) * p1.y,
