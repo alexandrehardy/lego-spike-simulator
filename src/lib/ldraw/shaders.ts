@@ -27,7 +27,7 @@ export const lego_fragment_shader = `
       uniform float far;
       varying vec4 v_colour;
       varying vec4 v;
-      bool renderDepth;
+      uniform bool renderDepth;
      
       void main() {
         // gl_FragColor is a special variable a fragment shader

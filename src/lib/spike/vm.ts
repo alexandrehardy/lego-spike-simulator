@@ -332,6 +332,8 @@ export class ActionStatement extends Statement {
             const brightness = this.arguments[2].evaluate(thread).getNumber();
             thread.vm.hub.setPixel(x - 1, y - 1, brightness);
         } else if (op == 'ultrasonicLightUp') {
+            // TODO: This is actually just turning an a light
+            // It doesn't affect the sensor.
             return super._execute(thread);
         } else if (op == 'centerButtonLight') {
             const colourIndex = this.arguments[0].evaluate(thread).getString();
@@ -947,7 +949,30 @@ export class EventStatement extends Statement {
             const condition = this.arguments[0].evaluate(thread).getBoolean();
             return condition;
         } else if (this.opcode == 'flipperevents_whenDistance') {
-            console.log(`Need code ${this.opcode}`);
+            const portString = this.arguments[0].evaluate(thread).getString();
+            const port = portString as PortType;
+            const comparator = this.arguments[1].evaluate(thread).getString();
+            const value = this.arguments[2].evaluate(thread).getNumber();
+            const unit = this.arguments[3].evaluate(thread).getString();
+            const attachment = thread.vm.hub.ports[port];
+            if (attachment && attachment.type == 'distance') {
+                let d = value;
+                if (unit == '%') {
+                    d = (d / 100.0) * 2000.0;
+                } else if (unit == 'cm') {
+                    d = d * 10.0;
+                } else if (unit == 'in') {
+                    d = d * 25.4;
+                }
+                if (comparator == '<') {
+                    return attachment.measure.distance < d;
+                } else if (comparator == '=') {
+                    return Math.trunc(d) == Math.trunc(attachment.measure.distance);
+                } else if (comparator == '>') {
+                    return attachment.measure.distance > d;
+                }
+            }
+            return false;
         } else if (this.opcode == 'flipperevents_whenGesture') {
             console.log(`Need code ${this.opcode}`);
         } else if (this.opcode == 'flipperevents_whenOrientation') {
@@ -959,7 +984,8 @@ export class EventStatement extends Statement {
         } else if (this.opcode == 'flipperevents_whenTilted') {
             console.log(`Need code ${this.opcode}`);
         } else if (this.opcode == 'flipperevents_whenTimer') {
-            console.log(`Need code ${this.opcode}`);
+            const timer = this.arguments[0].evaluate(thread).getNumber();
+            return thread.vm.getTimer() > timer;
         }
         return false;
     }
@@ -1219,10 +1245,51 @@ export class FunctionExpression extends Expression {
                 return new StringValue('-1');
             }
         } else if (this.opcode == 'flippersensors_distance') {
-            return super.evaluate(thread);
+            const portString = this.arguments[0].evaluate(thread).getString();
+            const port = portString as PortType;
+            const unit = this.arguments[1].evaluate(thread).getString();
+            const attachment = thread.vm.hub.ports[port];
+            if (attachment && attachment.type == 'distance') {
+                if (unit == '%') {
+                    return new NumberValue((attachment.measure.distance * 100.0) / 2000.0);
+                } else if (unit == 'cm') {
+                    return new NumberValue(attachment.measure.distance / 10.0);
+                } else if (unit == 'in') {
+                    return new NumberValue(attachment.measure.distance / 25.4);
+                }
+            }
+            return new NumberValue(0);
         } else if (this.opcode == 'flippersensors_force') {
             return super.evaluate(thread);
         } else if (this.opcode == 'flippersensors_isDistance') {
+            const portString = this.arguments[0].evaluate(thread).getString();
+            const port = portString as PortType;
+            const comparator = this.arguments[1].evaluate(thread).getString();
+            const value = this.arguments[2].evaluate(thread).getNumber();
+            const unit = this.arguments[3].evaluate(thread).getString();
+            const attachment = thread.vm.hub.ports[port];
+            if (attachment && attachment.type == 'distance') {
+                let d = value;
+                if (unit == '%') {
+                    d = (d / 100.0) * 2000.0;
+                } else if (unit == 'cm') {
+                    d = d * 10.0;
+                } else if (unit == 'in') {
+                    d = d * 25.4;
+                }
+                if (comparator == '<') {
+                    return new BooleanValue(attachment.measure.distance < d);
+                } else if (comparator == '=') {
+                    return new BooleanValue(
+                        Math.trunc(d) == Math.trunc(attachment.measure.distance)
+                    );
+                } else if (comparator == '>') {
+                    return new BooleanValue(attachment.measure.distance > d);
+                }
+            }
+            return new BooleanValue(false);
+        } else if (this.opcode == 'flipperevents_whenGesture') {
+            console.log(`Need code ${this.opcode}`);
             return super.evaluate(thread);
         } else if (this.opcode == 'flippersensors_isPressed') {
             return super.evaluate(thread);
@@ -1826,6 +1893,9 @@ export class Hub {
     }
 
     measureForce(port: PortType, force: number) {
+        // released = 0N
+        // pressed = >0N
+        // hard-pressed = >5N
         this.ports[port].measure.force = force;
     }
 }

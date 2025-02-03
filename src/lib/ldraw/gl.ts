@@ -51,12 +51,19 @@ export interface PipeLine {
     brightnessUniform: WebGLUniformLocation | null;
     nearUniform: WebGLUniformLocation | null;
     farUniform: WebGLUniformLocation | null;
+    renderDepthUniform: WebGLUniformLocation | null;
 }
 
 export interface MapTexture {
     width: number;
     height: number;
     texture: WebGLTexture;
+}
+
+export interface ColourBuffer {
+    width: number;
+    height: number;
+    buffer: Uint8Array;
 }
 
 export class WebGLCompiler {
@@ -1602,6 +1609,77 @@ export class WebGL extends WebGLCompiler {
         this.gl.drawArrays(this.gl.TRIANGLES, model.triangleOffset, model.triangles * 3);
     }
 
+    drawDepthQuad(texture: MapTexture) {
+        if (!this.vertexBuffer) {
+            return;
+        }
+        if (!this.texcoordBuffer) {
+            return;
+        }
+        if (!this.brickPipeline) {
+            return;
+        }
+        const w = texture.width / 2;
+        const h = texture.height / 2;
+        this.gl.useProgram(this.brickPipeline.program);
+        this.gl.uniform1f(this.brickPipeline.brightnessUniform, this.brightness);
+        if (this.brickPipeline.modelMatrixUniform) {
+            this.gl.uniformMatrix4fv(
+                this.brickPipeline.modelMatrixUniform,
+                false,
+                this.modelMatrix
+            );
+        }
+        if (this.brickPipeline.projectionMatrixUniform) {
+            this.gl.uniformMatrix4fv(
+                this.brickPipeline.projectionMatrixUniform,
+                false,
+                this.projectionMatrix
+            );
+        }
+        const vertices: number[] = [];
+        vertices.push(-w);
+        vertices.push(0.0);
+        vertices.push(h);
+        vertices.push(1.0);
+        vertices.push(w);
+        vertices.push(0.0);
+        vertices.push(h);
+        vertices.push(1.0);
+        vertices.push(-w);
+        vertices.push(0.0);
+        vertices.push(-h);
+        vertices.push(1.0);
+
+        vertices.push(-w);
+        vertices.push(0.0);
+        vertices.push(-h);
+        vertices.push(1.0);
+        vertices.push(w);
+        vertices.push(0.0);
+        vertices.push(h);
+        vertices.push(1.0);
+        vertices.push(w);
+        vertices.push(0.0);
+        vertices.push(-h);
+        vertices.push(1.0);
+        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.vertexBuffer);
+        this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(vertices), this.gl.STATIC_DRAW);
+        this.gl.vertexAttribPointer(
+            this.brickPipeline.vertexAttribute,
+            4,
+            this.gl.FLOAT,
+            false,
+            0,
+            0
+        );
+        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.texcoordBuffer);
+        this.gl.drawArrays(this.gl.TRIANGLES, 0, 2 * 3);
+        if (this.brickPipeline) {
+            this.gl.useProgram(this.brickPipeline.program);
+        }
+    }
+
     drawTexturedQuad(texture: MapTexture) {
         if (!this.vertexBuffer) {
             return;
@@ -1723,6 +1801,7 @@ export class WebGL extends WebGLCompiler {
                 );
                 const nearUniform = this.gl.getUniformLocation(legoProgram, 'near');
                 const farUniform = this.gl.getUniformLocation(legoProgram, 'far');
+                const renderDepthUniform = this.gl.getUniformLocation(legoProgram, 'renderDepth');
                 this.brickPipeline = {
                     program: legoProgram,
                     vertexAttribute: vertexAttribute,
@@ -1733,7 +1812,8 @@ export class WebGL extends WebGLCompiler {
                     samplerUniform: null,
                     brightnessUniform: brightnessUniform,
                     nearUniform: nearUniform,
-                    farUniform: farUniform
+                    farUniform: farUniform,
+                    renderDepthUniform: renderDepthUniform
                 };
                 this.pipeline = this.brickPipeline;
                 if (modelMatrixUniform) {
@@ -1785,7 +1865,8 @@ export class WebGL extends WebGLCompiler {
                     samplerUniform: samplerUniform,
                     brightnessUniform: brightnessUniform,
                     nearUniform: null,
-                    farUniform: null
+                    farUniform: null,
+                    renderDepthUniform: null
                 };
                 if (modelMatrixUniform) {
                     this.gl.uniformMatrix4fv(modelMatrixUniform, false, this.modelMatrix);
@@ -1812,6 +1893,12 @@ export class WebGL extends WebGLCompiler {
         this.gl.depthFunc(this.gl.LESS);
         if (this.brickPipeline) {
             this.gl.useProgram(this.brickPipeline.program);
+        }
+    }
+
+    renderDepth(visible: boolean) {
+        if (this.brickPipeline) {
+            this.gl.uniform1i(this.brickPipeline.renderDepthUniform, visible ? 1 : 0);
         }
     }
 
@@ -1939,7 +2026,7 @@ export class WebGL extends WebGLCompiler {
         this.gl.deleteTexture(t);
     }
 
-    getColourBuffer() {
+    getColourBuffer(): ColourBuffer {
         const pixels = new Uint8Array(this.gl.drawingBufferWidth * this.gl.drawingBufferHeight * 4);
         this.gl.readPixels(
             0,
@@ -1950,7 +2037,11 @@ export class WebGL extends WebGLCompiler {
             this.gl.UNSIGNED_BYTE,
             pixels
         );
-        return pixels;
+        return {
+            width: this.gl.drawingBufferWidth,
+            height: this.gl.drawingBufferHeight,
+            buffer: pixels
+        };
     }
 
     getCanvasWidth() {

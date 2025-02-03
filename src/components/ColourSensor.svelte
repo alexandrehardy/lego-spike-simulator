@@ -3,7 +3,7 @@
     import { Button, Dropdown, DropdownItem } from 'flowbite-svelte';
     import { WebGL, type MapTexture } from '$lib/ldraw/gl';
     import { type SceneStore, type SceneObject } from '$lib/spike/scene';
-    import { Hub, type PortType, VM } from '$lib/spike/vm';
+    import { Hub, type PortType } from '$lib/spike/vm';
     import * as m4 from '$lib/ldraw/m4';
     import { hexColor } from '$lib/ldraw/components';
     import { componentStore, findPartTransform, type Model } from '$lib/ldraw/components';
@@ -73,7 +73,7 @@
             return;
         }
 
-        const buffer = gl.getColourBuffer();
+        const buffer = gl.getColourBuffer().buffer;
         const histogram = new Map<string, number>();
         let avg = 0.0;
         let count = 0;
@@ -368,9 +368,9 @@
     $: loadRobot(scene.robot, false);
 </script>
 
-<div class="flex flex-row">
+<div class="flex flex-row gap-1">
     <canvas {id} class={$$props.class}></canvas>
-    <Button class="bg-blue-300 w-16 h-16 m-0 p-0">
+    <Button class="bg-blue-300 w-12 h-12 m-0 p-0">
         {#each colours as colour}
             {#if override == colour.value}
                 <img class="w-8 h-8" src={colour.icon} alt={colour.name} />
