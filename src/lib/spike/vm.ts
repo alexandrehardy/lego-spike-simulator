@@ -659,12 +659,14 @@ export class ActionStatement extends Statement {
             let left = 0;
             let right = 0;
 
-            if (steer < 0) {
-                left = -steer / 100.0;
-                right = 1.0 - left;
+            right = 0.5 - (steer / 100.0) * 0.5;
+            left = 0.5 + (steer / 100.0) * 0.5;
+            if (left > right) {
+                left = 1.0;
+                right = right / left;
             } else {
-                right = steer / 100.0;
-                left = 1.0 - right;
+                right = 1.0;
+                left = left / right;
             }
             let attachment = thread.vm.hub.ports[thread.vm.hub.movePair1];
             if (attachment && attachment.type == 'motor') {
@@ -695,12 +697,14 @@ export class ActionStatement extends Statement {
             let left = 0;
             let right = 0;
 
-            if (steer < 0) {
-                right = 0.5 - (steer / 100.0) * 0.5;
-                left = 0.5 + (steer / 100.0) * 0.5;
+            right = 0.5 - (steer / 100.0) * 0.5;
+            left = 0.5 + (steer / 100.0) * 0.5;
+            if (left > right) {
+                left = 1.0;
+                right = right / left;
             } else {
-                right = 0.5 - (steer / 100.0) * 0.5;
-                left = 0.5 + (steer / 100.0) * 0.5;
+                right = 1.0;
+                left = left / right;
             }
             let attachment = thread.vm.hub.ports[thread.vm.hub.movePair1];
             let rpm = 0;
