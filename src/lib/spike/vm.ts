@@ -769,6 +769,8 @@ export class ActionStatement extends Statement {
             thread.vm.resetTimer();
             return;
         } else if (op == 'resetYaw') {
+            thread.vm.hub.yaw = 0;
+            return;
         }
         return super._execute(thread);
     }
@@ -978,7 +980,24 @@ export class EventStatement extends Statement {
         } else if (this.opcode == 'flipperevents_whenOrientation') {
             console.log(`Need code ${this.opcode}`);
         } else if (this.opcode == 'flipperevents_whenPressed') {
-            console.log(`Need code ${this.opcode}`);
+            const portString = this.arguments[0].evaluate(thread).getString();
+            const port = portString as PortType;
+            const test = this.arguments[1].evaluate(thread).getString();
+            const attachment = thread.vm.hub.ports[port];
+            if (attachment && attachment.type == 'force') {
+                if (test == 'released') {
+                    return attachment.measure.force < 1e-5;
+                } else if (test == 'pressed') {
+                    return attachment.measure.force > 1e-5;
+                } else if (test == 'hard-pressed') {
+                    return attachment.measure.force > 5;
+                } else if (test == 'pressure changed') {
+                    const change = attachment.measure.force_changed;
+                    attachment.measure.force_changed = false;
+                    return change;
+                }
+            }
+            return false;
         } else if (this.opcode == 'flipperevents_whenProgramStarts') {
             return thread.vm.first;
         } else if (this.opcode == 'flipperevents_whenTilted') {
@@ -1260,7 +1279,18 @@ export class FunctionExpression extends Expression {
             }
             return new NumberValue(0);
         } else if (this.opcode == 'flippersensors_force') {
-            return super.evaluate(thread);
+            const portString = this.arguments[0].evaluate(thread).getString();
+            const port = portString as PortType;
+            const unit = this.arguments[1].evaluate(thread).getString();
+            const attachment = thread.vm.hub.ports[port];
+            if (attachment && attachment.type == 'force') {
+                if (unit == '%') {
+                    return new NumberValue((attachment.measure.force * 100.0) / 10.0);
+                } else if (unit == 'newton') {
+                    return new NumberValue(attachment.measure.force);
+                }
+            }
+            return new NumberValue(0);
         } else if (this.opcode == 'flippersensors_isDistance') {
             const portString = this.arguments[0].evaluate(thread).getString();
             const port = portString as PortType;
@@ -1292,7 +1322,20 @@ export class FunctionExpression extends Expression {
             console.log(`Need code ${this.opcode}`);
             return super.evaluate(thread);
         } else if (this.opcode == 'flippersensors_isPressed') {
-            return super.evaluate(thread);
+            const portString = this.arguments[0].evaluate(thread).getString();
+            const port = portString as PortType;
+            const test = this.arguments[1].evaluate(thread).getString();
+            const attachment = thread.vm.hub.ports[port];
+            if (attachment && attachment.type == 'force') {
+                if (test == 'released') {
+                    return new BooleanValue(attachment.measure.force < 1e-5);
+                } else if (test == 'pressed') {
+                    return new BooleanValue(attachment.measure.force > 1e-5);
+                } else if (test == 'hard-pressed') {
+                    return new BooleanValue(attachment.measure.force > 5);
+                }
+            }
+            return new BooleanValue(false);
         } else if (this.opcode == 'flippersensors_isReflectivity') {
             const portString = this.arguments[0].evaluate(thread).getString();
             const compare = this.arguments[1].evaluate(thread).getString();
@@ -1317,7 +1360,17 @@ export class FunctionExpression extends Expression {
         } else if (this.opcode == 'flippersensors_isorientation') {
             return super.evaluate(thread);
         } else if (this.opcode == 'flippersensors_orientationAxis') {
-            return super.evaluate(thread);
+            const axis = this.arguments[0].evaluate(thread).getString();
+            if (axis == 'pitch') {
+                // TODO: Should we calculate pitch?
+                return new NumberValue(0);
+            } else if (axis == 'roll') {
+                // TODO: Should we calculate roll?
+                return new NumberValue(0);
+            } else if (axis == 'yaw') {
+                return new NumberValue(thread.vm.hub.yaw);
+            }
+            return new NumberValue(0);
         } else if (this.opcode == 'flippersensors_reflectivity') {
             const portString = this.arguments[0].evaluate(thread).getString();
             const port = portString as PortType;
@@ -1654,6 +1707,7 @@ export interface Measure {
     distance: number;
     colour: string;
     reflected: number;
+    force_changed: boolean;
 }
 
 export class Port {
@@ -1666,11 +1720,23 @@ export class Port {
 
     constructor(type: 'none' | 'force' | 'distance' | 'light' | 'motor') {
         this.type = type;
-        this.measure = { colour: '#000000', distance: 10000.0, force: 0.0, reflected: 0.0 };
+        this.measure = {
+            colour: '#000000',
+            distance: 10000.0,
+            force: 0.0,
+            reflected: 0.0,
+            force_changed: false
+        };
     }
 
     reset() {
-        this.measure = { colour: '#000000', distance: 10000.0, force: 0.0, reflected: 0.0 };
+        this.measure = {
+            colour: '#000000',
+            distance: 10000.0,
+            force: 0.0,
+            reflected: 0.0,
+            force_changed: false
+        };
         if (this.motor) {
             this.motor.position = 0;
             this.motor.speed = 0.75;
@@ -1723,6 +1789,7 @@ export class Hub {
     moveDistance: number; // in mm
     movePair1: PortType;
     movePair2: PortType;
+    yaw: number;
 
     reload() {
         this.leftPressed = false;
@@ -1744,6 +1811,7 @@ export class Hub {
         this.movePair1 = 'A';
         this.movePair2 = 'B';
         this.screenRotate = 0;
+        this.yaw = 0;
     }
 
     reset() {
@@ -1763,6 +1831,7 @@ export class Hub {
         this.movePair1 = 'A';
         this.movePair2 = 'B';
         this.screenRotate = 0;
+        this.yaw = 0;
     }
 
     constructor() {
@@ -1785,6 +1854,7 @@ export class Hub {
         this.movePair2 = 'B';
         this.moveDistance = 175;
         this.screenRotate = 0;
+        this.yaw = 0;
     }
 
     setEventHandler(eventHandler: HubEventHandler) {
@@ -1896,6 +1966,9 @@ export class Hub {
         // released = 0N
         // pressed = >0N
         // hard-pressed = >5N
+        if (force != this.ports[port].measure.force) {
+            this.ports[port].measure.force_changed = true;
+        }
         this.ports[port].measure.force = force;
     }
 }
@@ -2426,6 +2499,14 @@ export class VM {
                     scene.robot.position!.y = position[1];
                     scene.robot.position!.z = position[2];
                     scene.robot.rotation! += (angle * 180.0) / Math.PI;
+                    this.hub.yaw -= (angle * 180.0) / Math.PI;
+                    // hubs yaw is -180 to 180
+                    while (this.hub.yaw >= 180.0) {
+                        this.hub.yaw -= 360.0;
+                    }
+                    while (this.hub.yaw < -180.0) {
+                        this.hub.yaw += 360.0;
+                    }
                     while (scene.robot.rotation! >= 360.0) {
                         scene.robot.rotation! -= 360.0;
                     }
@@ -2480,6 +2561,14 @@ export class VM {
                 scene.robot.position!.y = position[1];
                 scene.robot.position!.z = position[2];
                 scene.robot.rotation! += (angle * 180.0) / Math.PI;
+                this.hub.yaw -= (angle * 180.0) / Math.PI;
+                // hubs yaw is -180 to 180
+                while (this.hub.yaw >= 180.0) {
+                    this.hub.yaw -= 360.0;
+                }
+                while (this.hub.yaw < -180.0) {
+                    this.hub.yaw += 360.0;
+                }
                 while (scene.robot.rotation! >= 360.0) {
                     scene.robot.rotation! -= 360.0;
                 }
