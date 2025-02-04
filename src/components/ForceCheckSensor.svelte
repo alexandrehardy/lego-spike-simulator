@@ -298,9 +298,8 @@
     <div class="border">
         <canvas {id} class={$$props.class}></canvas>
     </div>
-    {force}N
     <Button color="blue">
-        {override}
+        {force}N
     </Button>
     <Dropdown class="rounded-xl" bind:open={overrideOpen}>
         <DropdownItem on:click={() => setOverride('measure')}>measure</DropdownItem>
