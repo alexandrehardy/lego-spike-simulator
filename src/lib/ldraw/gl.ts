@@ -1,6 +1,7 @@
 import {
     lego_vertex_shader,
     lego_fragment_shader,
+    lego_fragment_shader_df,
     map_vertex_shader,
     map_fragment_shader
 } from '$lib/ldraw/shaders';
@@ -806,6 +807,7 @@ export class WebGL extends WebGLCompiler {
     perspectiveAngle: number;
     mindist: number;
     maxdist: number;
+    fragmentDerivative: boolean;
 
     static create(canvas: HTMLCanvasElement): WebGL | undefined {
         const gl = canvas.getContext('webgl');
@@ -831,6 +833,7 @@ export class WebGL extends WebGLCompiler {
         this.mindist = 0.1;
         this.maxdist = 1000.0;
         this.setupPipeline();
+        this.fragmentDerivative = false;
     }
 
     setPerspective(fieldOfViewDegrees: number, aspect: number, near: number, far: number) {
@@ -1782,8 +1785,16 @@ export class WebGL extends WebGLCompiler {
     setupPipeline() {
         this.resizeToFit();
         const vertexShaderSource = lego_vertex_shader;
-        const fragmentShaderSource = lego_fragment_shader;
+        let fragmentShaderSource = lego_fragment_shader;
+        const extensions = this.gl.getSupportedExtensions();
+        const hasDerivative =
+            extensions != null && extensions.findIndex((x) => x == 'OES_standard_derivatives') >= 0;
 
+        if (hasDerivative) {
+            this.gl.getExtension('OES_standard_derivatives');
+            fragmentShaderSource = lego_fragment_shader_df;
+            this.fragmentDerivative = true;
+        }
         const vertexShader = this.createShader(this.gl.VERTEX_SHADER, vertexShaderSource);
         const fragmentShader = this.createShader(this.gl.FRAGMENT_SHADER, fragmentShaderSource);
 

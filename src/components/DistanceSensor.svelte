@@ -25,25 +25,29 @@
     function reportSensor(gl: WebGL) {
         const frame = gl.getColourBuffer();
         let closest = 10000;
-        let verticalAperture = 0.25;
-        for (
-            let y = Math.round(frame.height * verticalAperture);
-            y < frame.height * (1.0 - verticalAperture);
-            y++
-        ) {
-            for (let x = 0; x < frame.width - 1; x++) {
-                let d = frame.buffer[(x + y * frame.width) * 4];
-                let dx = frame.buffer[(x + 1 + y * frame.width) * 4];
-                let dy = frame.buffer[(x + (y + 1) * frame.width) * 4];
-                if (Math.abs(d - dx) > 20) {
-                    continue;
+        if (gl.fragmentDerivative) {
+            for (let y = 0; y < frame.height; y++) {
+                for (let x = 0; x < frame.width; x++) {
+                    let d = frame.buffer[(x + y * frame.width) * 4];
+                    d = (d / 255.0) * range; // remap to maximum range;
+                    if (d < closest) {
+                        closest = d;
+                    }
                 }
-                if (Math.abs(d - dy) > 20) {
-                    continue;
-                }
-                d = (d / 255.0) * range; // remap to maximum range;
-                if (d < closest) {
-                    closest = d;
+            }
+        } else {
+            let verticalAperture = 0.25;
+            for (
+                let y = Math.round(frame.height * verticalAperture);
+                y < frame.height * (1.0 - verticalAperture);
+                y++
+            ) {
+                for (let x = 0; x < frame.width; x++) {
+                    let d = frame.buffer[(x + y * frame.width) * 4];
+                    d = (d / 255.0) * range; // remap to maximum range;
+                    if (d < closest) {
+                        closest = d;
+                    }
                 }
             }
         }

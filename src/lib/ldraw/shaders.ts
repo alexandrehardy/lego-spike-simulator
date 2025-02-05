@@ -43,6 +43,37 @@ export const lego_fragment_shader = `
       }
 `;
 
+export const lego_fragment_shader_df = `#extension GL_OES_standard_derivatives : enable
+      // fragment shaders don't have a default precision so we need
+      // to pick one. mediump is a good default
+      precision mediump float;
+      uniform float near;
+      uniform float far;
+      varying vec4 v_colour;
+      varying vec4 v;
+      uniform bool renderDepth;
+     
+      void main() {
+        // gl_FragColor is a special variable a fragment shader
+        // is responsible for setting
+        if (renderDepth) {
+            float depth = (v.z - near) / (far - near);
+            float angle1 = dFdx(v).z;
+            float angle2 = dFdy(v).z;
+            float angle = abs(angle1) + abs(angle2);
+            if (angle > 10.0) {
+                gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);
+            } else {
+                gl_FragColor = vec4(depth, depth, depth, 1.0);
+            }
+        } else {
+            gl_FragColor = vec4(v_colour.rgb, 1.0);
+        }
+        // gl_FragDepth is used to specify the depth value
+        // it is taken from gl_FragCoord.z by default
+      }
+`;
+
 export const map_vertex_shader = `
       // an attribute will receive data from a buffer
       attribute vec4 a_vertex;
