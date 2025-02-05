@@ -419,6 +419,7 @@
                     camera="adaptive"
                     tilt={true}
                     select="#all"
+                    dimMap={true}
                     {hub}
                 />
             {:else}

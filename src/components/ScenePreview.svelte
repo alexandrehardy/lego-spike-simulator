@@ -11,6 +11,7 @@
     export let tilt = true;
     export let rotate = false;
     export let unresolved: string[] = [];
+    export let dimMap = false;
 
     let canRender = false;
     let gl: WebGL | undefined;
@@ -77,10 +78,14 @@
             gl.rotate(angle, 0.0, 1.0, 0.0);
         }
         if (mapTexture) {
-            if (select === '#map' || select === '#all') {
-                gl.setBrightness(1.0);
+            if (dimMap) {
+                gl.setBrightness(0.5);
             } else {
-                gl.setBrightness(0.3);
+                if (select === '#map' || select === '#all') {
+                    gl.setBrightness(1.0);
+                } else {
+                    gl.setBrightness(0.3);
+                }
             }
             gl.pushMatrix();
             gl.drawTexturedQuad(mapTexture);
