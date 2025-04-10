@@ -1,14 +1,8 @@
 import * as Blockly from 'blockly/core';
+import { genId } from '$lib/blockly/genid';
 
 function genCompatibleManifestId() {
-    const soup = '_-ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    const length = 12;
-    const soupLength = soup.length;
-    const id = [];
-    for (let i = 0; i < length; i++) {
-        id[i] = soup.charAt(Math.random() * soupLength);
-    }
-    return id.join('');
+    return genId();
 }
 
 export function createManifest(
