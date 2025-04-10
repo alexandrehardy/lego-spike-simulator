@@ -6,6 +6,7 @@ import {
     type Sb3Sprite
 } from '$lib/scratch/sb3';
 import { blocks as blockDefinitions } from '$lib/blockly/blocks';
+import { genId } from '$lib/blockly/genid';
 
 import {
     type BlocklyState,
@@ -260,21 +261,21 @@ export function convertToBlockly(project: Sb3Project): BlocklyState | undefined 
         if (id === 'undefined') {
             if (typeof value === 'number') {
                 block.inputs[key] = {
-                    shadow: { type: 'math_number', fields: { NUM: value } }
+                    shadow: { id: genId(), type: 'math_number', fields: { NUM: value } }
                 };
             } else if (typeof value === 'string') {
                 block.inputs[key] = {
-                    shadow: { type: 'text', fields: { TEXT: value } }
+                    shadow: { id: genId(), type: 'text', fields: { TEXT: value } }
                 };
             }
         } else if (id === 'null') {
             if (typeof value === 'number') {
                 block.inputs[key] = {
-                    shadow: { type: 'math_number', fields: { NUM: value } }
+                    shadow: { id: genId(), type: 'math_number', fields: { NUM: value } }
                 };
             } else if (typeof value === 'string') {
                 block.inputs[key] = {
-                    shadow: { type: 'text', fields: { TEXT: value } }
+                    shadow: { id: genId(), type: 'text', fields: { TEXT: value } }
                 };
             }
         } else if (typeof id === 'string') {
@@ -292,11 +293,11 @@ export function convertToBlockly(project: Sb3Project): BlocklyState | undefined 
             const value = decodeConst(id);
             if (value.type === 'Number') {
                 block.inputs[key] = {
-                    shadow: { type: 'math_number', fields: { NUM: value.numberValue } }
+                    shadow: { id: genId(), type: 'math_number', fields: { NUM: value.numberValue } }
                 };
             } else if (value.type === 'String') {
                 block.inputs[key] = {
-                    shadow: { type: 'text', fields: { TEXT: value.stringValue } }
+                    shadow: { id: genId(), type: 'text', fields: { TEXT: value.stringValue } }
                 };
             } else if (value.type === 'Variable') {
                 block.inputs[key] = {
