@@ -970,7 +970,7 @@ export const blocks = [
             {
                 type: 'input_value',
                 name: 'DURATION',
-                check: 'Number',
+                check: ['String', 'Number'],
                 shadow: {
                     type: 'math_positive_number',
                     fields: {
@@ -1039,7 +1039,7 @@ export const blocks = [
             {
                 type: 'input_value',
                 name: 'VALUE',
-                check: 'Number',
+                check: ['String', 'Number'],
                 shadow: {
                     type: 'math_number',
                     fields: {
@@ -1078,7 +1078,7 @@ export const blocks = [
             {
                 type: 'input_value',
                 name: 'INDEX',
-                check: 'Number',
+                check: ['String', 'Number'],
                 shadow: {
                     type: 'math_integer',
                     fields: {
@@ -1116,7 +1116,7 @@ export const blocks = [
             {
                 type: 'input_value',
                 name: 'INDEX',
-                check: 'Number',
+                check: ['String', 'Number'],
                 shadow: {
                     type: 'math_integer',
                     fields: {
@@ -1171,7 +1171,7 @@ export const blocks = [
             {
                 type: 'input_value',
                 name: 'INDEX',
-                check: 'Number',
+                check: ['String', 'Number'],
                 shadow: {
                     type: 'math_integer',
                     fields: {
@@ -1260,7 +1260,7 @@ export const blocks = [
             {
                 type: 'input_value',
                 name: 'INDEX',
-                check: 'Number',
+                check: ['String', 'Number'],
                 shadow: {
                     type: 'math_integer',
                     fields: {
@@ -1541,7 +1541,7 @@ export const blocks = [
                 type: 'input_value',
                 name: 'VALUE',
                 value: 36,
-                check: 'Number'
+                check: ['String', 'Number']
             },
             {
                 type: 'field_dropdown',
@@ -1709,7 +1709,7 @@ export const blocks = [
                 type: 'input_value',
                 name: 'VALUE',
                 value: 36,
-                check: 'Number'
+                check: ['String', 'Number']
             }
         ],
         inputsInline: true,
@@ -1796,7 +1796,7 @@ export const blocks = [
             {
                 type: 'input_value',
                 name: 'VALUE',
-                check: 'Number',
+                check: ['String', 'Number'],
                 value: 36,
                 shadow: {
                     type: 'math_number',
@@ -1874,7 +1874,7 @@ export const blocks = [
                 type: 'input_value',
                 name: 'BRIGHTNESS',
                 value: 2,
-                check: 'Number',
+                check: ['String', 'Number'],
                 shadow: {
                     type: 'math_number',
                     fields: {
@@ -1955,7 +1955,7 @@ export const blocks = [
                 type: 'input_value',
                 name: 'BRIGHTNESS',
                 value: 2,
-                check: 'Number',
+                check: ['String', 'Number'],
                 shadow: {
                     type: 'math_number',
                     fields: {
@@ -2068,7 +2068,7 @@ export const blocks = [
             {
                 type: 'input_value',
                 name: 'SPEED',
-                check: 'Number',
+                check: ['String', 'Number'],
                 value: 29,
                 shadow: {
                     type: 'math_number',
@@ -2347,7 +2347,7 @@ export const blocks = [
             },
             {
                 type: 'input_value',
-                check: 'Number',
+                check: ['String', 'Number'],
                 name: 'POSITION',
                 shadow: {
                     type: 'flippermotor_custom-angle',
@@ -2386,7 +2386,7 @@ export const blocks = [
             {
                 type: 'input_value',
                 name: 'SPEED',
-                check: 'Number',
+                check: ['String', 'Number'],
                 value: 29,
                 shadow: {
                     type: 'math_number',
@@ -2498,7 +2498,7 @@ export const blocks = [
                 type: 'input_value',
                 name: 'VALUE',
                 value: 36,
-                check: 'Number'
+                check: ['String', 'Number']
             },
             {
                 type: 'field_dropdown',
@@ -2566,7 +2566,7 @@ export const blocks = [
                 type: 'input_value',
                 name: 'VALUE',
                 value: 36,
-                check: 'Number',
+                check: ['String', 'Number'],
                 shadow: {
                     type: 'math_number',
                     fields: {
@@ -2606,7 +2606,7 @@ export const blocks = [
             {
                 type: 'input_value',
                 name: 'SPEED',
-                check: 'Number',
+                check: ['String', 'Number'],
                 value: 29,
                 shadow: {
                     type: 'math_number',
@@ -2635,7 +2635,7 @@ export const blocks = [
         args0: [
             {
                 type: 'input_value',
-                check: 'String',
+                check: ['String', 'Number'],
                 name: 'DISTANCE',
                 shadow: {
                     type: 'flippermove_custom-set-move-distance-number',
@@ -2728,7 +2728,7 @@ export const blocks = [
         args0: [
             {
                 type: 'input_value',
-                check: 'Number',
+                check: ['String', 'Number'],
                 name: 'STEERING',
                 shadow: {
                     type: 'flippermove_rotation-wheel',
@@ -2757,7 +2757,7 @@ export const blocks = [
         args0: [
             {
                 type: 'input_value',
-                check: 'Number',
+                check: ['String', 'Number'],
                 name: 'STEERING',
                 shadow: {
                     type: 'flippermove_rotation-wheel',
@@ -2770,7 +2770,7 @@ export const blocks = [
                 type: 'input_value',
                 name: 'VALUE',
                 value: 36,
-                check: 'Number',
+                check: ['String', 'Number'],
                 shadow: {
                     type: 'math_number',
                     fields: {
@@ -3036,7 +3036,7 @@ export const blocks = [
                 type: 'input_value',
                 name: 'VALUE',
                 value: 36,
-                check: 'Number',
+                check: ['String', 'Number'],
                 shadow: {
                     type: 'math_number',
                     fields: {
@@ -3127,7 +3127,7 @@ export const blocks = [
                 type: 'input_value',
                 name: 'VALUE',
                 value: 36,
-                check: 'Number',
+                check: ['String', 'Number'],
                 shadow: {
                     type: 'math_number',
                     fields: {
@@ -3326,7 +3326,7 @@ export const blocks = [
         args0: [
             {
                 type: 'input_value',
-                check: 'Number',
+                check: ['String', 'Number'],
                 name: 'NOTE',
                 shadow: {
                     type: 'flippersound_custom-piano',
@@ -3356,8 +3356,8 @@ export const blocks = [
             {
                 type: 'input_value',
                 name: 'NOTE',
+                check: ['String', 'Number'],
                 value: 22,
-                check: 'Number',
                 shadow: {
                     type: 'flippersound_custom-piano',
                     fields: {
@@ -3369,7 +3369,7 @@ export const blocks = [
                 type: 'input_value',
                 name: 'DURATION',
                 value: 10,
-                check: 'Number',
+                check: ['String', 'Number'],
                 shadow: {
                     type: 'math_number',
                     fields: {
@@ -3844,7 +3844,7 @@ export const blocks = [
             {
                 type: 'input_value',
                 name: 'VALUE',
-                check: 'Number'
+                check: ['String', 'Number']
             }
         ],
         inputsInline: true,
@@ -3860,7 +3860,7 @@ export const blocks = [
             {
                 type: 'input_value',
                 name: 'VOLUME',
-                check: 'Number'
+                check: ['String', 'Number']
             }
         ],
         inputsInline: true,
@@ -3892,7 +3892,7 @@ export const blocks = [
             {
                 type: 'input_value',
                 name: 'VALUE',
-                check: 'Number'
+                check: ['String', 'Number']
             }
         ],
         inputsInline: true,
@@ -3908,7 +3908,7 @@ export const blocks = [
             {
                 type: 'input_value',
                 name: 'VOLUME',
-                check: 'Number'
+                check: ['String', 'Number']
             }
         ],
         inputsInline: true,
