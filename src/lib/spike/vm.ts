@@ -590,6 +590,10 @@ export class ActionStatement extends Statement {
                 const revolution_time = 60.0 / rpm;
                 const revs = (amount * 25.4) / thread.vm.hub.moveDistance;
                 await thread.cancellable(vmSleep(revs * revolution_time * 1000));
+            } else if (unit == 'inches') {
+                const revolution_time = 60.0 / rpm;
+                const revs = (amount * 25.4) / thread.vm.hub.moveDistance;
+                await thread.cancellable(vmSleep(revs * revolution_time * 1000));
             }
             attachment = thread.vm.hub.ports[thread.vm.hub.movePair1];
             if (attachment && attachment.type == 'motor') {
@@ -610,6 +614,8 @@ export class ActionStatement extends Statement {
             if (unit == 'cm') {
                 thread.vm.hub.moveDistance = distance * 10.0;
             } else if (unit == 'in') {
+                thread.vm.hub.moveDistance = distance * 25.4;
+            } else if (unit == 'inches') {
                 thread.vm.hub.moveDistance = distance * 25.4;
             }
         } else if (op == 'setMovementPair') {
@@ -965,6 +971,8 @@ export class EventStatement extends Statement {
                     d = d * 10.0;
                 } else if (unit == 'in') {
                     d = d * 25.4;
+                } else if (unit == 'inches') {
+                    d = d * 25.4;
                 }
                 if (comparator == '<') {
                     return attachment.measure.distance < d;
@@ -1275,6 +1283,8 @@ export class FunctionExpression extends Expression {
                     return new NumberValue(attachment.measure.distance / 10.0);
                 } else if (unit == 'in') {
                     return new NumberValue(attachment.measure.distance / 25.4);
+                } else if (unit == 'inches') {
+                    return new NumberValue(attachment.measure.distance / 25.4);
                 }
             }
             return new NumberValue(0);
@@ -1305,6 +1315,8 @@ export class FunctionExpression extends Expression {
                 } else if (unit == 'cm') {
                     d = d * 10.0;
                 } else if (unit == 'in') {
+                    d = d * 25.4;
+                } else if (unit == 'inches') {
                     d = d * 25.4;
                 }
                 if (comparator == '<') {
