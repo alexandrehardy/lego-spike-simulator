@@ -51,7 +51,7 @@
         gl.setModelIdentity();
         gl.clearColour(0.0, 0.0, 0.0);
         gl.clear();
-        gl.translate(0, 0, -20);
+        gl.translate(0, 0, -30);
         // Make unit meters
         gl.scale(0.01);
         if (tilt) {
