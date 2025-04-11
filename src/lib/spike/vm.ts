@@ -1621,14 +1621,18 @@ export class Wheel {
         this.locationTransform = locationTransform;
         this.distanceMoved = 0.0;
         const position = m4.transformVector(this.locationTransform, [0.0, 0.0, 0.0, 1.0]);
-        const direction = m4.transformVector(this.locationTransform, [1.0, 0.0, 0.0, 0.0]);
+        const direction = m4.normalize(
+            m4.transformVector(this.locationTransform, [1.0, 0.0, 0.0, 0.0])
+        );
         this.position = { x: position[0], y: position[1], z: position[2] };
         this.direction = { x: direction[0], y: direction[1], z: direction[2] };
     }
 
     applyTransform() {
         const position = m4.transformVector(this.locationTransform, [0.0, 0.0, 0.0, 1.0]);
-        const direction = m4.transformVector(this.locationTransform, [1.0, 0.0, 0.0, 0.0]);
+        const direction = m4.normalize(
+            m4.transformVector(this.locationTransform, [1.0, 0.0, 0.0, 0.0])
+        );
         this.position = { x: position[0], y: position[1], z: position[2] };
         this.direction = { x: direction[0], y: direction[1], z: direction[2] };
     }
