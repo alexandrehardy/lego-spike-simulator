@@ -667,14 +667,26 @@ export class ActionStatement extends Statement {
             let left = 0;
             let right = 0;
 
-            right = 0.5 - (steer / 100.0) * 0.5;
-            left = 0.5 + (steer / 100.0) * 0.5;
-            if (left > right) {
-                left = 1.0;
-                right = right / left;
+            if (steer >= 0) {
+                left = 100.0;
+                right = 100.0 - steer * 2.0;
             } else {
+                right = 100.0;
+                left = steer * 2.0 + 100;
+            }
+            left = left / 100.0;
+            right = right / 100.0;
+            if (left > 1.0) {
+                left = 1.0;
+            }
+            if (left < -1.0) {
+                left = -1.0;
+            }
+            if (right > 1.0) {
                 right = 1.0;
-                left = left / right;
+            }
+            if (right < -1.0) {
+                right = -1.0;
             }
             let attachment = thread.vm.hub.ports[thread.vm.hub.movePair1];
             if (attachment && attachment.type == 'motor') {
@@ -705,14 +717,26 @@ export class ActionStatement extends Statement {
             let left = 0;
             let right = 0;
 
-            right = 0.5 - (steer / 100.0) * 0.5;
-            left = 0.5 + (steer / 100.0) * 0.5;
-            if (left > right) {
-                left = 1.0;
-                right = right / left;
+            if (steer >= 0) {
+                left = 100.0;
+                right = 100.0 - steer * 2.0;
             } else {
+                right = 100.0;
+                left = steer * 2.0 + 100;
+            }
+            left = left / 100.0;
+            right = right / 100.0;
+            if (left > 1.0) {
+                left = 1.0;
+            }
+            if (left < -1.0) {
+                left = -1.0;
+            }
+            if (right > 1.0) {
                 right = 1.0;
-                left = left / right;
+            }
+            if (right < -1.0) {
+                right = -1.0;
             }
             let attachment = thread.vm.hub.ports[thread.vm.hub.movePair1];
             let rpm = 0;
