@@ -9,7 +9,7 @@ import * as m4 from '$lib/ldraw/m4';
 export type PortType = 'A' | 'B' | 'C' | 'D' | 'E' | 'F';
 export const allPorts: PortType[] = ['A', 'B', 'C', 'D', 'E', 'F'];
 export const fontEmbedsSpace = false;
-let stepSleep = 1000;
+let stepSleep = 0;
 let timeFactor = 1.0;
 
 const colours: Record<string, string> = {
@@ -49,7 +49,7 @@ function sleep(ms: number): Promise<void> {
 }
 
 function vmSleep(ms: number): Promise<void> {
-    return sleep(Math.round(ms * timeFactor));
+    return sleep(Math.round(ms / timeFactor));
 }
 
 export function setStepSleep(time: number) {
@@ -1698,7 +1698,7 @@ export class Motor {
         if (!this.on) {
             return 0;
         }
-        const delta = (time * timeFactor * this.rpm) / 60.0;
+        const delta = (time * this.rpm) / 60.0;
         if (this.reverse) {
             this.position -= delta * 360;
         } else {
@@ -2426,7 +2426,7 @@ export class VM {
     step(seconds: number, scene: SceneStore) {
         if (this.state == 'running') {
             this.runThreads();
-            this.moveRobot(seconds, scene);
+            this.moveRobot(seconds * timeFactor, scene);
         }
     }
 
