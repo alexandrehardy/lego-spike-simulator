@@ -48,10 +48,6 @@ function sleep(ms: number): Promise<void> {
     return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-function vmSleep(ms: number): Promise<void> {
-    return sleep(Math.round(ms / timeFactor));
-}
-
 export function setStepSleep(time: number) {
     if (time > 0) {
         stepSleep = time;
@@ -103,7 +99,9 @@ export class Statement extends Node {
         }
         try {
             this.highlight(thread);
-            await sleep(stepSleep);
+            // Always sleep. If we don't then some things
+            // go wrong....
+            await thread.vm.sleep(stepSleep + 1e-5);
             await this._execute(thread);
         } finally {
             this.removeHighlight(thread);
@@ -247,7 +245,7 @@ export class ActionStatement extends Statement {
             thread.vm.hub.setScreen(screen.getString());
             const delay = duration.getNumber();
             if (delay > 0) {
-                await thread.cancellable(vmSleep(delay * 1000));
+                await thread.cancellable(thread.vm.sleep(delay));
             }
             thread.vm.hub.setScreen('0000000000000000000000000');
         } else if (op == 'lightDisplayOff') {
@@ -299,7 +297,7 @@ export class ActionStatement extends Statement {
                     row4.substring(offset, offset + 5);
                 offset++;
                 thread.vm.hub.setScreen(screen);
-                await thread.cancellable(vmSleep(200));
+                await thread.cancellable(thread.vm.sleep(0.2));
             }
         } else if (op == 'lightDisplaySetBrightness') {
             const brightness = this.arguments[0].evaluate(thread).getNumber();
@@ -386,7 +384,7 @@ export class ActionStatement extends Statement {
         const attachment = thread.vm.hub.ports[port];
         if (attachment && attachment.type == 'motor') {
             attachment.motor!.on = true;
-            await thread.cancellable(vmSleep(duration));
+            await thread.cancellable(thread.vm.sleep(duration));
             attachment.motor!.on = false;
             attachment.motor!.reverse = false;
         }
@@ -440,11 +438,7 @@ export class ActionStatement extends Statement {
                     // This is probably approximate
                     const revolution_time = 60.0 / rpm;
                     promises.push(
-                        this.execute_movemotor(
-                            thread,
-                            port,
-                            ((degrees * revolution_time) / 360.0) * 1000
-                        )
+                        this.execute_movemotor(thread, port, (degrees * revolution_time) / 360.0)
                     );
                 }
             }
@@ -512,20 +506,16 @@ export class ActionStatement extends Statement {
                     if (unit == 'rotations') {
                         const revolution_time = 60.0 / rpm;
                         promises.push(
-                            this.execute_movemotor(thread, port, amount * revolution_time * 1000)
+                            this.execute_movemotor(thread, port, amount * revolution_time)
                         );
                     } else if (unit == 'degrees') {
                         // This is probably approximate
                         const revolution_time = 60.0 / rpm;
                         promises.push(
-                            this.execute_movemotor(
-                                thread,
-                                port,
-                                ((amount * revolution_time) / 360.0) * 1000
-                            )
+                            this.execute_movemotor(thread, port, (amount * revolution_time) / 360.0)
                         );
                     } else if (unit == 'seconds') {
-                        promises.push(this.execute_movemotor(thread, port, amount * 1000));
+                        promises.push(this.execute_movemotor(thread, port, amount));
                     }
                 }
             }
@@ -575,25 +565,25 @@ export class ActionStatement extends Statement {
             }
             if (unit == 'rotations') {
                 const revolution_time = 60.0 / rpm;
-                await thread.cancellable(vmSleep(amount * revolution_time * 1000));
+                await thread.cancellable(thread.vm.sleep(amount * revolution_time));
             } else if (unit == 'degrees') {
                 // This is probably approximate
                 const revolution_time = 60.0 / rpm;
-                await thread.cancellable(vmSleep(((amount * revolution_time) / 360.0) * 1000));
+                await thread.cancellable(thread.vm.sleep((amount * revolution_time) / 360.0));
             } else if (unit == 'seconds') {
-                await thread.cancellable(vmSleep(amount * 1000));
+                await thread.cancellable(thread.vm.sleep(amount));
             } else if (unit == 'cm') {
                 const revolution_time = 60.0 / rpm;
                 const revs = (amount * 10.0) / thread.vm.hub.moveDistance;
-                await thread.cancellable(vmSleep(revs * revolution_time * 1000));
+                await thread.cancellable(thread.vm.sleep(revs * revolution_time));
             } else if (unit == 'in') {
                 const revolution_time = 60.0 / rpm;
                 const revs = (amount * 25.4) / thread.vm.hub.moveDistance;
-                await thread.cancellable(vmSleep(revs * revolution_time * 1000));
+                await thread.cancellable(thread.vm.sleep(revs * revolution_time));
             } else if (unit == 'inches') {
                 const revolution_time = 60.0 / rpm;
                 const revs = (amount * 25.4) / thread.vm.hub.moveDistance;
-                await thread.cancellable(vmSleep(revs * revolution_time * 1000));
+                await thread.cancellable(thread.vm.sleep(revs * revolution_time));
             }
             attachment = thread.vm.hub.ports[thread.vm.hub.movePair1];
             if (attachment && attachment.type == 'motor') {
@@ -767,13 +757,13 @@ export class ActionStatement extends Statement {
             }
             if (unit == 'rotations') {
                 const revolution_time = 60.0 / rpm;
-                await thread.cancellable(vmSleep(amount * revolution_time * 1000));
+                await thread.cancellable(thread.vm.sleep(amount * revolution_time));
             } else if (unit == 'degrees') {
                 // This is probably approximate
                 const revolution_time = 60.0 / rpm;
-                await thread.cancellable(vmSleep(((amount * revolution_time) / 360.0) * 1000));
+                await thread.cancellable(thread.vm.sleep((amount * revolution_time) / 360.0));
             } else if (unit == 'seconds') {
-                await thread.cancellable(vmSleep(amount * 1000));
+                await thread.cancellable(thread.vm.sleep(amount));
             }
             attachment = thread.vm.hub.ports[thread.vm.hub.movePair1];
             if (attachment && attachment.type == 'motor') {
@@ -846,7 +836,7 @@ export class ActionStatement extends Statement {
             const freq = Math.pow(2.0, (note - 69.0) / 12.0) * 440;
             thread.vm.startNote(freq, duration * timeFactor);
             try {
-                await thread.cancellable(vmSleep(duration * 1000));
+                await thread.cancellable(thread.vm.sleep(duration));
             } finally {
                 thread.vm.stopNote();
             }
@@ -1547,7 +1537,7 @@ export class ControlStatement extends Statement {
                 await this.statement.execute(thread);
                 // give things time to change
                 // and avoid a very tight loop
-                await sleep(50);
+                await thread.vm.sleep(0.05);
                 condition = this.condition.evaluate(thread);
             }
         } else if (this.opcode == 'repeat_until') {
@@ -1559,7 +1549,7 @@ export class ControlStatement extends Statement {
                 await this.statement.execute(thread);
                 // give things time to change
                 // and avoid a very tight loop
-                await sleep(50);
+                await thread.vm.sleep(0.05);
                 condition = this.condition.evaluate(thread);
             }
         } else if (this.opcode == 'if') {
@@ -1575,7 +1565,7 @@ export class ControlStatement extends Statement {
             const duration = this.condition.evaluate(thread);
             const delay = duration.getNumber();
             if (delay > 0) {
-                await thread.cancellable(vmSleep(delay * 1000));
+                await thread.cancellable(thread.vm.sleep(delay));
             }
         } else if (this.opcode == 'wait4') {
             if (!this.condition) {
@@ -1588,7 +1578,7 @@ export class ControlStatement extends Statement {
                 if (thread.state == 'stopped') {
                     return;
                 }
-                await sleep(50);
+                await thread.vm.sleep(0.05);
                 condition = this.condition.evaluate(thread);
             }
         } else {
@@ -2273,6 +2263,11 @@ function dist(a: Vertex, b: Vertex) {
     return Math.sqrt(dx * dx + dy * dy + dz * dz);
 }
 
+interface SleepRecord {
+    resolve: () => Promise<void> | void;
+    duration: number;
+}
+
 export class VM {
     hub: Hub;
     audio: HTMLAudioElement;
@@ -2287,6 +2282,7 @@ export class VM {
     first: boolean;
     timerStart: number;
     deltaTime: number;
+    sleepRecords: SleepRecord[];
 
     constructor(
         hub: Hub,
@@ -2311,6 +2307,7 @@ export class VM {
         oscillator.connect(audioContext.destination);
         this.oscillator = oscillator;
         this.deltaTime = 0.0;
+        this.sleepRecords = [];
 
         for (const entry of Array.from(events.entries())) {
             const key = entry[0];
@@ -2388,6 +2385,8 @@ export class VM {
             const thread = entry[1];
             thread.unpause();
             thread.stop();
+            this.sleepRecords.forEach((r) => r.resolve());
+            this.sleepRecords = [];
         }
         this.audio.pause();
         this.stopNote();
@@ -2425,13 +2424,44 @@ export class VM {
         }
     }
 
+    sleep(seconds: number): Promise<void> {
+        const promise = new Promise<void>((resolve) => {
+            this.sleepRecords.push({ resolve: resolve, duration: seconds });
+        });
+        return promise;
+    }
+
+    processSleep(seconds: number) {
+        this.sleepRecords.forEach((r) => {
+            r.duration -= seconds;
+            if (r.duration <= 0.0) {
+                r.resolve();
+            }
+        });
+        this.sleepRecords = this.sleepRecords.filter((r) => r.duration > 0.0);
+    }
+
+    stepTime() {
+        const durations = this.sleepRecords.map((r) => r.duration);
+        let shortest = Math.min.apply(null, durations);
+        if (shortest < 1e-5) {
+            shortest = 1e-5;
+        }
+        if (shortest > 0.01) {
+            shortest = 0.01;
+        }
+        return shortest;
+    }
+
     step(seconds: number, scene: SceneStore) {
         if (this.state == 'running') {
             let duration = seconds * timeFactor + this.deltaTime;
             while (duration > 0.0) {
+                const stepTime = this.stepTime();
+                this.processSleep(stepTime);
                 this.runThreads();
-                this.moveRobot(0.001, scene);
-                duration -= 0.001;
+                this.moveRobot(stepTime, scene);
+                duration -= stepTime;
             }
             this.deltaTime = duration;
         }
