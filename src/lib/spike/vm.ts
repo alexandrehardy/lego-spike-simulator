@@ -2286,6 +2286,7 @@ export class VM {
     state: 'running' | 'stopped' | 'paused';
     first: boolean;
     timerStart: number;
+    deltaTime: number;
 
     constructor(
         hub: Hub,
@@ -2309,6 +2310,7 @@ export class VM {
         const oscillator = audioContext.createOscillator();
         oscillator.connect(audioContext.destination);
         this.oscillator = oscillator;
+        this.deltaTime = 0.0;
 
         for (const entry of Array.from(events.entries())) {
             const key = entry[0];
@@ -2425,8 +2427,13 @@ export class VM {
 
     step(seconds: number, scene: SceneStore) {
         if (this.state == 'running') {
-            this.runThreads();
-            this.moveRobot(seconds * timeFactor, scene);
+            let duration = seconds * timeFactor + this.deltaTime;
+            while (duration > 0.0) {
+                this.runThreads();
+                this.moveRobot(0.001, scene);
+                duration -= 0.001;
+            }
+            this.deltaTime = duration;
         }
     }
 
