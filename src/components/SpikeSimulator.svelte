@@ -212,7 +212,6 @@
             return;
         }
         const frameTime = timestamp - lastFrame;
-        lastFrame = timestamp;
         if (vm.state == 'running') {
             if (lastFrame > 0) {
                 vm.step(frameTime / 1000.0, scene);
@@ -221,6 +220,7 @@
             }
             requestAnimationFrame(stepVM);
         }
+        lastFrame = timestamp;
     }
 
     function startOrPauseSimulation(start: boolean) {
@@ -271,6 +271,7 @@
             scene = copyScene($sceneStore);
             vm = new VM(hub, globals, $codeStore.events, $codeStore.procedures, workspace);
             vm.start();
+            lastFrame = 0;
             requestAnimationFrame(stepVM);
         } else {
             if (vm) {
