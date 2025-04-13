@@ -53,7 +53,9 @@
     let vm: VM | undefined;
     let hubImage = '0000000000000000000000000';
     let hubCentreButtonColour = '#ffffff';
-    let compiledRobot: CompiledModel | undefined = undefined;
+    let compiledRobot: CompiledModel | undefined = $componentStore.robotModel
+        ? compiler.compileModel($componentStore.robotModel, { rescale: false })
+        : undefined;
     let sensors: SensorView[] = [];
     let lastFrame: number = 0;
     let scene = copyScene($sceneStore);
