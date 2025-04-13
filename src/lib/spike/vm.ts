@@ -941,12 +941,18 @@ export class ActionStatement extends Statement {
 
     *execute_sound(thread: Thread, op: string): Generator<VMTask> {
         if (op == 'changeeffectby') {
+            yield* super._execute(thread);
         } else if (op == 'changevolumeby') {
+            yield* super._execute(thread);
         } else if (op == 'cleareffects') {
+            yield* super._execute(thread);
         } else if (op == 'seteffectto') {
+            yield* super._execute(thread);
         } else if (op == 'setvolumeto') {
+            yield* super._execute(thread);
+        } else {
+            yield* super._execute(thread);
         }
-        yield* super._execute(thread);
     }
 
     *execute_weather(thread: Thread, op: string): Generator<VMTask> {
@@ -996,7 +1002,7 @@ export class ActionStatement extends Statement {
         } else if (module == 'weather') {
             yield* this.execute_weather(thread, op);
         } else {
-            super._execute(thread);
+            yield* super._execute(thread);
         }
     }
 }
@@ -1664,7 +1670,7 @@ export class ControlStatement extends Statement {
                 condition = this.condition.evaluate(thread);
             }
         } else {
-            super._execute(thread);
+            yield* super._execute(thread);
         }
     }
 }
@@ -1688,7 +1694,7 @@ export class RepeatStatement extends Statement {
                 yield* this.statements.execute(thread);
             }
         } else {
-            super._execute(thread);
+            yield* super._execute(thread);
         }
     }
 }
