@@ -48,6 +48,87 @@ function sleep(ms: number): Promise<void> {
     return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+class VMTask {
+    type: string;
+    complete: boolean;
+
+    constructor(type: string) {
+        this.type = type;
+        this.complete = false;
+    }
+
+    run() {}
+}
+
+class TaskProcessor {
+    thread: Generator<VMTask> | undefined;
+    task: VMTask | undefined;
+    complete: boolean;
+
+    constructor(thread: Generator<VMTask>) {
+        this.thread = thread;
+        this.task = undefined;
+        this.complete = thread === undefined;
+    }
+
+    processNextTask() {
+        let newTask = true;
+        while (newTask) {
+            if (this.task) {
+                this.task.run();
+                if (!this.task.complete) {
+                    return;
+                }
+            }
+            this.task = undefined;
+            if (this.thread === undefined) {
+                this.complete = true;
+                return;
+            }
+            const state = this.thread.next();
+            if (state.value) {
+                this.task = state.value;
+            }
+            if (state.done) {
+                this.thread = undefined;
+            }
+        }
+    }
+}
+
+class CompleteTask extends VMTask {
+    constructor() {
+        super('done');
+        this.complete = true;
+    }
+}
+
+class SleepTask extends VMTask {
+    duration: number;
+    constructor(duration: number) {
+        super('sleep');
+        this.duration = duration;
+    }
+}
+
+class CompleteAllTask extends VMTask {
+    threads: TaskProcessor[];
+    constructor(operations: Generator<VMTask>[]) {
+        super('multi');
+        this.threads = operations.map((g) => new TaskProcessor(g));
+    }
+
+    override run() {
+        this.threads.forEach((thread) => {
+            if (!thread.complete) {
+                thread.processNextTask();
+            }
+        });
+        const completed = this.threads.filter((t) => t.complete);
+        this.complete = completed.length == this.threads.length;
+    }
+}
+
 export function setStepSleep(time: number) {
     if (time > 0) {
         stepSleep = time;
@@ -88,30 +169,31 @@ export class Statement extends Node {
         super(opcode, blocklyId);
     }
 
-    async execute(thread: Thread) {
+    *execute(thread: Thread): Generator<VMTask> {
         while (thread.paused) {
             // We should do a callback, but this should be rare
             // so we poll at 50ms interval
-            await sleep(50);
+            yield thread.vm.sleep(0.05);
         }
         if (thread.state == 'stopped') {
             return;
         }
         try {
             this.highlight(thread);
-            // Always sleep. If we don't then some things
-            // go wrong....
-            await thread.vm.sleep(stepSleep + 1e-5);
-            await this._execute(thread);
+            if (stepSleep > 0) {
+                yield thread.vm.sleep((stepSleep / 1000.0) * timeFactor);
+            }
+            yield* this._execute(thread);
         } finally {
             this.removeHighlight(thread);
         }
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    async _execute(thread: Thread) {
+    *_execute(thread: Thread): Generator<VMTask> {
         console.log('Execute not implemented on...');
         console.log(this);
+        yield new CompleteTask();
     }
 
     highlight(thread: Thread) {
@@ -145,11 +227,11 @@ export class ActionStatement extends Statement {
         this.arguments = args;
     }
 
-    async execute_bargraphmonitor(thread: Thread, op: string) {
-        return super._execute(thread);
+    *execute_bargraphmonitor(thread: Thread, op: string): Generator<VMTask> {
+        yield* super._execute(thread);
     }
 
-    async execute_data(thread: Thread, op: string) {
+    *execute_data(thread: Thread, op: string): Generator<VMTask> {
         if (op == 'setvariableto') {
             const variable = this.arguments[0] as Variable;
             const value = this.arguments[1].evaluate(thread);
@@ -212,19 +294,19 @@ export class ActionStatement extends Statement {
             const newList = list.toSpliced(index - 1, 1, value);
             thread.setVar(variable.name, new ListValue(newList), variable.local);
         } else {
-            return super._execute(thread);
+            yield* super._execute(thread);
         }
     }
 
-    async execute_displaymonitor(thread: Thread, op: string) {
-        return super._execute(thread);
+    *execute_displaymonitor(thread: Thread, op: string): Generator<VMTask> {
+        yield* super._execute(thread);
     }
 
-    async execute_event(thread: Thread, op: string) {
-        return super._execute(thread);
+    *execute_event(thread: Thread, op: string): Generator<VMTask> {
+        yield* super._execute(thread);
     }
 
-    async execute_flippercontrol(thread: Thread, op: string) {
+    *execute_flippercontrol(thread: Thread, op: string): Generator<VMTask> {
         if (op == 'stop') {
             thread.stop();
             return;
@@ -232,10 +314,10 @@ export class ActionStatement extends Statement {
             thread.vm.stopAllThreadsExcept(thread.id);
             return;
         }
-        return super._execute(thread);
+        yield* super._execute(thread);
     }
 
-    async execute_flipperlight(thread: Thread, op: string) {
+    *execute_flipperlight(thread: Thread, op: string): Generator<VMTask> {
         if (op == 'lightDisplayImageOn') {
             const value = this.arguments[0].evaluate(thread);
             thread.vm.hub.setScreen(value.getString());
@@ -245,7 +327,7 @@ export class ActionStatement extends Statement {
             thread.vm.hub.setScreen(screen.getString());
             const delay = duration.getNumber();
             if (delay > 0) {
-                await thread.cancellable(thread.vm.sleep(delay));
+                yield thread.vm.sleep(delay);
             }
             thread.vm.hub.setScreen('0000000000000000000000000');
         } else if (op == 'lightDisplayOff') {
@@ -297,7 +379,7 @@ export class ActionStatement extends Statement {
                     row4.substring(offset, offset + 5);
                 offset++;
                 thread.vm.hub.setScreen(screen);
-                await thread.cancellable(thread.vm.sleep(0.2));
+                yield thread.vm.sleep(0.2);
             }
         } else if (op == 'lightDisplaySetBrightness') {
             const brightness = this.arguments[0].evaluate(thread).getNumber();
@@ -332,7 +414,7 @@ export class ActionStatement extends Statement {
         } else if (op == 'ultrasonicLightUp') {
             // TODO: This is actually just turning an a light
             // It doesn't affect the sensor.
-            return super._execute(thread);
+            yield* super._execute(thread);
         } else if (op == 'centerButtonLight') {
             const colourIndex = this.arguments[0].evaluate(thread).getString();
             const colourMap: Record<string, string> = {
@@ -354,48 +436,48 @@ export class ActionStatement extends Statement {
             }
             return;
         } else {
-            return super._execute(thread);
+            yield* super._execute(thread);
         }
     }
 
-    async execute_flippermoremotor(thread: Thread, op: string) {
+    *execute_flippermoremotor(thread: Thread, op: string): Generator<VMTask> {
         if (op == 'motorGoToRelativePosition') {
-            return super._execute(thread);
+            yield* super._execute(thread);
         } else if (op == 'motorSetAcceleration') {
-            return super._execute(thread);
+            yield* super._execute(thread);
         } else if (op == 'motorSetStopMethod') {
-            return super._execute(thread);
+            yield* super._execute(thread);
         } else if (op == 'motorStartPower') {
-            return super._execute(thread);
+            yield* super._execute(thread);
         } else {
-            return super._execute(thread);
+            yield* super._execute(thread);
         }
     }
 
-    async execute_flippermoremove(thread: Thread, op: string) {
-        return super._execute(thread);
+    *execute_flippermoremove(thread: Thread, op: string): Generator<VMTask> {
+        yield* super._execute(thread);
     }
 
-    async execute_flippermoresensors(thread: Thread, op: string) {
-        return super._execute(thread);
+    *execute_flippermoresensors(thread: Thread, op: string): Generator<VMTask> {
+        yield* super._execute(thread);
     }
 
-    async execute_movemotor(thread: Thread, port: PortType, duration: number) {
+    *execute_movemotor(thread: Thread, port: PortType, duration: number): Generator<VMTask> {
         const attachment = thread.vm.hub.ports[port];
         if (attachment && attachment.type == 'motor') {
             attachment.motor!.on = true;
-            await thread.cancellable(thread.vm.sleep(duration));
+            yield thread.vm.sleep(duration);
             attachment.motor!.on = false;
             attachment.motor!.reverse = false;
         }
     }
 
-    async execute_flippermotor(thread: Thread, op: string) {
+    *execute_flippermotor(thread: Thread, op: string): Generator<VMTask> {
         if (op == 'motorGoDirectionToPosition') {
             const ports = this.arguments[0].evaluate(thread).getString();
             const direction = this.arguments[1].evaluate(thread).getString();
             let target = this.arguments[2].evaluate(thread).getNumber();
-            const promises: Promise<void>[] = [];
+            const promises: Generator<VMTask>[] = [];
             for (let i = 0; i < ports.length; i++) {
                 const portChar = ports.charAt(i);
                 const port = portChar as PortType;
@@ -442,7 +524,7 @@ export class ActionStatement extends Statement {
                     );
                 }
             }
-            await Promise.all(promises);
+            yield new CompleteAllTask(promises);
         } else if (op == 'motorSetSpeed') {
             const ports = this.arguments[0].evaluate(thread).getString();
             const speed = this.arguments[1].evaluate(thread).getNumber();
@@ -490,7 +572,7 @@ export class ActionStatement extends Statement {
             const direction = this.arguments[1].evaluate(thread).getString();
             const amount = this.arguments[2].evaluate(thread).getNumber();
             const unit = this.arguments[3].evaluate(thread).getString();
-            const promises: Promise<void>[] = [];
+            const promises: Generator<VMTask>[] = [];
             for (let i = 0; i < ports.length; i++) {
                 const portChar = ports.charAt(i);
                 const port = portChar as PortType;
@@ -519,13 +601,13 @@ export class ActionStatement extends Statement {
                     }
                 }
             }
-            await Promise.all(promises);
+            yield new CompleteAllTask(promises);
         } else {
-            return super._execute(thread);
+            yield* super._execute(thread);
         }
     }
 
-    async execute_flippermove(thread: Thread, op: string) {
+    *execute_flippermove(thread: Thread, op: string): Generator<VMTask> {
         if (op == 'move') {
             const direction = this.arguments[0].evaluate(thread).getString();
             const amount = this.arguments[1].evaluate(thread).getNumber();
@@ -565,25 +647,25 @@ export class ActionStatement extends Statement {
             }
             if (unit == 'rotations') {
                 const revolution_time = 60.0 / rpm;
-                await thread.cancellable(thread.vm.sleep(amount * revolution_time));
+                yield thread.vm.sleep(amount * revolution_time);
             } else if (unit == 'degrees') {
                 // This is probably approximate
                 const revolution_time = 60.0 / rpm;
-                await thread.cancellable(thread.vm.sleep((amount * revolution_time) / 360.0));
+                yield thread.vm.sleep((amount * revolution_time) / 360.0);
             } else if (unit == 'seconds') {
-                await thread.cancellable(thread.vm.sleep(amount));
+                yield thread.vm.sleep(amount);
             } else if (unit == 'cm') {
                 const revolution_time = 60.0 / rpm;
                 const revs = (amount * 10.0) / thread.vm.hub.moveDistance;
-                await thread.cancellable(thread.vm.sleep(revs * revolution_time));
+                yield thread.vm.sleep(revs * revolution_time);
             } else if (unit == 'in') {
                 const revolution_time = 60.0 / rpm;
                 const revs = (amount * 25.4) / thread.vm.hub.moveDistance;
-                await thread.cancellable(thread.vm.sleep(revs * revolution_time));
+                yield thread.vm.sleep(revs * revolution_time);
             } else if (unit == 'inches') {
                 const revolution_time = 60.0 / rpm;
                 const revs = (amount * 25.4) / thread.vm.hub.moveDistance;
-                await thread.cancellable(thread.vm.sleep(revs * revolution_time));
+                yield thread.vm.sleep(revs * revolution_time);
             }
             attachment = thread.vm.hub.ports[thread.vm.hub.movePair1];
             if (attachment && attachment.type == 'motor') {
@@ -757,13 +839,13 @@ export class ActionStatement extends Statement {
             }
             if (unit == 'rotations') {
                 const revolution_time = 60.0 / rpm;
-                await thread.cancellable(thread.vm.sleep(amount * revolution_time));
+                yield thread.vm.sleep(amount * revolution_time);
             } else if (unit == 'degrees') {
                 // This is probably approximate
                 const revolution_time = 60.0 / rpm;
-                await thread.cancellable(thread.vm.sleep((amount * revolution_time) / 360.0));
+                yield thread.vm.sleep((amount * revolution_time) / 360.0);
             } else if (unit == 'seconds') {
-                await thread.cancellable(thread.vm.sleep(amount));
+                yield thread.vm.sleep(amount);
             }
             attachment = thread.vm.hub.ports[thread.vm.hub.movePair1];
             if (attachment && attachment.type == 'motor') {
@@ -776,15 +858,15 @@ export class ActionStatement extends Statement {
                 attachment.motor!.on = false;
             }
         } else {
-            return super._execute(thread);
+            yield* super._execute(thread);
         }
     }
 
-    async execute_flippermusic(thread: Thread, op: string) {
-        return super._execute(thread);
+    *execute_flippermusic(thread: Thread, op: string): Generator<VMTask> {
+        yield* super._execute(thread);
     }
 
-    async execute_flippersensors(thread: Thread, op: string) {
+    *execute_flippersensors(thread: Thread, op: string): Generator<VMTask> {
         if (op == 'resetTimer') {
             thread.vm.resetTimer();
             return;
@@ -792,10 +874,10 @@ export class ActionStatement extends Statement {
             thread.vm.hub.yaw = 0;
             return;
         }
-        return super._execute(thread);
+        yield* super._execute(thread);
     }
 
-    async execute_flippersound(thread: Thread, op: string) {
+    *execute_flippersound(thread: Thread, op: string): Generator<VMTask> {
         if (op == 'playSound') {
             const sourceString = this.arguments[0].evaluate(thread).getString();
             if (!sourceString) {
@@ -827,7 +909,7 @@ export class ActionStatement extends Statement {
             thread.vm.audio.src = `https://spike.legoeducation.com/sounds/${id}.mp3`;
             thread.vm.audio.play();
             while (!thread.vm.audio.ended) {
-                await thread.cancellable(sleep(100));
+                yield thread.vm.sleep(0.01);
             }
         } else if (op == 'beepForTime') {
             const note = this.arguments[0].evaluate(thread).getNumber();
@@ -836,7 +918,7 @@ export class ActionStatement extends Statement {
             const freq = Math.pow(2.0, (note - 69.0) / 12.0) * 440;
             thread.vm.startNote(freq, duration * timeFactor);
             try {
-                await thread.cancellable(thread.vm.sleep(duration));
+                yield thread.vm.sleep(duration);
             } finally {
                 thread.vm.stopNote();
             }
@@ -849,29 +931,29 @@ export class ActionStatement extends Statement {
             thread.vm.stopNote();
             thread.vm.audio.pause();
         } else {
-            return super._execute(thread);
+            yield* super._execute(thread);
         }
     }
 
-    async execute_linegraphmonitor(thread: Thread, op: string) {
-        return super._execute(thread);
+    *execute_linegraphmonitor(thread: Thread, op: string): Generator<VMTask> {
+        yield* super._execute(thread);
     }
 
-    async execute_sound(thread: Thread, op: string) {
+    *execute_sound(thread: Thread, op: string): Generator<VMTask> {
         if (op == 'changeeffectby') {
         } else if (op == 'changevolumeby') {
         } else if (op == 'cleareffects') {
         } else if (op == 'seteffectto') {
         } else if (op == 'setvolumeto') {
         }
-        return super._execute(thread);
+        yield* super._execute(thread);
     }
 
-    async execute_weather(thread: Thread, op: string) {
-        return super._execute(thread);
+    *execute_weather(thread: Thread, op: string): Generator<VMTask> {
+        yield* super._execute(thread);
     }
 
-    override async _execute(thread: Thread) {
+    override *_execute(thread: Thread): Generator<VMTask> {
         const parts = this.opcode.split('_');
         if (parts.length < 2) {
             super._execute(thread);
@@ -880,39 +962,39 @@ export class ActionStatement extends Statement {
         const module = parts[0];
         const op = parts[1];
         if (module == 'bargraphmonitor') {
-            await this.execute_bargraphmonitor(thread, op);
+            yield* this.execute_bargraphmonitor(thread, op);
         } else if (module == 'data') {
-            await this.execute_data(thread, op);
+            yield* this.execute_data(thread, op);
         } else if (module == 'displaymonitor') {
-            await this.execute_displaymonitor(thread, op);
+            yield* this.execute_displaymonitor(thread, op);
         } else if (module == 'event') {
-            await this.execute_event(thread, op);
+            yield* this.execute_event(thread, op);
         } else if (module == 'flippercontrol') {
-            await this.execute_flippercontrol(thread, op);
+            yield* this.execute_flippercontrol(thread, op);
         } else if (module == 'flipperlight') {
-            await this.execute_flipperlight(thread, op);
+            yield* this.execute_flipperlight(thread, op);
         } else if (module == 'flippermoremotor') {
-            await this.execute_flippermoremotor(thread, op);
+            yield* this.execute_flippermoremotor(thread, op);
         } else if (module == 'flippermoremove') {
-            await this.execute_flippermoremove(thread, op);
+            yield* this.execute_flippermoremove(thread, op);
         } else if (module == 'flippermoresensors') {
-            await this.execute_flippermoresensors(thread, op);
+            yield* this.execute_flippermoresensors(thread, op);
         } else if (module == 'flippermotor') {
-            await this.execute_flippermotor(thread, op);
+            yield* this.execute_flippermotor(thread, op);
         } else if (module == 'flippermove') {
-            await this.execute_flippermove(thread, op);
+            yield* this.execute_flippermove(thread, op);
         } else if (module == 'flippermusic') {
-            await this.execute_flippermusic(thread, op);
+            yield* this.execute_flippermusic(thread, op);
         } else if (module == 'flippersensors') {
-            await this.execute_flippersensors(thread, op);
+            yield* this.execute_flippersensors(thread, op);
         } else if (module == 'flippersound') {
-            await this.execute_flippersound(thread, op);
+            yield* this.execute_flippersound(thread, op);
         } else if (module == 'linegraphmonitor') {
-            await this.execute_linegraphmonitor(thread, op);
+            yield* this.execute_linegraphmonitor(thread, op);
         } else if (module == 'sound') {
-            await this.execute_sound(thread, op);
+            yield* this.execute_sound(thread, op);
         } else if (module == 'weather') {
-            await this.execute_weather(thread, op);
+            yield* this.execute_weather(thread, op);
         } else {
             super._execute(thread);
         }
@@ -929,8 +1011,8 @@ export class EventStatement extends Statement {
         this.statements = statements;
     }
 
-    override async _execute(thread: Thread) {
-        await this.statements.execute(thread);
+    override *_execute(thread: Thread): Generator<VMTask> {
+        yield* this.statements.execute(thread);
     }
 
     satisfied(thread: Thread): boolean {
@@ -1040,7 +1122,7 @@ export class CallStatement extends ActionStatement {
         this.name = name;
     }
 
-    override async _execute(thread: Thread) {
+    override *_execute(thread: Thread): Generator<VMTask> {
         const procedureBlock = thread.vm.procedures.get(this.name)!;
         if (procedureBlock.arguments.length != this.arguments.length) {
             console.log('Argument mismatch');
@@ -1056,7 +1138,7 @@ export class CallStatement extends ActionStatement {
             const value = this.arguments[i].evaluate(thread);
             thread.locals[argName] = value;
         }
-        await procedureBlock.statements.execute(thread);
+        yield* procedureBlock.statements.execute(thread);
         thread.locals = oldLocals;
     }
 }
@@ -1486,13 +1568,13 @@ export class StatementBlock extends Statement {
         this.statements = statements;
     }
 
-    override async _execute(thread: Thread) {
+    override *_execute(thread: Thread): Generator<VMTask> {
         this.removeHighlight(thread);
         for (const statement of this.statements) {
             if (thread.state == 'stopped') {
                 return;
             }
-            await statement.execute(thread);
+            yield* statement.execute(thread);
         }
     }
 }
@@ -1527,17 +1609,17 @@ export class ControlStatement extends Statement {
         this.alternative = alternative;
     }
 
-    override async _execute(thread: Thread) {
+    override *_execute(thread: Thread): Generator<VMTask> {
         if (this.opcode == 'while') {
             let condition = this.condition.evaluate(thread);
             while (condition.getBoolean()) {
                 if (thread.state == 'stopped') {
                     return;
                 }
-                await this.statement.execute(thread);
+                yield* this.statement.execute(thread);
                 // give things time to change
                 // and avoid a very tight loop
-                await thread.vm.sleep(0.05);
+                yield thread.vm.sleep(0.05);
                 condition = this.condition.evaluate(thread);
             }
         } else if (this.opcode == 'repeat_until') {
@@ -1546,26 +1628,26 @@ export class ControlStatement extends Statement {
                 if (thread.state == 'stopped') {
                     return;
                 }
-                await this.statement.execute(thread);
+                yield* this.statement.execute(thread);
                 // give things time to change
                 // and avoid a very tight loop
-                await thread.vm.sleep(0.05);
+                yield thread.vm.sleep(0.05);
                 condition = this.condition.evaluate(thread);
             }
         } else if (this.opcode == 'if') {
             const condition = this.condition.evaluate(thread);
             if (condition.getBoolean()) {
-                await this.statement.execute(thread);
+                yield* this.statement.execute(thread);
             } else {
                 if (this.alternative) {
-                    await this.alternative.execute(thread);
+                    yield* this.alternative.execute(thread);
                 }
             }
         } else if (this.opcode == 'wait') {
             const duration = this.condition.evaluate(thread);
             const delay = duration.getNumber();
             if (delay > 0) {
-                await thread.cancellable(thread.vm.sleep(delay));
+                yield thread.vm.sleep(delay);
             }
         } else if (this.opcode == 'wait4') {
             if (!this.condition) {
@@ -1578,7 +1660,7 @@ export class ControlStatement extends Statement {
                 if (thread.state == 'stopped') {
                     return;
                 }
-                await thread.vm.sleep(0.05);
+                yield thread.vm.sleep(0.05);
                 condition = this.condition.evaluate(thread);
             }
         } else {
@@ -1596,14 +1678,14 @@ export class RepeatStatement extends Statement {
         this.statements = statements;
     }
 
-    override async _execute(thread: Thread) {
+    override *_execute(thread: Thread): Generator<VMTask> {
         if (this.opcode == 'repeat') {
             const times = this.times.evaluate(thread);
             for (let i = 0; i < times.getNumber(); i++) {
                 if (thread.state == 'stopped') {
                     return;
                 }
-                await this.statements.execute(thread);
+                yield* this.statements.execute(thread);
             }
         } else {
             super._execute(thread);
@@ -2135,10 +2217,9 @@ export class Thread {
     globals: Namespace;
     locals: Namespace;
     state: 'running' | 'stopped';
-    cancels: Map<number, Canceller>;
-    nextCancel: number;
     event: EventStatement;
     paused: boolean;
+    thread: TaskProcessor | undefined;
 
     constructor(id: string, vm: VM, event: EventStatement, globals: Namespace) {
         this.id = id;
@@ -2146,15 +2227,14 @@ export class Thread {
         this.globals = globals;
         this.locals = {};
         this.state = 'stopped';
-        this.nextCancel = 0;
-        this.cancels = new Map<number, Canceller>();
         this.event = event;
         this.paused = false;
+        this.thread = undefined;
     }
 
-    async _execute() {
+    *_execute(): Generator<VMTask> {
         try {
-            await this.event.execute(this);
+            yield* this.event.execute(this);
             this.state = 'stopped';
         } catch (e) {
             if (e instanceof ThreadStopped) {
@@ -2169,21 +2249,31 @@ export class Thread {
 
     checkConditionAndExecute() {
         if (this.state === 'running') {
-            return;
-        }
-        if (this.event.satisfied(this)) {
-            this.execute();
+            if (!this.thread) {
+                this.state = 'stopped';
+            } else {
+                this.thread.processNextTask();
+                if (this.thread.complete) {
+                    this.state = 'stopped';
+                    this.thread = undefined;
+                }
+            }
+        } else {
+            if (this.event.satisfied(this)) {
+                this.thread = new TaskProcessor(this.execute());
+                this.thread.processNextTask();
+            }
         }
     }
 
-    execute() {
+    *execute(): Generator<VMTask> {
         if (this.state === 'running') {
             // Already running
             return;
         }
         this.locals = {};
         this.state = 'running';
-        this._execute();
+        yield* this._execute();
     }
 
     getVar(id: string, local: boolean): TypedValue {
@@ -2202,49 +2292,11 @@ export class Thread {
         }
     }
 
-    cancellable<T>(promise: Promise<T>): Promise<T> {
-        const id = this.nextCancel;
-        // eslint-disable-next-line @typescript-eslint/no-this-alias
-        const threadThis = this;
-        this.nextCancel++;
-
-        const newPromise = new Promise<T>((resolve, reject) => {
-            try {
-                threadThis.cancels.set(id, reject);
-                promise.then(
-                    (value) => {
-                        threadThis.removeCancel(id);
-                        resolve(value);
-                    },
-                    (reason) => {
-                        threadThis.removeCancel(id);
-                        reject(reason);
-                    }
-                );
-            } catch (e) {
-                threadThis.removeCancel(id);
-                reject(e);
-            }
-        });
-        return newPromise;
-    }
-
-    removeCancel(id: number) {
-        this.cancels.delete(id);
-    }
-
     stop() {
         if (this.state === 'stopped') {
             return;
         }
         this.state = 'stopped';
-        const cancels = this.cancels;
-        // Clear the map, so we don't cancel twice
-        this.cancels = new Map<number, Canceller>();
-        for (const entry of Array.from(cancels.entries())) {
-            const value = entry[1];
-            value(new ThreadStopped());
-        }
     }
 
     pause() {
@@ -2263,11 +2315,6 @@ function dist(a: Vertex, b: Vertex) {
     return Math.sqrt(dx * dx + dy * dy + dz * dz);
 }
 
-interface SleepRecord {
-    resolve: () => Promise<void> | void;
-    duration: number;
-}
-
 export class VM {
     hub: Hub;
     audio: HTMLAudioElement;
@@ -2282,7 +2329,7 @@ export class VM {
     first: boolean;
     timerStart: number;
     deltaTime: number;
-    sleepRecords: SleepRecord[];
+    sleepTasks: SleepTask[];
 
     constructor(
         hub: Hub,
@@ -2307,7 +2354,7 @@ export class VM {
         oscillator.connect(audioContext.destination);
         this.oscillator = oscillator;
         this.deltaTime = 0.0;
-        this.sleepRecords = [];
+        this.sleepTasks = [];
 
         for (const entry of Array.from(events.entries())) {
             const key = entry[0];
@@ -2385,8 +2432,7 @@ export class VM {
             const thread = entry[1];
             thread.unpause();
             thread.stop();
-            this.sleepRecords.forEach((r) => r.resolve());
-            this.sleepRecords = [];
+            this.sleepTasks = [];
         }
         this.audio.pause();
         this.stopNote();
@@ -2424,31 +2470,30 @@ export class VM {
         }
     }
 
-    sleep(seconds: number): Promise<void> {
-        const promise = new Promise<void>((resolve) => {
-            this.sleepRecords.push({ resolve: resolve, duration: seconds });
-        });
-        return promise;
+    sleep(seconds: number): SleepTask {
+        const task = new SleepTask(seconds);
+        this.sleepTasks.push(task);
+        return task;
     }
 
     processSleep(seconds: number) {
-        this.sleepRecords.forEach((r) => {
+        this.sleepTasks.forEach((r) => {
             r.duration -= seconds;
             if (r.duration <= 0.0) {
-                r.resolve();
+                r.complete = true;
             }
         });
-        this.sleepRecords = this.sleepRecords.filter((r) => r.duration > 0.0);
+        this.sleepTasks = this.sleepTasks.filter((r) => r.duration > 0.0);
     }
 
     stepTime() {
-        const durations = this.sleepRecords.map((r) => r.duration);
+        const durations = this.sleepTasks.map((r) => r.duration);
         let shortest = Math.min.apply(null, durations);
         if (shortest < 1e-5) {
             shortest = 1e-5;
         }
-        if (shortest > 0.01) {
-            shortest = 0.01;
+        if (shortest > 0.001) {
+            shortest = 0.001;
         }
         return shortest;
     }
