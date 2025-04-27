@@ -1952,14 +1952,19 @@ export class WebGL extends WebGLCompiler {
         this.gl.deleteProgram(program);
     }
 
+    getPixelRatio() {
+        return window.devicePixelRatio || 1;
+    }
+
     resizeCanvasToDisplaySize() {
         // Lookup the size the browser is displaying the canvas in CSS pixels.
-        const displayWidth = this.canvas.clientWidth;
-        const displayHeight = this.canvas.clientHeight;
+        const pixelRatio = this.getPixelRatio();
+        const displayWidth = Math.floor(this.canvas.clientWidth * pixelRatio);
+        const displayHeight = Math.floor(this.canvas.clientHeight * pixelRatio);
 
         // Check if the canvas is not the same size.
         const needResize =
-            this.canvas.width !== displayWidth || this.canvas.height !== displayHeight;
+            this.canvas.width != displayWidth || this.canvas.height != displayHeight;
 
         if (needResize) {
             // Make the canvas the same size
