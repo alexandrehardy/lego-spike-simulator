@@ -1,38 +1,17 @@
-# create-svelte
+Welcome to the lego-spike-simulator project. The aim is to provide
+an environment where LEGO spike robots can be simulated and the
+code tested before uploading to a real LEGO spike robot.
 
-Everything you need to build a Svelte project, powered by [`create-svelte`](https://github.com/sveltejs/kit/tree/main/packages/create-svelte).
+The environment currently only supports the blockly based programming
+language.
 
-## Creating a project
+The simulator allows lego format llsp3 programs to be loaded and saved,
+and can load robots in the ldraw format.
 
-If you're seeing this, you've probably already done this step. Congrats!
+There is very limited physics at the moment, focussed on moving a
+wheel base with a specific gearing.
 
-```bash
-# create a new project in the current directory
-npm create svelte@latest
-
-# create a new project in my-app
-npm create svelte@latest my-app
-```
-
-## Developing
-
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
-
-```bash
-npm run dev
-
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
-```
-
-## Building
-
-To create a production version of your app:
-
-```bash
-npm run build
-```
-
-You can preview the production build with `npm run preview`.
-
-> To deploy your app, you may need to install an [adapter](https://kit.svelte.dev/docs/adapters) for your target environment.
+The system is currently available at http://spike.ahardy.za.net/.
+However, the system can be built locally and executed directly
+from files, so no webserver is required. The software can run completely
+from the web browser.
