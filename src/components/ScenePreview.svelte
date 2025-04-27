@@ -48,6 +48,7 @@
         if (!gl) {
             return;
         }
+        gl.resizeToFit();
         gl.setModelIdentity();
         gl.clearColour(0.0, 0.0, 0.0);
         gl.clear();
@@ -149,19 +150,6 @@
         }
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    function resizeGL(data: SceneStore) {
-        if (!gl) {
-            return;
-        }
-        const gl2use = gl;
-        setTimeout(() => gl2use.resizeToFit(), 100);
-    }
-
-    function handleResize() {
-        resizeGL(scene);
-    }
-
     function checkEnabled(enabled: boolean) {
         if (enabled) {
             queueRender();
@@ -237,7 +225,6 @@
         if (canvas) {
             gl = WebGL.create(canvas as HTMLCanvasElement);
             if (gl) {
-                resizeGL(scene);
                 loadSceneItems(scene.objects, true, unresolved);
                 loadRobot(scene.robot, true, unresolved);
                 loadMapTexture(scene.map);
@@ -247,12 +234,10 @@
         } else {
             console.log('No WebGL available');
         }
-        addEventListener('resize', handleResize);
     });
 
     onDestroy(() => {
         canRender = false;
-        removeEventListener('resize', handleResize);
         if (mapTexture && gl) {
             gl.deleteTexture(mapTexture.texture);
             mapTexture = null;
@@ -266,7 +251,6 @@
         }
     }
 
-    $: resizeGL(scene);
     $: checkEnabled(enabled);
     $: loadMapTexture(scene.map);
     $: setMapSize(scene);

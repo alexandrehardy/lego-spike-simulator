@@ -58,6 +58,7 @@
             gl.clear();
             return;
         }
+        gl.resizeToFit();
         gl.setModelIdentity();
         gl.clearColour(0.0, 0.0, 0.0);
         gl.clear();
@@ -79,19 +80,6 @@
         }
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    function resizeGL(data: CompiledModel | undefined) {
-        if (!gl) {
-            return;
-        }
-        const gl2use = gl;
-        setTimeout(() => gl2use.resizeToFit(), 100);
-    }
-
-    function handleResize() {
-        resizeGL(compiledRobot);
-    }
-
     function checkEnabled(enabled: boolean) {
         if (enabled) {
             queueRender();
@@ -105,7 +93,6 @@
             if (gl) {
                 gl.mindist = 0.01;
                 gl.maxdist = 50.0;
-                resizeGL(compiledRobot);
                 compiledRobot = doCompile(robotModel, select);
             }
             canRender = true;
@@ -113,16 +100,13 @@
         } else {
             console.log('No WebGL available');
         }
-        addEventListener('resize', handleResize);
     });
 
     onDestroy(() => {
         canRender = false;
-        removeEventListener('resize', handleResize);
     });
 
     $: compiledRobot = doCompile(robotModel, select);
-    $: resizeGL(compiledRobot);
     $: checkEnabled(enabled);
 </script>
 

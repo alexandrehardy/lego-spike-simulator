@@ -115,7 +115,7 @@
 <LoadScene bind:modalOpen={sceneOpen} />
 <SimulatorSettings bind:modalOpen={settingsOpen} />
 {#if modalOpen}
-    <div class="flex-1 h-full">
+    <div class="flex-1 h-full overflow-hidden">
         <div class="relative flex-1 h-full flex flex-col overflow-hidden">
             <div
                 class="flex flex-row bg-gray-100 gap-2 p-2 items-center border-b border-b-gray-300"

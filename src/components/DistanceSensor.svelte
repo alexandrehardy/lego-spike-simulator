@@ -86,6 +86,7 @@
         if (!gl) {
             return;
         }
+        gl.resizeToFit();
         gl.setModelIdentity();
         if (scene.robot) {
             const obj = scene.robot;
@@ -165,19 +166,6 @@
         gl.flush();
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    function resizeGL(data: SceneStore) {
-        if (!gl) {
-            return;
-        }
-        const gl2use = gl;
-        setTimeout(() => gl2use.resizeToFit(), 100);
-    }
-
-    function handleResize() {
-        resizeGL(scene);
-    }
-
     function checkEnabled(enabled: boolean) {
         if (enabled) {
             queueRender();
@@ -250,7 +238,6 @@
                 gl.perspectiveAngle = 35; // 35 degree viewing angle
                 gl.mindist = 1; //Only measures from 50mm, but we don't want to clip that, so we set 1mm
                 gl.maxdist = range; // fast sensing is 300mm. But can measure up to 2000mm. Go with 2000
-                resizeGL(scene);
                 gl.renderDepth(true);
                 loadSceneItems(scene.objects, true);
                 loadRobot(scene.robot, true);
@@ -261,12 +248,10 @@
         } else {
             console.log('No WebGL available');
         }
-        addEventListener('resize', handleResize);
     });
 
     onDestroy(() => {
         canRender = false;
-        removeEventListener('resize', handleResize);
         if (mapTexture && gl) {
             gl.deleteTexture(mapTexture.texture);
             mapTexture = null;
@@ -295,7 +280,6 @@
     }
 
     $: cameraMatrix = getCameraMatrix(distanceSensorId, $componentStore.robotModel);
-    $: resizeGL(scene);
     $: checkEnabled(enabled);
     $: loadMapTexture(scene.map);
     $: setMapSize(scene);

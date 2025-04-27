@@ -354,7 +354,7 @@
         </div>
     {/if}
 
-    <div class="w-full flex-1 relative" hidden={!compiledRobot && !runSimulation}>
+    <div class="w-full h-full relative overflow-hidden" hidden={!compiledRobot && !runSimulation}>
         <div class="flex flex-row w-full h-full">
             <div class="flex flex-col">
                 <div class="mx-3 my-0 h-min">
@@ -412,28 +412,30 @@
                     {/each}
                 {/if}
             </div>
-            {#if runSimulation}
-                <ScenePreview
-                    id="scene_preview"
-                    {scene}
-                    class="h-full w-full"
-                    map={$sceneStore.map}
-                    rotate={false}
-                    camera="adaptive"
-                    tilt={true}
-                    select="#all"
-                    dimMap={true}
-                    {hub}
-                />
-            {:else}
-                <RobotPreview
-                    id="robot_preview"
-                    class="flex-1 w-full h-full"
-                    robotModel={$componentStore.robotModel}
-                    {compiledRobot}
-                    enabled={!connectorOpen && !sceneOpen && !wheelsOpen}
-                />
-            {/if}
+            <div class="overflow-hidden w-full h-full">
+                {#if runSimulation}
+                    <ScenePreview
+                        id="scene_preview"
+                        {scene}
+                        class="h-full w-full"
+                        map={$sceneStore.map}
+                        rotate={false}
+                        camera="adaptive"
+                        tilt={true}
+                        select="#all"
+                        dimMap={true}
+                        {hub}
+                    />
+                {:else}
+                    <RobotPreview
+                        id="robot_preview"
+                        class="w-full h-full"
+                        robotModel={$componentStore.robotModel}
+                        {compiledRobot}
+                        enabled={!connectorOpen && !sceneOpen && !wheelsOpen}
+                    />
+                {/if}
+            </div>
         </div>
     </div>
 </div>

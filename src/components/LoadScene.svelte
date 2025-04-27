@@ -639,9 +639,9 @@
     size="xl"
     bind:open={modalOpen}
 >
-    <div class="flex flex-col gap-1 h-[80dvh] relative">
+    <div class="flex flex-col gap-1 h-[75dvh] relative overflow-hidden">
         <Menu {menu} class="absolute z-50" />
-        <div class="flex flex-row flex-1 relative">
+        <div class="flex flex-row flex-1 relative overflow-hidden">
             <div class="flex-1 h-full relative">
                 {#if selectedText && $componentStore.unresolved.length == 0}
                     <div class="absolute right-0 top-0 text-white mx-2 my-1">{selectedText}</div>
@@ -738,17 +738,19 @@
                         />
                     </button>
                 {/if}
-                <ScenePreview
-                    id="scene_preview"
-                    unresolved={$componentStore.unresolved}
-                    scene={$sceneStore}
-                    class="h-full w-full"
-                    map={mapFile}
-                    {rotate}
-                    {camera}
-                    {tilt}
-                    {select}
-                />
+                <div class="h-full w-full overflow-hidden">
+                    <ScenePreview
+                        id="scene_preview"
+                        unresolved={$componentStore.unresolved}
+                        scene={$sceneStore}
+                        class="h-full w-full"
+                        map={mapFile}
+                        {rotate}
+                        {camera}
+                        {tilt}
+                        {select}
+                    />
+                </div>
             </div>
         </div>
     </div>

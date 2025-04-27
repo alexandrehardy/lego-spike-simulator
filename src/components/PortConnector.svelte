@@ -92,8 +92,8 @@
     size="xl"
     bind:open={modalOpen}
 >
-    <div class="flex flex-row gap-2 h-[80dvh]">
-        <div class="flex-1 flex flex-row gap-4 mb-4">
+    <div class="flex flex-row gap-2 h-[75dvh] overflow-hidden">
+        <div class="flex-1 flex flex-row gap-4 mb-4 overflow-hidden">
             <HubWidget
                 bind:selectedPort={port}
                 on:A={() => selectPort('A')}
@@ -124,12 +124,14 @@
                 {/key}
             </div>
         </div>
-        <RobotPreview
-            id="robot_preview_port"
-            class="flex-1 w-full h-full"
-            robotModel={$componentStore.robotModel}
-            enabled={modalOpen}
-            select={[selected]}
-        />
+        <div class="flex-1 w-full h-full overflow-hidden">
+            <RobotPreview
+                id="robot_preview_port"
+                class="w-full h-full"
+                robotModel={$componentStore.robotModel}
+                enabled={modalOpen}
+                select={[selected]}
+            />
+        </div>
     </div>
 </Modal>

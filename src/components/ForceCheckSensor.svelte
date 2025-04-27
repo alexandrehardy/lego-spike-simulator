@@ -96,6 +96,7 @@
         if (!gl) {
             return;
         }
+        gl.resizeToFit();
         gl.setModelIdentity();
         if (scene.robot) {
             const obj = scene.robot;
@@ -154,19 +155,6 @@
         }
 
         gl.flush();
-    }
-
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    function resizeGL(data: SceneStore) {
-        if (!gl) {
-            return;
-        }
-        const gl2use = gl;
-        setTimeout(() => gl2use.resizeToFit(), 100);
-    }
-
-    function handleResize() {
-        resizeGL(scene);
     }
 
     function checkEnabled(enabled: boolean) {
@@ -241,7 +229,6 @@
                 gl.perspectiveAngle = 10; // Very narrow field required
                 gl.mindist = 1; //Only measures from 50mm, but we don't want to clip that, so we set 1mm
                 gl.maxdist = range; // Activation is at 8mm, don't go beyond tht.
-                resizeGL(scene);
                 gl.renderDepth(true);
                 loadSceneItems(scene.objects, true);
                 loadRobot(scene.robot, true);
@@ -252,12 +239,10 @@
         } else {
             console.log('No WebGL available');
         }
-        addEventListener('resize', handleResize);
     });
 
     onDestroy(() => {
         canRender = false;
-        removeEventListener('resize', handleResize);
         if (mapTexture && gl) {
             gl.deleteTexture(mapTexture.texture);
             mapTexture = null;
@@ -286,7 +271,6 @@
     }
 
     $: cameraMatrix = getCameraMatrix(forceSensorId, $componentStore.robotModel);
-    $: resizeGL(scene);
     $: checkEnabled(enabled);
     $: loadMapTexture(scene.map);
     $: setMapSize(scene);

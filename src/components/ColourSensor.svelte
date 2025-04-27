@@ -147,6 +147,7 @@
         if (!gl) {
             return;
         }
+        gl.resizeToFit();
         gl.setModelIdentity();
         if (scene.robot) {
             const obj = scene.robot;
@@ -226,19 +227,6 @@
         gl.flush();
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    function resizeGL(data: SceneStore) {
-        if (!gl) {
-            return;
-        }
-        const gl2use = gl;
-        setTimeout(() => gl2use.resizeToFit(), 100);
-    }
-
-    function handleResize() {
-        resizeGL(scene);
-    }
-
     function checkEnabled(enabled: boolean) {
         if (enabled) {
             queueRender();
@@ -316,7 +304,6 @@
                 gl.perspectiveAngle = 45;
                 gl.mindist = 0.01;
                 gl.maxdist = 50.0;
-                resizeGL(scene);
                 loadSceneItems(scene.objects, true);
                 loadRobot(scene.robot, true);
                 loadMapTexture(scene.map);
@@ -326,12 +313,10 @@
         } else {
             console.log('No WebGL available');
         }
-        addEventListener('resize', handleResize);
     });
 
     onDestroy(() => {
         canRender = false;
-        removeEventListener('resize', handleResize);
         if (mapTexture && gl) {
             gl.deleteTexture(mapTexture.texture);
             mapTexture = null;
@@ -360,7 +345,6 @@
     }
 
     $: cameraMatrix = getCameraMatrix(lightSensorId, $componentStore.robotModel);
-    $: resizeGL(scene);
     $: checkEnabled(enabled);
     $: loadMapTexture(scene.map);
     $: setMapSize(scene);
