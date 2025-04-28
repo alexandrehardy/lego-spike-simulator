@@ -21,6 +21,7 @@
     export let modalOpen = false;
     export let blocklyOpen: boolean;
     export let workspace: Blockly.WorkspaceSvg | undefined;
+    export let split = 2;
     let hub = new Hub();
 
     let connectorOpen = false;
@@ -115,7 +116,7 @@
 <LoadScene bind:modalOpen={sceneOpen} />
 <SimulatorSettings bind:modalOpen={settingsOpen} />
 {#if modalOpen}
-    <div class="flex-1 h-full overflow-hidden">
+    <div class="{split == 1 ? 'flex-1' : 'flex-[2]'} h-full overflow-hidden">
         <div class="relative flex-1 h-full flex flex-col overflow-hidden">
             <div
                 class="flex flex-row bg-gray-100 gap-2 p-2 items-center border-b border-b-gray-300"

@@ -49,6 +49,8 @@
     let procedureCreateCallback: procedureFlyout.ProcedureCreateCallback | undefined = undefined;
     let simulatorOpen = false;
     let blocklyOpen = true;
+    let split = 2;
+    let observer = new ResizeObserver(onBlocklyResize);
 
     function createAudioDialog() {
         audioDialogOpen = true;
@@ -106,13 +108,22 @@
         selectAudio('Cat Meow 1');
         const zoomToFit = new ZoomToFitControl(workspace);
         zoomToFit.init();
+        observer.observe(element);
     });
 
     onDestroy(() => {
         if (zoomToFit) {
             zoomToFit.dispose();
         }
+        observer.disconnect();
     });
+
+    function onBlocklyResize() {
+        if (!workspace) {
+            return;
+        }
+        Blockly.svgResize(workspace);
+    }
 
     async function loadLlsp3(f: File) {
         const zip = new JSZip();
@@ -230,6 +241,10 @@
         simulatorOpen = !simulatorOpen;
     }
 
+    function toggleSize() {
+        split = 2 - split + 1;
+    }
+
     function resizeWorkspace(open: boolean) {
         if (!open && !blocklyOpen) {
             blocklyOpen = true;
@@ -271,6 +286,13 @@
             <Button color="light" class="!p-2" on:click={toggleRobot}>
                 <img alt="play" width="32" height="32" src="icons/Brick.svg" />
             </Button>
+            {#if simulatorOpen}
+                <Button color="light" class="!p-2" on:click={toggleSize}>
+                    <div class="w-8 h-8 flex flex-row justify-center items-center text-base">
+                        1:{split == 1 ? 2 : 1}
+                    </div>
+                </Button>
+            {/if}
             {#if !simulatorOpen}
                 <div class="flex-1" />
                 <a href="https://developers.google.com/blockly" target="_blank">
@@ -284,7 +306,7 @@
             <div id="blocklyDiv" />
         </div>
     </div>
-    <SpikeSimulatorWindow bind:modalOpen={simulatorOpen} bind:blocklyOpen {workspace} />
+    <SpikeSimulatorWindow bind:modalOpen={simulatorOpen} bind:blocklyOpen {workspace} {split} />
 </div>
 
 <style scoped>
