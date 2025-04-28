@@ -1963,8 +1963,7 @@ export class WebGL extends WebGLCompiler {
         const displayHeight = Math.floor(this.canvas.clientHeight * pixelRatio);
 
         // Check if the canvas is not the same size.
-        const needResize =
-            this.canvas.width != displayWidth || this.canvas.height != displayHeight;
+        const needResize = this.canvas.width != displayWidth || this.canvas.height != displayHeight;
 
         if (needResize) {
             // Make the canvas the same size
