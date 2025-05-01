@@ -2,6 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
+.blocklyToolboxDiv {
+    z-index: 1;
+}
+
 svg[display='none'] {
     display: none;
 }

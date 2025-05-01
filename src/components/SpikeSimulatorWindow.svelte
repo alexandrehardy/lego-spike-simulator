@@ -1,7 +1,7 @@
 <script lang="ts">
     import * as Blockly from 'blockly/core';
     import { CogOutline } from 'flowbite-svelte-icons';
-    import { Button, CloseButton } from 'flowbite-svelte';
+    import { Button, CloseButton, Tooltip } from 'flowbite-svelte';
     import HubIcon from '$components/HubIcon.svelte';
     import SpikeSimulator from '$components/SpikeSimulator.svelte';
     import SaveSimulation from '$components/SaveSimulation.svelte';
@@ -119,47 +119,60 @@
     <div class="{split == 1 ? 'flex-1' : 'flex-[2]'} h-full overflow-hidden">
         <div class="relative flex-1 h-full flex flex-col overflow-hidden">
             <div
-                class="flex flex-row bg-gray-100 gap-2 p-2 items-center border-b border-b-gray-300"
+                class="flex flex-row bg-gray-100 gap-2 p-2 items-center border-b border-b-gray-300 z-10"
             >
                 <img alt="code" width="32" height="32" src="icons/Brick.svg" />
                 <Button color={robotButtonColour} class="!p-2" on:click={askForRobot}>
                     <img alt="robot" width="32" height="32" src="icons/Robot.svg" />
                 </Button>
+                <Tooltip>Load a robot model for use in the simulator</Tooltip>
                 <Button color="light" class="!p-2" on:click={connectPorts}>
                     <HubIcon />
                 </Button>
+                <Tooltip>Connect ports on the spike hub of the robot</Tooltip>
                 <Button color="light" class="!p-2" on:click={connectWheels}>
                     <img alt="scene" width="32" height="32" src="icons/wheel.svg" />
                 </Button>
+                <Tooltip>Connect wheels to motors of the robot</Tooltip>
                 <Button color="light" class="!p-2" on:click={loadScene}>
                     <img alt="scene" width="32" height="32" src="icons/Scene.svg" />
                 </Button>
+                <Tooltip>Setup or load a scene based on a WRO or FLL mat</Tooltip>
                 <Button color="light" class={libraryClass} on:click={askForLibrary}>
                     <img alt="scene" width="32" height="32" src="icons/Library.svg" />
                 </Button>
+                <Tooltip>Load any missing components from the ldraw library (complete.zip)</Tooltip>
                 <Button color="light" class="!p-2" on:click={saveRobotOrScene}>
                     <img alt="save" width="32" height="32" src="icons/SaveMedium.svg" />
                 </Button>
+                <Tooltip
+                    >Save the robot with ports and wheels, or the scene (without the robot)</Tooltip
+                >
                 <Button color="light" class="!p-2" on:click={openSettings}>
                     <CogOutline class="w-8 h-8" />
                 </Button>
+                <Tooltip>Adjust simulator speed settings</Tooltip>
                 {#if runSimulation}
                     <Button color="light" class="!p-2" on:click={stopRobot}>
                         <img alt="play" width="32" height="32" src="icons/GenericStopIcon.svg" />
                     </Button>
+                    <Tooltip>Stop the simulation</Tooltip>
                 {:else}
                     <Button color="light" class="!p-2" on:click={startRobot}>
                         <img alt="play" width="32" height="32" src="icons/GenericPlayIcon.svg" />
                     </Button>
+                    <Tooltip>Start the simulation, running the code in the code panel</Tooltip>
                 {/if}
                 {#if !blocklyOpen}
                     <Button color="light" class="!p-2" on:click={openBlockly}>
                         <img alt="blockly" width="32" height="32" src="icons/BlocklyIcon.svg" />
                     </Button>
+                    <Tooltip>Open the code panel</Tooltip>
                 {/if}
                 <div class="flex-1" />
                 {#if blocklyOpen}
                     <CloseButton on:click={closeWindow} />
+                    <Tooltip>Close the simulation window</Tooltip>
                 {/if}
             </div>
             {#key blocklyOpen}

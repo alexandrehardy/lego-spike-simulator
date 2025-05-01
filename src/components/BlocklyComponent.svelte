@@ -30,7 +30,7 @@
     import { blocks } from '$lib/blockly/blocks';
     import { toolbox } from '$lib/blockly/toolbox';
     import { type BlocklyState } from '$lib/blockly/state';
-    import { Button, CloseButton } from 'flowbite-svelte';
+    import { Button, CloseButton, Tooltip } from 'flowbite-svelte';
     import { loadScratchSb3 } from '$lib/scratch/sb3';
     import { createManifest } from '$lib/scratch/manifest';
     import { convertToBlockly, convertToScratch } from '$lib/scratch/blockly';
@@ -274,24 +274,31 @@
 />
 <ProcedureDialog bind:modalOpen={procedureDialogOpen} bind:callback={procedureCreateCallback} />
 <div class="relative h-full w-full overflow-hidden flex flex-row">
+    <!-- flex-col-reverse so that the buttons are higher in z order -->
     <div class="relative {blocklyOpen ? 'flex-1' : 'w-0'} h-full flex flex-col overflow-hidden">
-        <div class="flex flex-row bg-gray-100 gap-2 p-2 items-center border-r border-r-gray-300">
+        <div
+            class="flex flex-row bg-gray-100 gap-2 p-2 items-center border-r border-r-gray-300 z-10"
+        >
             <img alt="code" width="32" height="32" src="icons/BlocklyIcon.svg" />
             <Button color="light" class="!p-2" on:click={askForFile}>
                 <img alt="open" width="32" height="32" src="icons/FolderMedium.svg" />
             </Button>
+            <Tooltip>Open a spike program</Tooltip>
             <Button color="light" class="!p-2" on:click={saveState}>
                 <img alt="save" width="32" height="32" src="icons/SaveMedium.svg" />
             </Button>
+            <Tooltip>Save the spike program</Tooltip>
             <Button color="light" class="!p-2" on:click={toggleRobot}>
                 <img alt="play" width="32" height="32" src="icons/Brick.svg" />
             </Button>
+            <Tooltip>Open the robot simulator panel</Tooltip>
             {#if simulatorOpen}
                 <Button color="light" class="!p-2" on:click={toggleSize}>
                     <div class="w-8 h-8 flex flex-row justify-center items-center text-base">
                         1:{split == 1 ? 2 : 1}
                     </div>
                 </Button>
+                <Tooltip>Adjust the code panel width</Tooltip>
             {/if}
             {#if !simulatorOpen}
                 <div class="flex-1" />
@@ -300,6 +307,7 @@
                 </a>
             {:else}
                 <CloseButton on:click={closeWindow} />
+                <Tooltip>Close the code panel without losing code</Tooltip>
             {/if}
         </div>
         <div class="flex-1 w-full overflow-hidden">
