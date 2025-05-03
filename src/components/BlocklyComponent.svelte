@@ -279,17 +279,25 @@
         <div
             class="flex flex-row bg-gray-100 gap-2 p-2 items-center border-r border-r-gray-300 z-10"
         >
-            <img alt="code" width="32" height="32" src="icons/BlocklyIcon.svg" />
+            <div class="w-8 h-8 flex flex-col justify-center items-center">
+                <img alt="code" width="32" height="32" src="icons/BlocklyIcon.svg" />
+            </div>
             <Button color="light" class="!p-2" on:click={askForFile}>
-                <img alt="open" width="32" height="32" src="icons/FolderMedium.svg" />
+                <div class="w-8 h-8 flex flex-col justify-center items-center">
+                    <img alt="open" width="32" height="32" src="icons/FolderMedium.svg" />
+                </div>
             </Button>
             <Tooltip>Open a spike program</Tooltip>
             <Button color="light" class="!p-2" on:click={saveState}>
-                <img alt="save" width="32" height="32" src="icons/SaveMedium.svg" />
+                <div class="w-8 h-8 flex flex-col justify-center items-center">
+                    <img alt="save" width="32" height="32" src="icons/SaveMedium.svg" />
+                </div>
             </Button>
             <Tooltip>Save the spike program</Tooltip>
             <Button color="light" class="!p-2" on:click={toggleRobot}>
-                <img alt="play" width="32" height="32" src="icons/Brick.svg" />
+                <div class="w-8 h-8 flex flex-col justify-center items-center">
+                    <img alt="simulator" width="32" height="32" src="icons/Brick.svg" />
+                </div>
             </Button>
             <Tooltip>Open the robot simulator panel</Tooltip>
             {#if simulatorOpen}
@@ -303,7 +311,9 @@
             {#if !simulatorOpen}
                 <div class="flex-1" />
                 <a href="https://developers.google.com/blockly" target="_blank">
-                    <img class="w-32" src="icons/blockly.svg" alt="blockly" />
+                    <div class="w-8 h-8 flex flex-col justify-center items-center">
+                        <img class="w-32" src="icons/blockly.svg" alt="blockly" />
+                    </div>
                 </a>
             {:else}
                 <CloseButton on:click={closeWindow} />

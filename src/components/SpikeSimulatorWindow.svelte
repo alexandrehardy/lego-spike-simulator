@@ -121,29 +121,43 @@
             <div
                 class="flex flex-row bg-gray-100 gap-2 p-2 items-center border-b border-b-gray-300 z-10"
             >
-                <img alt="code" width="32" height="32" src="icons/Brick.svg" />
+                <div class="w-8 h-8 flex flex-col justify-center items-center">
+                    <img alt="code" width="32" height="32" src="icons/Brick.svg" />
+                </div>
                 <Button color={robotButtonColour} class="!p-2" on:click={askForRobot}>
-                    <img alt="robot" width="32" height="32" src="icons/Robot.svg" />
+                    <div class="w-8 h-8 flex flex-col justify-center items-center">
+                        <img alt="robot" width="32" height="32" src="icons/Robot.svg" />
+                    </div>
                 </Button>
                 <Tooltip>Load a robot model for use in the simulator</Tooltip>
                 <Button color="light" class="!p-2" on:click={connectPorts}>
-                    <HubIcon />
+                    <div class="w-8 h-8 flex flex-col justify-center items-center">
+                        <HubIcon />
+                    </div>
                 </Button>
                 <Tooltip>Connect ports on the spike hub of the robot</Tooltip>
                 <Button color="light" class="!p-2" on:click={connectWheels}>
-                    <img alt="scene" width="32" height="32" src="icons/wheel.svg" />
+                    <div class="w-8 h-8 flex flex-col justify-center items-center">
+                        <img alt="scene" width="32" height="32" src="icons/wheel.svg" />
+                    </div>
                 </Button>
                 <Tooltip>Connect wheels to motors of the robot</Tooltip>
                 <Button color="light" class="!p-2" on:click={loadScene}>
-                    <img alt="scene" width="32" height="32" src="icons/Scene.svg" />
+                    <div class="w-8 h-8 flex flex-col justify-center items-center">
+                        <img alt="scene" width="32" height="32" src="icons/Scene.svg" />
+                    </div>
                 </Button>
                 <Tooltip>Setup or load a scene based on a WRO or FLL mat</Tooltip>
                 <Button color="light" class={libraryClass} on:click={askForLibrary}>
-                    <img alt="scene" width="32" height="32" src="icons/Library.svg" />
+                    <div class="w-8 h-8 flex flex-col justify-center items-center">
+                        <img alt="scene" width="32" height="32" src="icons/Library.svg" />
+                    </div>
                 </Button>
                 <Tooltip>Load any missing components from the ldraw library (complete.zip)</Tooltip>
                 <Button color="light" class="!p-2" on:click={saveRobotOrScene}>
-                    <img alt="save" width="32" height="32" src="icons/SaveMedium.svg" />
+                    <div class="w-8 h-8 flex flex-col justify-center items-center">
+                        <img alt="save" width="32" height="32" src="icons/SaveMedium.svg" />
+                    </div>
                 </Button>
                 <Tooltip
                     >Save the robot with ports and wheels, or the scene (without the robot)</Tooltip
@@ -151,21 +165,42 @@
                 <Button color="light" class="!p-2" on:click={openSettings}>
                     <CogOutline class="w-8 h-8" />
                 </Button>
+                <Button color="light" class="!p-2" on:click={openSettings}>
+                    <div class="w-8 h-8 flex flex-col justify-center items-center">
+                        <img alt="eye" width="32" height="32" src="icons/Eye.svg" />
+                    </div>
+                </Button>
                 <Tooltip>Adjust simulator speed settings</Tooltip>
                 {#if runSimulation}
                     <Button color="light" class="!p-2" on:click={stopRobot}>
-                        <img alt="play" width="32" height="32" src="icons/GenericStopIcon.svg" />
+                        <div class="w-8 h-8 flex flex-col justify-center items-center">
+                            <img
+                                alt="stop"
+                                width="32"
+                                height="32"
+                                src="icons/GenericStopIcon.svg"
+                            />
+                        </div>
                     </Button>
                     <Tooltip>Stop the simulation</Tooltip>
                 {:else}
                     <Button color="light" class="!p-2" on:click={startRobot}>
-                        <img alt="play" width="32" height="32" src="icons/GenericPlayIcon.svg" />
+                        <div class="w-8 h-8 flex flex-col justify-center items-center">
+                            <img
+                                alt="play"
+                                width="32"
+                                height="32"
+                                src="icons/GenericPlayIcon.svg"
+                            />
+                        </div>
                     </Button>
                     <Tooltip>Start the simulation, running the code in the code panel</Tooltip>
                 {/if}
                 {#if !blocklyOpen}
                     <Button color="light" class="!p-2" on:click={openBlockly}>
-                        <img alt="blockly" width="32" height="32" src="icons/BlocklyIcon.svg" />
+                        <div class="w-8 h-8 flex flex-col justify-center items-center">
+                            <img alt="blockly" width="32" height="32" src="icons/BlocklyIcon.svg" />
+                        </div>
                     </Button>
                     <Tooltip>Open the code panel</Tooltip>
                 {/if}
