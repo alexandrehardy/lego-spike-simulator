@@ -2,6 +2,8 @@
     import * as Blockly from 'blockly/core';
     import { CogOutline } from 'flowbite-svelte-icons';
     import { Button, CloseButton, Tooltip } from 'flowbite-svelte';
+    import MenuDropdown from '$components/MenuDropdown.svelte';
+    import { type MenuAction } from '$components/Menu.svelte';
     import HubIcon from '$components/HubIcon.svelte';
     import SpikeSimulator from '$components/SpikeSimulator.svelte';
     import SaveSimulation from '$components/SaveSimulation.svelte';
@@ -32,6 +34,89 @@
     let robotButtonColour: 'light' | 'red' | 'green' = 'light';
     let libraryClass = '!p-2';
     let runSimulation = false;
+    let cameraOpen = false;
+    let camera: 'top' | 'left' | 'right' | 'front' | 'back' | 'adaptive' = 'adaptive';
+    let robotFocus = false;
+    let tilt = true;
+
+    let cameraMenu = buildCameraMenu();
+
+    function buildCameraMenu(): MenuAction[] {
+        return [
+            {
+                name: 'Default view',
+                action: () => {
+                    camera = 'adaptive';
+                    tilt = true;
+                    robotFocus = false;
+                    cameraMenu = buildCameraMenu();
+                },
+                radio: camera == 'adaptive'
+            },
+            {
+                name: 'View left',
+                action: () => {
+                    camera = 'left';
+                    cameraMenu = buildCameraMenu();
+                },
+                radio: camera == 'left'
+            },
+            {
+                name: 'View right',
+                action: () => {
+                    camera = 'right';
+                    cameraMenu = buildCameraMenu();
+                },
+                radio: camera == 'right'
+            },
+            {
+                name: 'View back',
+                action: () => {
+                    camera = 'back';
+                    cameraMenu = buildCameraMenu();
+                },
+                radio: camera == 'back'
+            },
+            {
+                name: 'View front',
+                action: () => {
+                    camera = 'front';
+                    cameraMenu = buildCameraMenu();
+                },
+                radio: camera == 'front'
+            },
+            {
+                name: 'View top',
+                action: () => {
+                    camera = 'top';
+                    tilt = false;
+                    robotFocus = false;
+                    cameraMenu = buildCameraMenu();
+                },
+                radio: camera == 'top'
+            },
+            {
+                name: 'Tilt view',
+                action: () => {
+                    tilt = !tilt;
+                    cameraMenu = buildCameraMenu();
+                },
+                toggle: tilt
+            },
+            {
+                name: 'Robot view',
+                action: () => {
+                    robotFocus = !robotFocus;
+                    if (robotFocus) {
+                        camera = 'back';
+                        tilt = true;
+                    }
+                    cameraMenu = buildCameraMenu();
+                },
+                toggle: robotFocus
+            }
+        ];
+    }
 
     function closeWindow() {
         modalOpen = false;
@@ -165,12 +250,19 @@
                 <Button color="light" class="!p-2" on:click={openSettings}>
                     <CogOutline class="w-8 h-8" />
                 </Button>
-                <Button color="light" class="!p-2" on:click={openSettings}>
+                <Tooltip>Adjust simulator speed settings</Tooltip>
+                <Button id="camera_config_button" color="light" class="!p-2">
                     <div class="w-8 h-8 flex flex-col justify-center items-center">
                         <img alt="eye" width="32" height="32" src="icons/Eye.svg" />
                     </div>
                 </Button>
-                <Tooltip>Adjust simulator speed settings</Tooltip>
+                <MenuDropdown
+                    name="camera"
+                    actions={cameraMenu}
+                    rounded={true}
+                    class="bg-white rounded-2xl"
+                />
+                <Tooltip triggeredBy="#camera_config_button">Set camera for simulator</Tooltip>
                 {#if runSimulation}
                     <Button color="light" class="!p-2" on:click={stopRobot}>
                         <div class="w-8 h-8 flex flex-col justify-center items-center">
@@ -219,6 +311,9 @@
                         bind:hub
                         bind:sceneOpen
                         bind:wheelsOpen
+                        {camera}
+                        {tilt}
+                        {robotFocus}
                     />
                 </div>
             {/key}

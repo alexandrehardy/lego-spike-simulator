@@ -8,6 +8,7 @@
         submenu?: MenuEntry;
         radio?: boolean;
         checkbox?: boolean;
+        toggle?: boolean;
     }
 
     export interface MenuEntry {

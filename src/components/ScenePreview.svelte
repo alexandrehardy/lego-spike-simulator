@@ -8,6 +8,7 @@
     export let enabled = true;
     export let select: string | undefined = undefined;
     export let camera: 'top' | 'left' | 'right' | 'front' | 'back' | 'adaptive';
+    export let robotFocus = false;
     export let tilt = true;
     export let rotate = false;
     export let unresolved: string[] = [];
@@ -52,11 +53,20 @@
         gl.setModelIdentity();
         gl.clearColour(0.0, 0.0, 0.0);
         gl.clear();
-        gl.translate(0, 0, -30);
+        if (robotFocus) {
+            gl.translate(0, 0, -3);
+        } else {
+            gl.translate(0, 0, -30);
+        }
         // Make unit meters
         gl.scale(0.01);
+
         if (tilt) {
-            gl.rotate(45, 1.0, 0.0, 0.0);
+            if (robotFocus) {
+                gl.rotate(30, 1.0, 0.0, 0.0);
+            } else {
+                gl.rotate(45, 1.0, 0.0, 0.0);
+            }
         }
         if (camera == 'adaptive') {
             if (gl.getCanvasAspect() >= 1.0) {
@@ -77,6 +87,17 @@
         }
         if (rotate) {
             gl.rotate(angle, 0.0, 1.0, 0.0);
+        }
+        if (robotFocus) {
+            if (scene.robot) {
+                const obj = scene.robot;
+                if (obj.rotation) {
+                    gl.rotate(-obj.rotation, 0.0, 1.0, 0.0);
+                }
+                if (obj.position) {
+                    gl.translate(-obj.position.x, -obj.position.y, -obj.position.z);
+                }
+            }
         }
         if (mapTexture) {
             if (dimMap) {

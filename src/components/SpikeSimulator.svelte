@@ -41,6 +41,10 @@
     export let sceneOpen = false;
     export let wheelsOpen = false;
     export let hub = new Hub();
+    export let camera: 'top' | 'left' | 'right' | 'front' | 'back' | 'adaptive' = 'adaptive';
+    export let robotFocus = false;
+    export let tilt = true;
+
     let compiler = new WebGLCompiler();
 
     interface SensorView {
@@ -420,8 +424,9 @@
                         class="h-full w-full"
                         map={$sceneStore.map}
                         rotate={false}
-                        camera="adaptive"
-                        tilt={true}
+                        {camera}
+                        {robotFocus}
+                        {tilt}
                         select="#all"
                         dimMap={true}
                         {hub}

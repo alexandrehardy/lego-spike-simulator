@@ -1,15 +1,22 @@
 <script lang="ts">
-    import { Checkbox, Dropdown, DropdownItem, Radio } from 'flowbite-svelte';
+    import { twMerge } from 'tailwind-merge';
+    import { Checkbox, Dropdown, DropdownItem, Radio, Toggle } from 'flowbite-svelte';
     import { type MenuAction } from '$components/Menu.svelte';
     export let actions: MenuAction[];
     export let placement: 'bottom-start' | 'right' = 'bottom-start';
     export let name: string;
+    export let rounded = false;
 </script>
 
-<Dropdown {placement} rounded={false} class="bg-blue-100" offset={0}>
+<Dropdown {placement} {rounded} class={twMerge('bg-blue-100', $$props.class)} offset={0}>
     {#each actions as action}
         {#if action.radio !== undefined}
-            <li class="font-medium py-2 px-4 text-sm hover:bg-gray-100 dark:hover:bg-gray-600">
+            <li
+                class={twMerge(
+                    'font-medium py-2 px-4 text-sm hover:bg-gray-100 dark:hover:bg-gray-600',
+                    $$props.itemClass
+                )}
+            >
                 <Radio
                     {name}
                     value={action.name}
@@ -18,9 +25,25 @@
                 >
             </li>
         {:else if action.checkbox !== undefined}
-            <li class="font-medium py-2 px-4 text-sm hover:bg-gray-100 dark:hover:bg-gray-600">
+            <li
+                class={twMerge(
+                    'font-medium py-2 px-4 text-sm hover:bg-gray-100 dark:hover:bg-gray-600',
+                    $$props.itemClass
+                )}
+            >
                 <Checkbox on:change={() => action.action()} checked={action.checkbox}
                     >{action.name}</Checkbox
+                >
+            </li>
+        {:else if action.toggle !== undefined}
+            <li
+                class={twMerge(
+                    'font-medium py-2 px-4 text-sm hover:bg-gray-100 dark:hover:bg-gray-600',
+                    $$props.itemClass
+                )}
+            >
+                <Toggle size="small" on:change={() => action.action()} checked={action.toggle}
+                    >{action.name}</Toggle
                 >
             </li>
         {:else}
