@@ -432,13 +432,22 @@
                         {hub}
                     />
                 {:else}
-                    <RobotPreview
-                        id="robot_preview"
-                        class="w-full h-full"
-                        robotModel={$componentStore.robotModel}
-                        {compiledRobot}
-                        enabled={!connectorOpen && !sceneOpen && !wheelsOpen}
-                    />
+                    <div class="flex flex-col w-full h-full">
+                        {#if compiledRobot}
+                            <div class="absolute right-0 top-0 text-white px-2 mx-2 my-1">
+                                {Math.ceil(compiledRobot.bbox.max.x - compiledRobot.bbox.min.x)}mm x
+                                {Math.ceil(compiledRobot.bbox.max.z - compiledRobot.bbox.min.z)}mm x
+                                {Math.ceil(compiledRobot.bbox.max.y - compiledRobot.bbox.min.y)}mm
+                            </div>
+                        {/if}
+                        <RobotPreview
+                            id="robot_preview"
+                            class="w-full h-full"
+                            robotModel={$componentStore.robotModel}
+                            {compiledRobot}
+                            enabled={!connectorOpen && !sceneOpen && !wheelsOpen}
+                        />
+                    </div>
                 {/if}
             </div>
         </div>
