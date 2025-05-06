@@ -72,7 +72,7 @@ class TaskProcessor {
     }
 
     processNextTask() {
-        let newTask = true;
+        const newTask = true;
         while (newTask) {
             if (this.task) {
                 this.task.run();

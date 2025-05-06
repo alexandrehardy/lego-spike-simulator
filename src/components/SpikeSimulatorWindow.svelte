@@ -34,6 +34,8 @@
     let robotButtonColour: 'light' | 'red' | 'green' = 'light';
     let libraryClass = '!p-2';
     let runSimulation = false;
+    // cameraOpen is used as a bind variable, but reported as unused by es-lint
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     let cameraOpen = false;
     let camera: 'top' | 'left' | 'right' | 'front' | 'back' | 'adaptive' = 'adaptive';
     let robotFocus = false;
