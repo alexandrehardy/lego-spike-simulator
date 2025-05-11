@@ -392,7 +392,7 @@ export function saveMPD(model: Model) {
                 content.push(`0 !SPIKE_PORT ${subpart.port.hub} ${subpart.port.port}`);
             }
             if (subpart.gear_ratio) {
-                content.push(`0 !SPIKE_GEARING ${subpart.gear_ratio}`);
+                content.push(`0 !SPIKE_GEARING ${-subpart.gear_ratio}`);
             }
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
             const [a, d, g, zero1, b, e, h, zero2, c, f, i, zero3, x, y, z, one] = subpart.matrix;
@@ -486,7 +486,7 @@ export function loadModel(name: string, content: string): Model {
                 entry.port = { hub: lastHub, port: lastPort };
             }
             if (lastGearRatio) {
-                entry.gear_ratio = +lastGearRatio;
+                entry.gear_ratio = -lastGearRatio;
             }
             model.subparts.push(entry);
             resolveSubpart(entry);

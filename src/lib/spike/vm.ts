@@ -623,10 +623,10 @@ export class ActionStatement extends Statement {
             if (attachment && attachment.type == 'motor') {
                 if (moveSpeed < 0) {
                     attachment.motor!.setSpeed(-moveSpeed);
-                    attachment.motor!.reverse = true;
+                    attachment.motor!.reverse = false;
                 } else {
                     attachment.motor!.setSpeed(moveSpeed);
-                    attachment.motor!.reverse = false;
+                    attachment.motor!.reverse = true;
                 }
                 attachment.motor!.on = true;
                 rpm = attachment.motor!.rpm;
@@ -635,10 +635,10 @@ export class ActionStatement extends Statement {
             if (attachment && attachment.type == 'motor') {
                 if (thread.vm.hub.moveSpeed < 0) {
                     attachment.motor!.setSpeed(-moveSpeed);
-                    attachment.motor!.reverse = false;
+                    attachment.motor!.reverse = true;
                 } else {
                     attachment.motor!.setSpeed(moveSpeed);
-                    attachment.motor!.reverse = true;
+                    attachment.motor!.reverse = false;
                 }
                 attachment.motor!.on = true;
                 if (attachment.motor!.rpm > rpm) {
@@ -705,10 +705,10 @@ export class ActionStatement extends Statement {
             if (attachment && attachment.type == 'motor') {
                 if (thread.vm.hub.moveSpeed < 0) {
                     attachment.motor!.setSpeed(-thread.vm.hub.moveSpeed);
-                    attachment.motor!.reverse = true;
+                    attachment.motor!.reverse = false;
                 } else {
                     attachment.motor!.setSpeed(thread.vm.hub.moveSpeed);
-                    attachment.motor!.reverse = false;
+                    attachment.motor!.reverse = true;
                 }
                 attachment.motor!.on = true;
             }
@@ -716,10 +716,10 @@ export class ActionStatement extends Statement {
             if (attachment && attachment.type == 'motor') {
                 if (thread.vm.hub.moveSpeed < 0) {
                     attachment.motor!.setSpeed(-thread.vm.hub.moveSpeed);
-                    attachment.motor!.reverse = false;
+                    attachment.motor!.reverse = true;
                 } else {
                     attachment.motor!.setSpeed(thread.vm.hub.moveSpeed);
-                    attachment.motor!.reverse = true;
+                    attachment.motor!.reverse = false;
                 }
                 attachment.motor!.on = true;
             }
@@ -764,10 +764,10 @@ export class ActionStatement extends Statement {
             if (attachment && attachment.type == 'motor') {
                 if (thread.vm.hub.moveSpeed < 0) {
                     attachment.motor!.setSpeed(-thread.vm.hub.moveSpeed * left);
-                    attachment.motor!.reverse = true;
+                    attachment.motor!.reverse = false;
                 } else {
                     attachment.motor!.setSpeed(thread.vm.hub.moveSpeed * left);
-                    attachment.motor!.reverse = false;
+                    attachment.motor!.reverse = true;
                 }
                 attachment.motor!.on = true;
             }
@@ -775,10 +775,10 @@ export class ActionStatement extends Statement {
             if (attachment && attachment.type == 'motor') {
                 if (thread.vm.hub.moveSpeed < 0) {
                     attachment.motor!.setSpeed(-thread.vm.hub.moveSpeed * right);
-                    attachment.motor!.reverse = false;
+                    attachment.motor!.reverse = true;
                 } else {
                     attachment.motor!.setSpeed(thread.vm.hub.moveSpeed * right);
-                    attachment.motor!.reverse = true;
+                    attachment.motor!.reverse = false;
                 }
                 attachment.motor!.on = true;
             }
@@ -815,10 +815,10 @@ export class ActionStatement extends Statement {
             if (attachment && attachment.type == 'motor') {
                 if (thread.vm.hub.moveSpeed < 0) {
                     attachment.motor!.setSpeed(-thread.vm.hub.moveSpeed * left);
-                    attachment.motor!.reverse = true;
+                    attachment.motor!.reverse = false;
                 } else {
                     attachment.motor!.setSpeed(thread.vm.hub.moveSpeed * left);
-                    attachment.motor!.reverse = false;
+                    attachment.motor!.reverse = true;
                 }
                 attachment.motor!.on = true;
                 rpm = attachment.motor!.rpm;
@@ -827,10 +827,10 @@ export class ActionStatement extends Statement {
             if (attachment && attachment.type == 'motor') {
                 if (thread.vm.hub.moveSpeed < 0) {
                     attachment.motor!.setSpeed(-thread.vm.hub.moveSpeed * right);
-                    attachment.motor!.reverse = false;
+                    attachment.motor!.reverse = true;
                 } else {
                     attachment.motor!.setSpeed(thread.vm.hub.moveSpeed * right);
-                    attachment.motor!.reverse = true;
+                    attachment.motor!.reverse = false;
                 }
                 attachment.motor!.on = true;
                 if (attachment.motor!.rpm > rpm) {
