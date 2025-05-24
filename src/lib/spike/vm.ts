@@ -1559,7 +1559,7 @@ export class FunctionExpression extends Expression {
                 // TODO: Should we calculate roll?
                 return new NumberValue(0);
             } else if (axis == 'yaw') {
-                return new NumberValue(thread.vm.hub.yaw);
+                return new NumberValue(Math.floor(thread.vm.hub.yaw));
             }
             return new NumberValue(0);
         } else if (this.opcode == 'flippersensors_reflectivity') {
