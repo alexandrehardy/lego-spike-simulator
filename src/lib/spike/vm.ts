@@ -1215,12 +1215,13 @@ export class CallStatement extends ActionStatement {
         }
 
         const oldLocals = thread.locals;
-        thread.locals = {};
+        const newLocals: Namespace = {};
         for (let i = 0; i < this.arguments.length; i++) {
             const argName = procedureBlock.arguments[i].name;
             const value = this.arguments[i].evaluate(thread);
-            thread.locals[argName] = value;
+            newLocals[argName] = value;
         }
+        thread.locals = newLocals;
         yield* procedureBlock.statements.execute(thread);
         thread.locals = oldLocals;
     }
@@ -1743,7 +1744,7 @@ export class ControlStatement extends Statement {
                 if (thread.state == 'stopped') {
                     return;
                 }
-                yield thread.vm.sleep(0.05);
+                yield thread.vm.sleep(0.005);
                 condition = this.condition.evaluate(thread);
             }
         } else {
