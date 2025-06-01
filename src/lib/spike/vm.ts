@@ -1834,8 +1834,17 @@ export class Motor {
     rpm: number;
     on: boolean;
     reverse: boolean;
+
     constructor(id: number) {
         this.id = id;
+        this.position = 0;
+        this.motorSpeed = 0.75;
+        this.rpm = 135 * this.motorSpeed;
+        this.on = false;
+        this.reverse = false;
+    }
+
+    reset() {
         this.position = 0;
         this.motorSpeed = 0.75;
         this.rpm = 135 * this.motorSpeed;
@@ -1963,11 +1972,7 @@ export class Port {
             force_changed: false
         };
         if (this.motor) {
-            this.motor.position = 0;
-            this.motor.motorSpeed = 0.75;
-            this.motor.rpm = 135 * this.motor.motorSpeed;
-            this.motor.on = false;
-            this.motor.reverse = false;
+            this.motor.reset();
         }
     }
 
@@ -2015,6 +2020,7 @@ export class Hub {
     movePair1: PortType;
     movePair2: PortType;
     yaw: number;
+    id: string;
 
     reload() {
         this.leftPressed = false;
@@ -2060,6 +2066,7 @@ export class Hub {
     }
 
     constructor() {
+        this.id = '';
         this.leftPressed = false;
         this.rightPressed = false;
         this.screen = '0000000000000000000000000';
@@ -2429,6 +2436,7 @@ function dist(a: Vertex, b: Vertex) {
 }
 
 export class VM {
+    id: string;
     hub: Hub;
     audio: HTMLAudioElement;
     volume: number;
@@ -2445,12 +2453,15 @@ export class VM {
     sleepTasks: SleepTask[];
 
     constructor(
+        id: string,
         hub: Hub,
         globals: Namespace,
         events: Map<string, EventStatement>,
         procedures: Map<string, ProcedureBlock>,
         workspace: Blockly.WorkspaceSvg | undefined
     ) {
+        this.id = id;
+        hub.id = id;
         this.hub = hub;
         this.globals = globals;
         this.events = events;

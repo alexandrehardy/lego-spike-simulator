@@ -25,6 +25,7 @@
         ForceSensor,
         Wheel
     } from '$lib/spike/vm';
+    import { genId } from '$lib/blockly/genid';
     import { copyScene, sceneStore } from '$lib/spike/scene';
     import HubWidget from '$components/HubWidget.svelte';
     import RobotPreview from '$components/RobotPreview.svelte';
@@ -63,6 +64,7 @@
     let sensors: SensorView[] = [];
     let lastFrame: number = 0;
     let scene = copyScene($sceneStore);
+    let id = genId();
 
     const partNames: Record<string, string> = {
         '54696': 'motor',
@@ -217,6 +219,9 @@
         if (!vm) {
             return;
         }
+        if (vm.id != vm.hub.id) {
+            return;
+        }
         const frameTime = timestamp - lastFrame;
         if (vm.state == 'running') {
             if (lastFrame > 0) {
@@ -275,7 +280,7 @@
             }
             hub = hub;
             scene = copyScene($sceneStore);
-            vm = new VM(hub, globals, $codeStore.events, $codeStore.procedures, workspace);
+            vm = new VM(id, hub, globals, $codeStore.events, $codeStore.procedures, workspace);
             vm.start();
             lastFrame = 0;
             requestAnimationFrame(stepVM);
