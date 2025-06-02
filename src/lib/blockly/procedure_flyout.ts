@@ -166,6 +166,27 @@ export function registerProcedureFlyout(
         }
     }
 
+    function restoreArgument(input: Blockly.Input, movingBlock: Blockly.Block) {
+        if (!input.connection) {
+            return;
+        }
+        if (input.connection.isConnected()) {
+            if (!input.connection.targetBlock()?.isShadow()) {
+                return;
+            }
+        }
+        const argBlock = Blockly.serialization.blocks.append(
+            {
+                type: movingBlock.type,
+                fields: { VALUE: movingBlock.getFieldValue('VALUE') }
+            },
+            workspace
+        );
+        if (argBlock.outputConnection && input.connection) {
+            input.connection.connect(argBlock.outputConnection);
+        }
+    }
+
     function onDragArgument(event: Blockly.Events.Abstract) {
         if (event.type == Blockly.Events.BLOCK_MOVE) {
             const moveEvent = event as Blockly.Events.BlockMove;
@@ -195,16 +216,7 @@ export function registerProcedureFlyout(
                     if (!input) {
                         return;
                     }
-                    const argBlock = Blockly.serialization.blocks.append(
-                        {
-                            type: movingBlock.type,
-                            fields: { VALUE: movingBlock.getFieldValue('VALUE') }
-                        },
-                        workspace
-                    );
-                    if (argBlock.outputConnection && input.connection) {
-                        input.connection.connect(argBlock.outputConnection);
-                    }
+                    restoreArgument(input, movingBlock);
                 }
             }
         }
