@@ -156,7 +156,8 @@ export function registerProcedureFlyout(
         if (event.type == Blockly.Events.BLOCK_DELETE) {
             const deleteEvent = event as Blockly.Events.BlockDelete;
             if (deleteEvent.oldJson?.type === 'procedures_definition') {
-                const blockId = deleteEvent.blockId;
+                const prototype = deleteEvent.oldJson?.inputs?.custom_block?.block;
+                const blockId = prototype?.id;
                 if (blockId) {
                     delete procedureMap[blockId];
                     workspace.refreshToolboxSelection();
