@@ -162,6 +162,16 @@ export class Node {
         this.opcode = opcode;
         this.blocklyId = blocklyId;
     }
+
+    deselect(vm: VM) {
+        const workspace = vm.workspace;
+        if (workspace) {
+            const block = workspace.getBlockById(this.blocklyId);
+            if (block) {
+                block.unselect();
+            }
+        }
+    }
 }
 
 export class Statement extends Node {
@@ -1195,6 +1205,11 @@ export class EventStatement extends Statement {
         }
         return false;
     }
+
+    override deselect(vm: VM) {
+        super.deselect(vm);
+        this.statements.deselect(vm);
+    }
 }
 
 export class CallStatement extends ActionStatement {
@@ -1661,6 +1676,13 @@ export class StatementBlock extends Statement {
             yield* statement.execute(thread);
         }
     }
+
+    override deselect(vm: VM) {
+        super.deselect(vm);
+        for (const statement of this.statements) {
+            statement.deselect(vm);
+        }
+    }
 }
 
 export class ProcedureBlock extends Node {
@@ -1673,6 +1695,11 @@ export class ProcedureBlock extends Node {
         this.name = name;
         this.arguments = args;
         this.statements = statements;
+    }
+
+    override deselect(vm: VM) {
+        super.deselect(vm);
+        this.statements.deselect(vm);
     }
 }
 
@@ -1751,6 +1778,14 @@ export class ControlStatement extends Statement {
             yield* super._execute(thread);
         }
     }
+
+    override deselect(vm: VM) {
+        super.deselect(vm);
+        this.statement.deselect(vm);
+        if (this.alternative) {
+            this.alternative.deselect(vm);
+        }
+    }
 }
 
 export class RepeatStatement extends Statement {
@@ -1774,6 +1809,11 @@ export class RepeatStatement extends Statement {
         } else {
             yield* super._execute(thread);
         }
+    }
+
+    override deselect(vm: VM) {
+        super.deselect(vm);
+        this.statements.deselect(vm);
     }
 }
 
@@ -2560,6 +2600,14 @@ export class VM {
         }
         this.audio.pause();
         this.stopNote();
+        for (const entry of Array.from(this.events.entries())) {
+            const event = entry[1];
+            event.deselect(this);
+        }
+        for (const entry of Array.from(this.procedures.entries())) {
+            const procedure = entry[1];
+            procedure.deselect(this);
+        }
     }
 
     pause() {
