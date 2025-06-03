@@ -768,3 +768,42 @@ export function convertToScratch(state: BlocklyState): Sb3Project {
     project.targets.push(program);
     return project;
 }
+
+export function mergeBlockly(state1: BlocklyState, state2: BlocklyState): BlocklyState {
+    const state: BlocklyState = {
+        variables: [],
+        blocks: { languageVersion: 0, blocks: [] },
+        workspaceComments: []
+    };
+    if (state1.variables) {
+        for (const variable of state1.variables) {
+            state.variables!.push(variable);
+        }
+    }
+    if (state2.variables) {
+        for (const variable of state2.variables) {
+            state.variables!.push(variable);
+        }
+    }
+    if (state1.blocks?.blocks) {
+        for (const block of state1.blocks.blocks) {
+            state.blocks!.blocks.push(block);
+        }
+    }
+    if (state2.blocks?.blocks) {
+        for (const block of state2.blocks.blocks) {
+            state.blocks!.blocks.push(block);
+        }
+    }
+    if (state1.workspaceComments) {
+        for (const comment of state1.workspaceComments) {
+            state.workspaceComments!.push(comment);
+        }
+    }
+    if (state2.workspaceComments) {
+        for (const comment of state2.workspaceComments) {
+            state.workspaceComments!.push(comment);
+        }
+    }
+    return state;
+}

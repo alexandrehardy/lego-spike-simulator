@@ -33,7 +33,7 @@
     import { Button, CloseButton, Tooltip } from 'flowbite-svelte';
     import { loadScratchSb3 } from '$lib/scratch/sb3';
     import { createManifest } from '$lib/scratch/manifest';
-    import { convertToBlockly, convertToScratch } from '$lib/scratch/blockly';
+    import { convertToBlockly, convertToScratch, mergeBlockly } from '$lib/scratch/blockly';
     import { cat, clearSelectedAudio, selectAudio, registerAudioDialog } from '$lib/blockly/audio';
     import JSZip from 'jszip';
     import FileSaver from 'file-saver';
@@ -187,8 +187,62 @@
         }
     }
 
+    async function mergeLlsp3(f: File) {
+        const zip = new JSZip();
+        const zipFile = await zip.loadAsync(f);
+        const file = zipFile.file('scratch.sb3');
+        if (!file) {
+            console.log('Missing scratch.sb3');
+            return;
+        }
+        const content = await file.async('arraybuffer');
+        const project = await loadScratchSb3(content);
+        if (project) {
+            const state = convertToBlockly(project);
+            if (state) {
+                for (const target of project.targets) {
+                    for (const sound of target.sounds) {
+                        selectAudio(sound.name);
+                    }
+                }
+                if (workspace) {
+                    const oldState = Blockly.serialization.workspaces.save(workspace);
+                    const newState = mergeBlockly(oldState, state);
+                    Blockly.serialization.workspaces.load(newState, workspace);
+                }
+            } else {
+                // TODO: Display an error
+                console.log('Failed to convert project');
+            }
+        } else {
+            // TODO: Display an error
+            console.log('Failed to load project');
+        }
+    }
+
+    function mergeState() {
+        const element = document.getElementById('load_merge');
+        if (element) {
+            const fileElement = element as HTMLInputElement;
+            if (fileElement.files) {
+                if (fileElement.files.length > 0) {
+                    const first = fileElement.files[0];
+                    numberOfLoads++;
+                    mergeLlsp3(first);
+                }
+            }
+        }
+    }
+
     function askForFile() {
         const element = document.getElementById('load_project');
+        if (element) {
+            element.click();
+        }
+    }
+
+    function askForMerge() {
+        const element = document.getElementById('load_merge');
         if (element) {
             element.click();
         }
@@ -265,6 +319,7 @@
 
 {#key numberOfLoads}
     <input type="file" id="load_project" class="hidden" accept=".llsp3" on:change={loadState} />
+    <input type="file" id="load_merge" class="hidden" accept=".llsp3" on:change={mergeState} />
 {/key}
 <AudioDialog bind:modalOpen={audioDialogOpen} />
 <VariableDialog
@@ -288,6 +343,12 @@
                 </div>
             </Button>
             <Tooltip>Open a spike program</Tooltip>
+            <Button color="light" class="!p-2" on:click={askForMerge}>
+                <div class="w-8 h-8 flex flex-col justify-center items-center">
+                    <img alt="merge" width="32" height="32" src="icons/FolderMerge.svg" />
+                </div>
+            </Button>
+            <Tooltip>Merge in another spike program</Tooltip>
             <Button color="light" class="!p-2" on:click={saveState}>
                 <div class="w-8 h-8 flex flex-col justify-center items-center">
                     <img alt="save" width="32" height="32" src="icons/SaveMedium.svg" />
