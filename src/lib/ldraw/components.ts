@@ -25,6 +25,7 @@ export interface BrickColour {
     edge: Colour;
     surface: Colour;
 }
+
 export interface Vertex {
     x: number;
     y: number;

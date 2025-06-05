@@ -1,6 +1,7 @@
 <script lang="ts">
     import { onDestroy, onMount } from 'svelte';
     import { WebGL, type MapTexture } from '$lib/ldraw/gl';
+    import { brickColour } from '$lib/ldraw/components';
     import { type SceneStore, type SceneObject } from '$lib/spike/scene';
 
     export let id: string;
@@ -20,6 +21,7 @@
     let lastFrame: number = 0;
     let angle = 0;
     let mapTexture: MapTexture | null = null;
+    let brown = brickColour('86');
 
     function doRender(timestamp: number) {
         const frameTime = timestamp - lastFrame;
@@ -100,6 +102,8 @@
             }
         }
         if (mapTexture) {
+            const w = mapTexture.width / 2;
+            const h = mapTexture.height / 2;
             if (dimMap) {
                 gl.setBrightness(0.5);
             } else {
@@ -112,6 +116,36 @@
             gl.pushMatrix();
             gl.drawTexturedQuad(mapTexture);
             gl.popMatrix();
+            const quads: Quad[] = [];
+            quads.push({
+                colour: brown,
+                p1: { x: -w, y: 0.0, z: -h },
+                p2: { x: -w, y: 50.0, z: -h },
+                p3: { x: w, y: 50.0, z: -h },
+                p4: { x: w, y: 0.0, z: -h }
+            });
+            quads.push({
+                colour: brown,
+                p1: { x: -w, y: 0.0, z: h },
+                p2: { x: -w, y: 50.0, z: h },
+                p3: { x: w, y: 50.0, z: h },
+                p4: { x: w, y: 0.0, z: h }
+            });
+            quads.push({
+                colour: brown,
+                p1: { x: w, y: 0.0, z: -h },
+                p2: { x: w, y: 50.0, z: -h },
+                p3: { x: w, y: 50.0, z: h },
+                p4: { x: w, y: 0.0, z: h }
+            });
+            quads.push({
+                colour: brown,
+                p1: { x: -w, y: 0.0, z: -h },
+                p2: { x: -w, y: 50.0, z: -h },
+                p3: { x: -w, y: 50.0, z: h },
+                p4: { x: -w, y: 0.0, z: h }
+            });
+            gl.drawQuads(quads);
             gl.setBrightness(1.0);
         }
         gl.translate(0, 0, 0);

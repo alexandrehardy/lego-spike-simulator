@@ -4,7 +4,12 @@
     import { type SceneStore, type SceneObject } from '$lib/spike/scene';
     import { Hub, type PortType } from '$lib/spike/vm';
     import * as m4 from '$lib/ldraw/m4';
-    import { componentStore, findPartTransform, type Model } from '$lib/ldraw/components';
+    import {
+        brickColour,
+        componentStore,
+        findPartTransform,
+        type Model
+    } from '$lib/ldraw/components';
 
     export let id: string;
     export let scene: SceneStore;
@@ -21,6 +26,7 @@
     let cameraMatrix: m4.Matrix4 = getCameraMatrix(distanceSensorId, $componentStore.robotModel);
     let distance = 0.0;
     let range = 2000.0;
+    let brown = brickColour('86');
 
     function reportSensor(gl: WebGL) {
         const frame = gl.getColourBuffer();
@@ -120,11 +126,43 @@
         gl.clearColour(1.0, 1.0, 1.0);
         gl.clear();
         if (mapTexture) {
+            const w = mapTexture.width / 2;
+            const h = mapTexture.height / 2;
             gl.setBrightness(1.0);
             gl.pushMatrix();
             gl.drawDepthQuad(mapTexture);
             gl.popMatrix();
             gl.setBrightness(1.0);
+            const quads: Quad[] = [];
+            quads.push({
+                colour: brown,
+                p1: { x: -w, y: 0.0, z: -h },
+                p2: { x: -w, y: 50.0, z: -h },
+                p3: { x: w, y: 50.0, z: -h },
+                p4: { x: w, y: 0.0, z: -h }
+            });
+            quads.push({
+                colour: brown,
+                p1: { x: -w, y: 0.0, z: h },
+                p2: { x: -w, y: 50.0, z: h },
+                p3: { x: w, y: 50.0, z: h },
+                p4: { x: w, y: 0.0, z: h }
+            });
+            quads.push({
+                colour: brown,
+                p1: { x: w, y: 0.0, z: -h },
+                p2: { x: w, y: 50.0, z: -h },
+                p3: { x: w, y: 50.0, z: h },
+                p4: { x: w, y: 0.0, z: h }
+            });
+            quads.push({
+                colour: brown,
+                p1: { x: -w, y: 0.0, z: -h },
+                p2: { x: -w, y: 50.0, z: -h },
+                p3: { x: -w, y: 50.0, z: h },
+                p4: { x: -w, y: 0.0, z: h }
+            });
+            gl.drawQuads(quads);
         }
         for (const obj of scene.objects) {
             gl.setBrightness(1.0);
