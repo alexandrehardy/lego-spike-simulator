@@ -20,6 +20,7 @@ import * as m4 from '$lib/ldraw/m4';
 export interface BBox {
     min: Vertex;
     max: Vertex;
+    radius: number; // Radius from center of bbox
 }
 
 export interface CompiledModel {
@@ -122,6 +123,11 @@ export class WebGLCompiler {
         let maxx: number | undefined = undefined;
         let maxy: number | undefined = undefined;
         let maxz: number | undefined = undefined;
+        let cx = 0;
+        let cy = 0;
+        let cz = 0;
+        let radius = 0;
+
         for (const line of model.lines) {
             for (const v of [line.p1, line.p2]) {
                 if (!minx || v.x < minx) {
@@ -188,6 +194,39 @@ export class WebGLCompiler {
                 }
             }
         }
+
+        cx = 0.5 * (minx + maxx);
+        cy = 0.5 * (miny + maxy);
+        cz = 0.5 * (minz + maxz);
+
+        for (const line of model.lines) {
+            for (const v of [line.p1, line.p2]) {
+                const r =
+                    (v.x - cx) * (v.x - cx) + (v.y - c.y) * (v.y - c.y) + (v.z - c.z) * (v.z - c.z);
+                if (r > radius) {
+                    radius = r;
+                }
+            }
+        }
+        for (const t of model.triangles) {
+            for (const v of [t.p1, t.p2, t.p3]) {
+                const r =
+                    (v.x - cx) * (v.x - cx) + (v.y - c.y) * (v.y - c.y) + (v.z - c.z) * (v.z - c.z);
+                if (r > radius) {
+                    radius = r;
+                }
+            }
+        }
+        for (const q of model.quads) {
+            for (const v of [q.p1, q.p2, q.p3, q.p4]) {
+                const r =
+                    (v.x - cx) * (v.x - cx) + (v.y - c.y) * (v.y - c.y) + (v.z - c.z) * (v.z - c.z);
+                if (r > radius) {
+                    radius = r;
+                }
+            }
+        }
+
         for (const submodel of model.subparts) {
             if (submodel.model) {
                 const bbox = this.computeBoundingBox(submodel.model);
@@ -239,7 +278,11 @@ export class WebGLCompiler {
         ) {
             return undefined;
         }
-        return { min: { x: minx, y: miny, z: minz }, max: { x: maxx, y: maxy, z: maxz } };
+        return {
+            min: { x: minx, y: miny, z: minz },
+            max: { x: maxx, y: maxy, z: maxz },
+            radius: radius
+        };
     }
 
     compileQuads(quads: Quad[]) {
