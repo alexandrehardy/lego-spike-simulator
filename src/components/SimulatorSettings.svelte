@@ -1,5 +1,6 @@
 <script lang="ts">
-    import { Modal, Label, Range } from 'flowbite-svelte';
+    import { boundaryStore } from '$lib/spike/scene';
+    import { Modal, Label, Range, Toggle } from 'flowbite-svelte';
     import { getStepSleep, getTimeFactor, setStepSleep, setTimeFactor } from '$lib/spike/vm';
 
     export let modalOpen = false;
@@ -12,6 +13,33 @@
 
     function updateScale() {
         setTimeFactor(timeScale);
+    }
+
+    function toggleBoundary() {
+        boundaryStore.update((old) => {
+            return {
+                ...old,
+                draw: !old.draw
+            };
+        });
+    }
+
+    function toggleScale() {
+        boundaryStore.update((old) => {
+            return {
+                ...old,
+                scale: old.scale > 1.5 ? 1.0 : 2.0
+            };
+        });
+    }
+
+    function toggleCollisions() {
+        boundaryStore.update((old) => {
+            return {
+                ...old,
+                collisions: !old.collisions
+            };
+        });
     }
 </script>
 
@@ -33,5 +61,19 @@
             bind:value={timeScale}
             on:change={() => updateScale()}
         />
+        <div class="h-2" />
+        <Toggle size="small" on:change={() => toggleBoundary()} checked={$boundaryStore.draw}>
+            Draw boundary
+        </Toggle>
+        <Toggle size="small" on:change={() => toggleScale()} checked={$boundaryStore.scale > 1.5}>
+            Double height boundary
+        </Toggle>
+        <Toggle
+            size="small"
+            on:change={() => toggleCollisions()}
+            checked={$boundaryStore.collisions}
+        >
+            Show boundary collisions
+        </Toggle>
     </div>
 </Modal>

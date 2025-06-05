@@ -55,3 +55,16 @@ export function copyScene(scene: SceneStore): SceneStore {
 
 // FLL table is 2434mm x 1145mm
 // Mat is 2360mm x 1140mm
+// Boundary is 50mm high
+
+export interface Boundary {
+    draw: boolean;
+    scale: number;
+    collisions: boolean;
+}
+
+export const boundaryStore = writable<Boundary>({
+    draw: true,
+    scale: 2.0,
+    collisions: true
+});

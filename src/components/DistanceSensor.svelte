@@ -1,4 +1,5 @@
 <script lang="ts">
+    import { boundaryStore } from '$lib/spike/scene';
     import { onDestroy, onMount } from 'svelte';
     import { WebGL, type MapTexture } from '$lib/ldraw/gl';
     import { type SceneStore, type SceneObject } from '$lib/spike/scene';
@@ -134,32 +135,33 @@
             gl.popMatrix();
             gl.setBrightness(1.0);
             const quads: Quad[] = [];
+            const size = 50.0 * $boundaryStore.scale;
             quads.push({
                 colour: brown,
                 p1: { x: -w, y: 0.0, z: -h },
-                p2: { x: -w, y: 50.0, z: -h },
-                p3: { x: w, y: 50.0, z: -h },
+                p2: { x: -w, y: size, z: -h },
+                p3: { x: w, y: size, z: -h },
                 p4: { x: w, y: 0.0, z: -h }
             });
             quads.push({
                 colour: brown,
                 p1: { x: -w, y: 0.0, z: h },
-                p2: { x: -w, y: 50.0, z: h },
-                p3: { x: w, y: 50.0, z: h },
+                p2: { x: -w, y: size, z: h },
+                p3: { x: w, y: size, z: h },
                 p4: { x: w, y: 0.0, z: h }
             });
             quads.push({
                 colour: brown,
                 p1: { x: w, y: 0.0, z: -h },
-                p2: { x: w, y: 50.0, z: -h },
-                p3: { x: w, y: 50.0, z: h },
+                p2: { x: w, y: size, z: -h },
+                p3: { x: w, y: size, z: h },
                 p4: { x: w, y: 0.0, z: h }
             });
             quads.push({
                 colour: brown,
                 p1: { x: -w, y: 0.0, z: -h },
-                p2: { x: -w, y: 50.0, z: -h },
-                p3: { x: -w, y: 50.0, z: h },
+                p2: { x: -w, y: size, z: -h },
+                p3: { x: -w, y: size, z: h },
                 p4: { x: -w, y: 0.0, z: h }
             });
             gl.drawQuads(quads);

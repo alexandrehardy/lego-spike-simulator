@@ -1,4 +1,5 @@
 <script lang="ts">
+    import { boundaryStore } from '$lib/spike/scene';
     import { onDestroy, onMount } from 'svelte';
     import { WebGL, type MapTexture } from '$lib/ldraw/gl';
     import { brickColour } from '$lib/ldraw/components';
@@ -116,36 +117,39 @@
             gl.pushMatrix();
             gl.drawTexturedQuad(mapTexture);
             gl.popMatrix();
-            const quads: Quad[] = [];
-            quads.push({
-                colour: brown,
-                p1: { x: -w, y: 0.0, z: -h },
-                p2: { x: -w, y: 50.0, z: -h },
-                p3: { x: w, y: 50.0, z: -h },
-                p4: { x: w, y: 0.0, z: -h }
-            });
-            quads.push({
-                colour: brown,
-                p1: { x: -w, y: 0.0, z: h },
-                p2: { x: -w, y: 50.0, z: h },
-                p3: { x: w, y: 50.0, z: h },
-                p4: { x: w, y: 0.0, z: h }
-            });
-            quads.push({
-                colour: brown,
-                p1: { x: w, y: 0.0, z: -h },
-                p2: { x: w, y: 50.0, z: -h },
-                p3: { x: w, y: 50.0, z: h },
-                p4: { x: w, y: 0.0, z: h }
-            });
-            quads.push({
-                colour: brown,
-                p1: { x: -w, y: 0.0, z: -h },
-                p2: { x: -w, y: 50.0, z: -h },
-                p3: { x: -w, y: 50.0, z: h },
-                p4: { x: -w, y: 0.0, z: h }
-            });
-            gl.drawQuads(quads);
+            if ($boundaryStore.draw) {
+                const quads: Quad[] = [];
+                const size = 50.0 * $boundaryStore.scale;
+                quads.push({
+                    colour: brown,
+                    p1: { x: -w, y: 0.0, z: -h },
+                    p2: { x: -w, y: size, z: -h },
+                    p3: { x: w, y: size, z: -h },
+                    p4: { x: w, y: 0.0, z: -h }
+                });
+                quads.push({
+                    colour: brown,
+                    p1: { x: -w, y: 0.0, z: h },
+                    p2: { x: -w, y: size, z: h },
+                    p3: { x: w, y: size, z: h },
+                    p4: { x: w, y: 0.0, z: h }
+                });
+                quads.push({
+                    colour: brown,
+                    p1: { x: w, y: 0.0, z: -h },
+                    p2: { x: w, y: size, z: -h },
+                    p3: { x: w, y: size, z: h },
+                    p4: { x: w, y: 0.0, z: h }
+                });
+                quads.push({
+                    colour: brown,
+                    p1: { x: -w, y: 0.0, z: -h },
+                    p2: { x: -w, y: size, z: -h },
+                    p3: { x: -w, y: size, z: h },
+                    p4: { x: -w, y: 0.0, z: h }
+                });
+                gl.drawQuads(quads);
+            }
             gl.setBrightness(1.0);
         }
         gl.translate(0, 0, 0);
