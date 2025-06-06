@@ -20,7 +20,7 @@ import * as m4 from '$lib/ldraw/m4';
 export interface BBox {
     min: Vertex;
     max: Vertex;
-    radius: number; // Radius from center of bbox
+    radius: number; // Radius from center of bbox, squared
 }
 
 export interface CompiledModel {
@@ -195,14 +195,14 @@ export class WebGLCompiler {
             }
         }
 
-        cx = 0.5 * (minx + maxx);
-        cy = 0.5 * (miny + maxy);
-        cz = 0.5 * (minz + maxz);
+        cx = 0.5 * ((minx ?? 0) + (maxx ?? 0));
+        cy = 0.5 * ((miny ?? 0) + (maxy ?? 0));
+        cz = 0.5 * ((minz ?? 0) + (maxz ?? 0));
 
         for (const line of model.lines) {
             for (const v of [line.p1, line.p2]) {
                 const r =
-                    (v.x - cx) * (v.x - cx) + (v.y - c.y) * (v.y - c.y) + (v.z - c.z) * (v.z - c.z);
+                    (v.x - cx) * (v.x - cx) + (v.y - cy) * (v.y - cy) + (v.z - cz) * (v.z - cz);
                 if (r > radius) {
                     radius = r;
                 }
@@ -211,7 +211,7 @@ export class WebGLCompiler {
         for (const t of model.triangles) {
             for (const v of [t.p1, t.p2, t.p3]) {
                 const r =
-                    (v.x - cx) * (v.x - cx) + (v.y - c.y) * (v.y - c.y) + (v.z - c.z) * (v.z - c.z);
+                    (v.x - cx) * (v.x - cx) + (v.y - cy) * (v.y - cy) + (v.z - cz) * (v.z - cz);
                 if (r > radius) {
                     radius = r;
                 }
@@ -220,7 +220,7 @@ export class WebGLCompiler {
         for (const q of model.quads) {
             for (const v of [q.p1, q.p2, q.p3, q.p4]) {
                 const r =
-                    (v.x - cx) * (v.x - cx) + (v.y - c.y) * (v.y - c.y) + (v.z - c.z) * (v.z - c.z);
+                    (v.x - cx) * (v.x - cx) + (v.y - cy) * (v.y - cy) + (v.z - cz) * (v.z - cz);
                 if (r > radius) {
                     radius = r;
                 }
@@ -817,6 +817,20 @@ export class WebGLCompiler {
             if (z > maxz) maxz = z;
         }
 
+        const cx = 0.5 * (minx + maxx);
+        const cy = 0.5 * (miny + maxy);
+        const cz = 0.5 * (minz + maxz);
+        let radius = 0;
+        for (let i = 0; i < this.compileVertices.length; i += 4) {
+            const x = this.compileVertices[i + 0];
+            const y = this.compileVertices[i + 1];
+            const z = this.compileVertices[i + 2];
+            const r = (x - cx) * (x - cx) + (y - cy) * (y - cy) + (z - cz) * (z - cz);
+            if (r > radius) {
+                radius = r;
+            }
+        }
+
         const compiledModel = {
             vertices: new Float32Array(this.compileVertices),
             colours: new Float32Array(this.compileColours),
@@ -824,7 +838,11 @@ export class WebGLCompiler {
             lines: this.compiledLines,
             triangleOffset: triangleOffset / 4,
             triangles: this.compiledTriangles,
-            bbox: { min: { x: minx, y: miny, z: minz }, max: { x: maxx, y: maxy, z: maxz } },
+            bbox: {
+                min: { x: minx, y: miny, z: minz },
+                max: { x: maxx, y: maxy, z: maxz },
+                radius: radius
+            },
             recenter: roffset
         };
         this.compileMatrix = m4.identity();
