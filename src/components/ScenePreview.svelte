@@ -2,8 +2,9 @@
     import { boundaryStore } from '$lib/spike/scene';
     import { onDestroy, onMount } from 'svelte';
     import { WebGL, type MapTexture } from '$lib/ldraw/gl';
-    import { brickColour } from '$lib/ldraw/components';
+    import { brickColour, type Quad } from '$lib/ldraw/components';
     import { type SceneStore, type SceneObject } from '$lib/spike/scene';
+    import * as m4 from '$lib/ldraw/m4';
 
     export let id: string;
     export let scene: SceneStore;
@@ -23,6 +24,7 @@
     let angle = 0;
     let mapTexture: MapTexture | null = null;
     let brown = brickColour('86');
+    let red = brickColour('4');
 
     function doRender(timestamp: number) {
         const frameTime = timestamp - lastFrame;
@@ -52,6 +54,11 @@
         if (!gl) {
             return;
         }
+
+        let leftBarrierHit = false;
+        let rightBarrierHit = false;
+        let bottomBarrierHit = false;
+        let topBarrierHit = false;
         gl.resizeToFit();
         gl.setModelIdentity();
         gl.clearColour(0.0, 0.0, 0.0);
@@ -91,6 +98,62 @@
         if (rotate) {
             gl.rotate(angle, 0.0, 1.0, 0.0);
         }
+        if (scene.robot && scene.robot.compiled && mapTexture) {
+            const w = mapTexture.width / 2;
+            const h = mapTexture.height / 2;
+            const obj = scene.robot;
+            const bbox = scene.robot.compiled.bbox;
+            let sphereIntersect = false;
+            const cx = 0.5 * (bbox.min.x + bbox.max.x);
+            const cy = 0.5 * (bbox.min.y + bbox.max.y);
+            const cz = 0.5 * (bbox.min.z + bbox.max.z);
+            let matrix = m4.identity();
+            if (obj.position) {
+                matrix = m4.translate(matrix, obj.position.x, obj.position.y, obj.position.z);
+            }
+            if (obj.rotation) {
+                //matrix = m4.axisRotate(matrix, [0.0, 1.0, 0.0], obj.rotation);
+            }
+
+            // Check bounding sphere first
+            const c = m4.transformVector(matrix, [cx, cy, cz, 1.0]);
+            if ((c[0] + w) * (c[0] + w) < bbox.radius) {
+                sphereIntersect = true;
+                // check bbox, left
+            } else if ((c[0] - w) * (c[0] - w) < bbox.radius) {
+                sphereIntersect = true;
+                // check bbox, right
+            } else if ((c[2] + h) * (c[2] + h) < bbox.radius) {
+                sphereIntersect = true;
+                // check bbox, bottom
+            } else if ((c[2] - h) * (c[2] - h) < bbox.radius) {
+                sphereIntersect = true;
+                // check bbox, top
+            }
+
+            if (sphereIntersect) {
+                // Do a quick check on min and max
+                const p1 = [bbox.min.x, bbox.min.y, bbox.min.z, 1.0];
+                const p2 = [bbox.max.x, bbox.min.y, bbox.min.z, 1.0];
+                const p3 = [bbox.min.x, bbox.min.y, bbox.max.z, 1.0];
+                const p4 = [bbox.max.x, bbox.min.y, bbox.max.z, 1.0];
+                for (const p of [p1, p2, p3, p4]) {
+                    const pt = m4.transformVector(matrix, p);
+                    if (pt[0] < -w) {
+                        leftBarrierHit = true;
+                    }
+                    if (pt[0] > w) {
+                        rightBarrierHit = true;
+                    }
+                    if (pt[2] < -h) {
+                        bottomBarrierHit = true;
+                    }
+                    if (pt[2] > h) {
+                        topBarrierHit = true;
+                    }
+                }
+            }
+        }
         if (robotFocus) {
             if (scene.robot) {
                 const obj = scene.robot;
@@ -118,31 +181,34 @@
             gl.drawTexturedQuad(mapTexture);
             gl.popMatrix();
             if ($boundaryStore.draw) {
+                if (bottomBarrierHit || topBarrierHit || leftBarrierHit || rightBarrierHit) {
+                    gl.setBrightness(1.0);
+                }
                 const quads: Quad[] = [];
                 const size = 50.0 * $boundaryStore.scale;
                 quads.push({
-                    colour: brown,
+                    colour: bottomBarrierHit ? red : brown,
                     p1: { x: -w, y: 0.0, z: -h },
                     p2: { x: -w, y: size, z: -h },
                     p3: { x: w, y: size, z: -h },
                     p4: { x: w, y: 0.0, z: -h }
                 });
                 quads.push({
-                    colour: brown,
+                    colour: topBarrierHit ? red : brown,
                     p1: { x: -w, y: 0.0, z: h },
                     p2: { x: -w, y: size, z: h },
                     p3: { x: w, y: size, z: h },
                     p4: { x: w, y: 0.0, z: h }
                 });
                 quads.push({
-                    colour: brown,
+                    colour: rightBarrierHit ? red : brown,
                     p1: { x: w, y: 0.0, z: -h },
                     p2: { x: w, y: size, z: -h },
                     p3: { x: w, y: size, z: h },
                     p4: { x: w, y: 0.0, z: h }
                 });
                 quads.push({
-                    colour: brown,
+                    colour: leftBarrierHit ? red : brown,
                     p1: { x: -w, y: 0.0, z: -h },
                     p2: { x: -w, y: size, z: -h },
                     p3: { x: -w, y: size, z: h },
