@@ -180,40 +180,48 @@
             gl.pushMatrix();
             gl.drawTexturedQuad(mapTexture);
             gl.popMatrix();
-            if ($boundaryStore.draw) {
-                if (bottomBarrierHit || topBarrierHit || leftBarrierHit || rightBarrierHit) {
-                    gl.setBrightness(1.0);
-                }
+            if (bottomBarrierHit || topBarrierHit || leftBarrierHit || rightBarrierHit) {
+                gl.setBrightness(1.0);
+            }
+            if ($boundaryStore.draw || $boundaryStore.collisions) {
                 const quads: Quad[] = [];
                 const size = 50.0 * $boundaryStore.scale;
-                quads.push({
-                    colour: bottomBarrierHit ? red : brown,
-                    p1: { x: -w, y: 0.0, z: -h },
-                    p2: { x: -w, y: size, z: -h },
-                    p3: { x: w, y: size, z: -h },
-                    p4: { x: w, y: 0.0, z: -h }
-                });
-                quads.push({
-                    colour: topBarrierHit ? red : brown,
-                    p1: { x: -w, y: 0.0, z: h },
-                    p2: { x: -w, y: size, z: h },
-                    p3: { x: w, y: size, z: h },
-                    p4: { x: w, y: 0.0, z: h }
-                });
-                quads.push({
-                    colour: rightBarrierHit ? red : brown,
-                    p1: { x: w, y: 0.0, z: -h },
-                    p2: { x: w, y: size, z: -h },
-                    p3: { x: w, y: size, z: h },
-                    p4: { x: w, y: 0.0, z: h }
-                });
-                quads.push({
-                    colour: leftBarrierHit ? red : brown,
-                    p1: { x: -w, y: 0.0, z: -h },
-                    p2: { x: -w, y: size, z: -h },
-                    p3: { x: -w, y: size, z: h },
-                    p4: { x: -w, y: 0.0, z: h }
-                });
+                if (bottomBarrierHit || $boundaryStore.draw) {
+                    quads.push({
+                        colour: bottomBarrierHit ? red : brown,
+                        p1: { x: -w, y: 0.0, z: -h },
+                        p2: { x: -w, y: size, z: -h },
+                        p3: { x: w, y: size, z: -h },
+                        p4: { x: w, y: 0.0, z: -h }
+                    });
+                }
+                if (topBarrierHit || $boundaryStore.draw) {
+                    quads.push({
+                        colour: topBarrierHit ? red : brown,
+                        p1: { x: -w, y: 0.0, z: h },
+                        p2: { x: -w, y: size, z: h },
+                        p3: { x: w, y: size, z: h },
+                        p4: { x: w, y: 0.0, z: h }
+                    });
+                }
+                if (rightBarrierHit || $boundaryStore.draw) {
+                    quads.push({
+                        colour: rightBarrierHit ? red : brown,
+                        p1: { x: w, y: 0.0, z: -h },
+                        p2: { x: w, y: size, z: -h },
+                        p3: { x: w, y: size, z: h },
+                        p4: { x: w, y: 0.0, z: h }
+                    });
+                }
+                if (leftBarrierHit || $boundaryStore.draw) {
+                    quads.push({
+                        colour: leftBarrierHit ? red : brown,
+                        p1: { x: -w, y: 0.0, z: -h },
+                        p2: { x: -w, y: size, z: -h },
+                        p3: { x: -w, y: size, z: h },
+                        p4: { x: -w, y: 0.0, z: h }
+                    });
+                }
                 gl.drawQuads(quads);
             }
             gl.setBrightness(1.0);
