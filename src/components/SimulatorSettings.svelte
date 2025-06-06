@@ -6,6 +6,7 @@
     export let modalOpen = false;
     let stepTime = getStepSleep() / 1000.0;
     let timeScale = getTimeFactor();
+    let boundaryScale = $boundaryStore.scale;
 
     function updateSleep() {
         setStepSleep(stepTime * 1000);
@@ -24,11 +25,11 @@
         });
     }
 
-    function toggleScale() {
+    function updateBoundaryScale() {
         boundaryStore.update((old) => {
             return {
                 ...old,
-                scale: old.scale > 1.5 ? 1.0 : 2.0
+                scale: boundaryScale
             };
         });
     }
@@ -62,11 +63,17 @@
             on:change={() => updateScale()}
         />
         <div class="h-2" />
+        <Label>Boundary scale: {$boundaryStore.scale}</Label>
+        <Range
+            min="1.0"
+            max="4.0"
+            step="1.0"
+            bind:value={boundaryScale}
+            on:change={() => updateBoundaryScale()}
+        />
+        <div class="h-2" />
         <Toggle size="small" on:change={() => toggleBoundary()} checked={$boundaryStore.draw}>
             Draw boundary
-        </Toggle>
-        <Toggle size="small" on:change={() => toggleScale()} checked={$boundaryStore.scale > 1.5}>
-            Double height boundary
         </Toggle>
         <Toggle
             size="small"

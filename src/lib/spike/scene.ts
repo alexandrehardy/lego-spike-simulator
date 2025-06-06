@@ -65,6 +65,6 @@ export interface Boundary {
 
 export const boundaryStore = writable<Boundary>({
     draw: true,
-    scale: 2.0,
+    scale: 1.0,
     collisions: true
 });
