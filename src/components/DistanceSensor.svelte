@@ -9,7 +9,8 @@
         brickColour,
         componentStore,
         findPartTransform,
-        type Model
+        type Model,
+        type Quad
     } from '$lib/ldraw/components';
 
     export let id: string;
