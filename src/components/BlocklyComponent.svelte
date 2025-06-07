@@ -51,6 +51,7 @@
     let blocklyOpen = true;
     let split = 2;
     let observer = new ResizeObserver(onBlocklyResize);
+    let print = false;
 
     function createAudioDialog() {
         audioDialogOpen = true;
@@ -109,6 +110,7 @@
         const zoomToFit = new ZoomToFitControl(workspace);
         zoomToFit.init();
         observer.observe(element);
+        workspace.toolbox_.setVisible(!print);
     });
 
     onDestroy(() => {
@@ -295,6 +297,10 @@
         simulatorOpen = !simulatorOpen;
     }
 
+    function togglePrint() {
+        print = !print;
+    }
+
     function toggleSize() {
         split = 2 - split + 1;
     }
@@ -314,7 +320,14 @@
         blocklyOpen = false;
     }
 
+    function setPrintMode(print: boolean) {
+        if (workspace) {
+            workspace.toolbox_.setVisible(!print);
+        }
+    }
+
     $: resizeWorkspace(simulatorOpen);
+    $: setPrintMode(print);
 </script>
 
 {#key numberOfLoads}
@@ -355,6 +368,14 @@
                 </div>
             </Button>
             <Tooltip>Save the spike program</Tooltip>
+            {#if !simulatorOpen}
+                <Button color="light" class="!p-2" on:click={togglePrint}>
+                    <div class="w-8 h-8 flex flex-col justify-center items-center">
+                        <img alt="print" width="32" height="32" src="icons/Print.svg" />
+                    </div>
+                </Button>
+                <Tooltip>Toggle print mode</Tooltip>
+            {/if}
             <Button color="light" class="!p-2" on:click={toggleRobot}>
                 <div class="w-8 h-8 flex flex-col justify-center items-center">
                     <img alt="simulator" width="32" height="32" src="icons/Brick.svg" />
@@ -388,9 +409,50 @@
     <SpikeSimulatorWindow bind:modalOpen={simulatorOpen} bind:blocklyOpen {workspace} {split} />
 </div>
 
-<style scoped>
-    #blocklyDiv {
-        height: 100%;
-        width: 100%;
-    }
-</style>
+{#if !print}
+    <style scoped>
+        #blocklyDiv {
+            height: 100%;
+            width: 100%;
+        }
+    </style>
+{:else}
+    <style>
+        #blocklyDiv {
+            height: 100%;
+            width: 100%;
+        }
+        .blocklyPath {
+            stroke-width: 1px !important;
+            fill: white !important;
+            stroke: black !important;
+        }
+        .blocklyText {
+            fill: #000 !important;
+        }
+        rect.blocklyMainBackground {
+            fill: white !important;
+        }
+        rect.blocklyBlockBackground {
+            stroke: black !important;
+            fill: white !important;
+        }
+        rect.blocklyFieldRect {
+            fill: black !important;
+        }
+        rect.blocklyDropdownRect {
+            stroke: white !important;
+            fill: black !important;
+        }
+        .blocklyDropdownText {
+            fill: #000 !important;
+        }
+        .blocklyNonEditableText > text,
+        .blocklyEditableText > text {
+            fill: black !important;
+        }
+        image {
+            filter: grayscale(1);
+        }
+    </style>
+{/if}
