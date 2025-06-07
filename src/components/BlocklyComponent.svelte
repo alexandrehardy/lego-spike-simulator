@@ -376,12 +376,6 @@
                 </Button>
                 <Tooltip>Toggle print mode</Tooltip>
             {/if}
-            <Button color="light" class="!p-2" on:click={toggleRobot}>
-                <div class="w-8 h-8 flex flex-col justify-center items-center">
-                    <img alt="simulator" width="32" height="32" src="icons/Brick.svg" />
-                </div>
-            </Button>
-            <Tooltip>Open the robot simulator panel</Tooltip>
             {#if simulatorOpen}
                 <Button color="light" class="!p-2" on:click={toggleSize}>
                     <div class="w-8 h-8 flex flex-row justify-center items-center text-base">
@@ -390,6 +384,12 @@
                 </Button>
                 <Tooltip>Adjust the code panel width</Tooltip>
             {/if}
+            <Button color="light" class="!p-2" on:click={toggleRobot}>
+                <div class="w-8 h-8 flex flex-col justify-center items-center">
+                    <img alt="simulator" width="32" height="32" src="icons/Brick.svg" />
+                </div>
+            </Button>
+            <Tooltip>Open the robot simulator panel</Tooltip>
             {#if !simulatorOpen}
                 <div class="flex-1" />
                 <a href="https://developers.google.com/blockly" target="_blank">
