@@ -6,6 +6,13 @@ class SpikeRenderer extends Blockly.zelos.Renderer {
     constructor() {
         super(spikeRendererName);
     }
+
+    protected override makeConstants_(): ConstantProvider {
+        const constants = super.makeConstants_();
+        // Default flow colour is '#fff200'
+        constants.SELECTED_GLOW_COLOUR = '#4eff4e';
+        return constants;
+    }
 }
 
 Blockly.blockRendering.register(spikeRendererName, SpikeRenderer);
