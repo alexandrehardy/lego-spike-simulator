@@ -7,6 +7,18 @@
     <meta name="description" content="Lego Spike Simulator" />
 </svelte:head>
 
-<section class="h-dvh w-dvw overflow-hidden">
+<!-- print display -->
+<svg
+    id="printSvg"
+    xmlns="http://www.w3.org/2000/svg"
+    xmlns:xlink="http://www.w3.org/1999/xlink"
+    version="1.1"
+    class="blocklyWorkspace"
+    width="0px"
+    height="0px"
+>
+</svg>
+
+<section id="blockly-ui" class="h-dvh w-dvw overflow-hidden">
     <BlocklyPage />
 </section>

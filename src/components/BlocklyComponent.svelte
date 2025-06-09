@@ -3,6 +3,7 @@
     import AudioDialog from '$components/AudioDialog.svelte';
     import VariableDialog from '$components/VariableDialog.svelte';
     import ProcedureDialog from '$components/ProcedureDialog.svelte';
+    import PrintDialog from '$components/PrintDialog.svelte';
     import SpikeSimulatorWindow from '$components/SpikeSimulatorWindow.svelte';
     import * as Blockly from 'blockly/core';
     // Import the list of blocks so it gets loaded into blockly
@@ -31,6 +32,7 @@
     import { toolbox } from '$lib/blockly/toolbox';
     import { type BlocklyState } from '$lib/blockly/state';
     import { Button, CloseButton, Tooltip } from 'flowbite-svelte';
+    import { Dropdown, DropdownItem } from 'flowbite-svelte';
     import { loadScratchSb3 } from '$lib/scratch/sb3';
     import { createManifest } from '$lib/scratch/manifest';
     import { convertToBlockly, convertToScratch, mergeBlockly } from '$lib/scratch/blockly';
@@ -52,6 +54,8 @@
     let split = 2;
     let observer = new ResizeObserver(onBlocklyResize);
     let print = false;
+    let printDialogOpen = false;
+    let printColour = false;
 
     function createAudioDialog() {
         audioDialogOpen = true;
@@ -110,7 +114,6 @@
         const zoomToFit = new ZoomToFitControl(workspace);
         zoomToFit.init();
         observer.observe(element);
-        workspace.toolbox_.setVisible(!print);
     });
 
     onDestroy(() => {
@@ -297,7 +300,12 @@
         simulatorOpen = !simulatorOpen;
     }
 
-    function togglePrint() {
+    function togglePrintDialog() {
+        printDialogOpen = !printDialogOpen;
+    }
+
+    function printCallback(colour: boolean) {
+        printColour = colour;
         print = !print;
     }
 
@@ -320,9 +328,41 @@
         blocklyOpen = false;
     }
 
-    function setPrintMode(print: boolean) {
+    function closePrint() {
+        print = false;
+    }
+
+    async function setPrintMode(print: boolean) {
         if (workspace) {
-            workspace.toolbox_.setVisible(!print);
+            if (print) {
+                const metrics = workspace.getMetricsManager().getContentMetrics(false);
+                const blocks = document.getElementsByClassName('blocklyBlockCanvas');
+                if (blocks.length > 0) {
+                    document.getElementById('blockly-ui')!.classList.add('hidden');
+                    const printSvg = document.getElementById('printSvg')!;
+                    const clone = blocks[0].cloneNode(true) as Element;
+                    printSvg.appendChild(clone);
+                    printSvg.style.width = `${Math.ceil(metrics.width) + 100}px`;
+                    printSvg.style.height = `${Math.ceil(metrics.height) + 100}px`;
+                    clone.setAttribute(
+                        'transform',
+                        `translate(${-metrics.left} ${-metrics.top}) scale(${workspace.scale} ${workspace.scale})`
+                    );
+                }
+                setTimeout(() => {
+                    window.print();
+                    const element = document.getElementById('print_close_button');
+                    if (element) {
+                        element.click();
+                    }
+                }, 500);
+            } else {
+                const printSvg = document.getElementById('printSvg')!;
+                printSvg.innerHTML = '';
+                document.getElementById('blockly-ui')!.classList.remove('hidden');
+                printSvg.style.width = '0px';
+                printSvg.style.height = '0px';
+            }
         }
     }
 
@@ -341,6 +381,8 @@
     bind:type={variableType}
 />
 <ProcedureDialog bind:modalOpen={procedureDialogOpen} bind:callback={procedureCreateCallback} />
+<PrintDialog bind:modalOpen={printDialogOpen} callback={printCallback} />
+
 <div class="relative h-full w-full overflow-hidden flex flex-row">
     <!-- flex-col-reverse so that the buttons are higher in z order -->
     <div class="relative {blocklyOpen ? 'flex-1' : 'w-0'} h-full flex flex-col overflow-hidden">
@@ -368,13 +410,16 @@
                 </div>
             </Button>
             <Tooltip>Save the spike program</Tooltip>
+            <Button id="print_close_button" color="light" class="hidden" on:click={closePrint}>
+                Close print
+            </Button>
             {#if !simulatorOpen}
-                <Button color="light" class="!p-2" on:click={togglePrint}>
+                <Button color="light" class="!p-2" on:click={togglePrintDialog}>
                     <div class="w-8 h-8 flex flex-col justify-center items-center">
                         <img alt="print" width="32" height="32" src="icons/Print.svg" />
                     </div>
                 </Button>
-                <Tooltip>Toggle print mode</Tooltip>
+                <Tooltip>Print the code</Tooltip>
             {/if}
             {#if simulatorOpen}
                 <Button color="light" class="!p-2" on:click={toggleSize}>
@@ -393,7 +438,7 @@
             {#if !simulatorOpen}
                 <div class="flex-1" />
                 <a href="https://developers.google.com/blockly" target="_blank">
-                    <div class="w-8 h-8 flex flex-col justify-center items-center">
+                    <div class="w-24 h-8 flex flex-col justify-center items-center">
                         <img class="w-32" src="icons/blockly.svg" alt="blockly" />
                     </div>
                 </a>
@@ -409,7 +454,7 @@
     <SpikeSimulatorWindow bind:modalOpen={simulatorOpen} bind:blocklyOpen {workspace} {split} />
 </div>
 
-{#if !print}
+{#if !print || printColour}
     <style scoped>
         #blocklyDiv {
             height: 100%;
@@ -442,13 +487,15 @@
         }
         rect.blocklyDropdownRect {
             stroke: white !important;
-            fill: black !important;
+            fill: white !important;
         }
         .blocklyDropdownText {
-            fill: #000 !important;
+            //stroke: black !important;
+            fill: black !important;
         }
         .blocklyNonEditableText > text,
         .blocklyEditableText > text {
+            //stroke: black !important;
             fill: black !important;
         }
         image {
