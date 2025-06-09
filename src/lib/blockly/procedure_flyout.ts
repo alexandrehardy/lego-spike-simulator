@@ -30,7 +30,11 @@ export function getProcedureById(id: string): BlockProcedure | undefined {
     return procedureMap[id];
 }
 
-export function setupProtototypeBlock(prototype: Blockly.Block, proc: ProcedureDefinition) {
+export function setupProtototypeBlock(
+    prototype: Blockly.Block,
+    proc: ProcedureDefinition,
+    shadows: boolean
+) {
     if (!proc.id) {
         proc.id = prototype.id;
     }
@@ -53,15 +57,17 @@ export function setupProtototypeBlock(prototype: Blockly.Block, proc: ProcedureD
                     fields: { VALUE: proc.parameters[i].name }
                 });
             }
-            const argBlock = Blockly.serialization.blocks.append(
-                {
-                    type: 'argument_reporter_boolean',
-                    fields: { VALUE: proc.parameters[i].name }
-                },
-                prototype.workspace
-            );
-            if (lastInput.connection && argBlock.outputConnection) {
-                lastInput.connection.connect(argBlock.outputConnection);
+            if (shadows) {
+                const argBlock = Blockly.serialization.blocks.append(
+                    {
+                        type: 'argument_reporter_boolean',
+                        fields: { VALUE: proc.parameters[i].name }
+                    },
+                    prototype.workspace
+                );
+                if (lastInput.connection && argBlock.outputConnection) {
+                    lastInput.connection.connect(argBlock.outputConnection);
+                }
             }
         } else {
             if (lastInput.connection) {
@@ -70,15 +76,17 @@ export function setupProtototypeBlock(prototype: Blockly.Block, proc: ProcedureD
                     fields: { VALUE: proc.parameters[i].name }
                 });
             }
-            const argBlock = Blockly.serialization.blocks.append(
-                {
-                    type: 'argument_reporter_string_number',
-                    fields: { VALUE: proc.parameters[i].name }
-                },
-                prototype.workspace
-            );
-            if (lastInput.connection && argBlock.outputConnection) {
-                lastInput.connection.connect(argBlock.outputConnection);
+            if (shadows) {
+                const argBlock = Blockly.serialization.blocks.append(
+                    {
+                        type: 'argument_reporter_string_number',
+                        fields: { VALUE: proc.parameters[i].name }
+                    },
+                    prototype.workspace
+                );
+                if (lastInput.connection && argBlock.outputConnection) {
+                    lastInput.connection.connect(argBlock.outputConnection);
+                }
             }
         }
     }
@@ -114,7 +122,7 @@ function blockButtonClickHandler(button: Blockly.FlyoutButton) {
         if (!prototype) {
             return false;
         }
-        setupProtototypeBlock(prototype, proc);
+        setupProtototypeBlock(prototype, proc, true);
         const newBlockSvg = newBlock as Blockly.BlockSvg;
         newBlockSvg.moveBy(300, 100);
         workspace.refreshToolboxSelection();

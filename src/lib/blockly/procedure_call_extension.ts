@@ -49,7 +49,7 @@ export function registerProcedureCallExtension(blockly: typeof Blockly) {
         Object.assign(thisBlock, {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             loadExtraState: function (this: Blockly.Block, state: any) {
-                setupProtototypeBlock(this, state);
+                setupProtototypeBlock(this, state, false);
             },
             // eslint-disable-next-line @typescript-eslint/no-explicit-any,@typescript-eslint/no-unused-vars
             saveExtraState: function (this: Blockly.Block, doFullSerialization: boolean): any {
