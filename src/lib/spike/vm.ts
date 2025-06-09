@@ -1575,7 +1575,7 @@ export class FunctionExpression extends Expression {
                 // TODO: Should we calculate roll?
                 return new NumberValue(0);
             } else if (axis == 'yaw') {
-                return new NumberValue(Math.floor(thread.vm.hub.yaw));
+                return new NumberValue(Math.floor(thread.vm.hub.yaw + 0.5));
             }
             return new NumberValue(0);
         } else if (this.opcode == 'flippersensors_reflectivity') {
@@ -1771,7 +1771,7 @@ export class ControlStatement extends Statement {
                 if (thread.state == 'stopped') {
                     return;
                 }
-                yield thread.vm.sleep(0.005);
+                yield thread.vm.sleep(0.0005);
                 condition = this.condition.evaluate(thread);
             }
         } else {
