@@ -1985,7 +1985,7 @@ export const blocks = [
                 type: 'input_value',
                 name: 'TEXT',
                 value: 51,
-                check: ['String'],
+                check: ['String', 'Number'],
                 shadow: {
                     type: 'text',
                     fields: {
