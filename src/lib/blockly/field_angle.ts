@@ -203,6 +203,28 @@ export class FieldAngle extends Blockly.FieldNumber {
         }
     }
 
+    convertValue(value: AnyDuringMigration) {
+        if (!value) {
+            return 0;
+        }
+        if (typeof value === 'number') {
+            return value;
+        }
+        if (typeof value === 'string') {
+            const parts = value.split(':');
+            if (parts.length == 2) {
+                return parseInt(parts[1]);
+            } else {
+                return parseInt(value);
+            }
+        }
+        return 0;
+    }
+
+    override setValue(newValue: AnyDuringMigration, fireChangeEvent = true) {
+        super.setValue(this.convertValue(newValue), fireChangeEvent);
+    }
+
     createPrefix(value: number | string | null | undefined) {
         if (!value) {
             value = 0;
@@ -216,7 +238,7 @@ export class FieldAngle extends Blockly.FieldNumber {
     updatePrefix(value: number | string | null | undefined) {
         if (this.mode == Mode.STEERING) {
             if (this.labelElement) {
-                const newElement = this.createPrefix(value);
+                const newElement = this.createPrefix(this.convertValue(value));
                 this.labelElement.replaceWith(newElement);
                 this.labelElement = newElement;
             }
