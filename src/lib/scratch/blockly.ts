@@ -523,6 +523,38 @@ export function convertToScratch(state: BlocklyState): Sb3Project {
         }
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    function encodeShadow(shadowBlock: Sb3Block, shadowId: string): any[] {
+        if (shadowBlock.opcode == 'math_number') {
+            const value = [1, [4, shadowBlock.fields.NUM[0].toString()]];
+            delete linearBlocks[shadowId];
+            return value;
+        } else if (shadowBlock.opcode == 'math_whole_number') {
+            const value = [1, [4, shadowBlock.fields.NUM[0].toString()]];
+            delete linearBlocks[shadowId];
+            return value;
+        } else if (shadowBlock.opcode == 'math_integer') {
+            const value = [1, [7, shadowBlock.fields.NUM[0].toString()]];
+            delete linearBlocks[shadowId];
+            return value;
+        } else if (shadowBlock.opcode == 'math_positive_number') {
+            const value = [1, [5, shadowBlock.fields.NUM[0].toString()]];
+            delete linearBlocks[shadowId];
+            return value;
+        } else if (shadowBlock.opcode == 'text') {
+            const value = [1, [10, shadowBlock.fields.TEXT[0]]];
+            delete linearBlocks[shadowId];
+            return value;
+        } else if (shadowBlock.opcode == 'event_broadcast_menu') {
+            const value = [1, shadowBlock.fields.BROADCAST_OPTION[1]];
+            delete linearBlocks[shadowId];
+            return value;
+        } else {
+            const value = [1, shadowId];
+            return value;
+        }
+    }
+
     function recurseBlock(
         block: BlocklyStateBlock,
         topLevel: boolean,
@@ -550,12 +582,11 @@ export function convertToScratch(state: BlocklyState): Sb3Project {
         if (block.inputs) {
             for (const key of Object.keys(block.inputs)) {
                 const value = block.inputs[key];
-                if (value.block) {
-                    recurseBlock(value.block, false, block, false);
-                    sb3Block.inputs[key] = [1, value.block.id];
-                } else if (value.shadow) {
-                    const shadowId = value.shadow.id!;
-                    const shadowBlock = recurseBlock(
+                let shadowBlock: Sb3Block | undefined = undefined;
+                let shadowId: string | undefined = undefined;
+                if (value.shadow) {
+                    shadowId = value.shadow.id!;
+                    shadowBlock = recurseBlock(
                         {
                             id: shadowId,
                             type: value.shadow.type,
@@ -566,27 +597,16 @@ export function convertToScratch(state: BlocklyState): Sb3Project {
                         block,
                         true
                     );
-                    if (shadowBlock.opcode == 'math_number') {
-                        sb3Block.inputs[key] = [1, [4, shadowBlock.fields.NUM[0].toString()]];
-                        delete linearBlocks[shadowId];
-                    } else if (shadowBlock.opcode == 'math_whole_number') {
-                        sb3Block.inputs[key] = [1, [4, shadowBlock.fields.NUM[0].toString()]];
-                        delete linearBlocks[shadowId];
-                    } else if (shadowBlock.opcode == 'math_integer') {
-                        sb3Block.inputs[key] = [1, [7, shadowBlock.fields.NUM[0].toString()]];
-                        delete linearBlocks[shadowId];
-                    } else if (shadowBlock.opcode == 'math_positive_number') {
-                        sb3Block.inputs[key] = [1, [5, shadowBlock.fields.NUM[0].toString()]];
-                        delete linearBlocks[shadowId];
-                    } else if (shadowBlock.opcode == 'text') {
-                        sb3Block.inputs[key] = [1, [10, shadowBlock.fields.TEXT[0]]];
-                        delete linearBlocks[shadowId];
-                    } else if (shadowBlock.opcode == 'event_broadcast_menu') {
-                        sb3Block.inputs[key] = [1, shadowBlock.fields.BROADCAST_OPTION[1]];
-                        delete linearBlocks[shadowId];
+                }
+                if (value.block) {
+                    recurseBlock(value.block, false, block, false);
+                    if (value.shadow) {
+                        sb3Block.inputs[key] = [3, value.block.id, encodeShadow(shadowBlock!, shadowId!)[1]];
                     } else {
-                        sb3Block.inputs[key] = [1, value.shadow.id];
+                        sb3Block.inputs[key] = [2, value.block.id];
                     }
+                } else if (value.shadow) {
+                    sb3Block.inputs[key] = encodeShadow(shadowBlock!, shadowId!);
                 }
             }
         }
