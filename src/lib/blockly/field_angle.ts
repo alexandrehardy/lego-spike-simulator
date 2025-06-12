@@ -10,6 +10,8 @@
 
 import * as Blockly from 'blockly/core';
 
+type AnyDuringMigration = any;
+
 /**
  * Class for an editable angle field.
  */

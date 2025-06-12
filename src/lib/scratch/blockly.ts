@@ -601,7 +601,11 @@ export function convertToScratch(state: BlocklyState): Sb3Project {
                 if (value.block) {
                     recurseBlock(value.block, false, block, false);
                     if (value.shadow) {
-                        sb3Block.inputs[key] = [3, value.block.id, encodeShadow(shadowBlock!, shadowId!)[1]];
+                        sb3Block.inputs[key] = [
+                            3,
+                            value.block.id,
+                            encodeShadow(shadowBlock!, shadowId!)[1]
+                        ];
                     } else {
                         sb3Block.inputs[key] = [2, value.block.id];
                     }
