@@ -39,6 +39,7 @@
 
     let colourGrid = computeGrid(colours, 4);
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     function computeGrid(a: any[], cols: number) {
         let row = [];
         const rows = [];
