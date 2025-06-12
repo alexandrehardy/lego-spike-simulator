@@ -550,7 +550,7 @@
             color: #575e75;
         }
         .print-renderer.spike-theme .blocklyDropdownText {
-            fill: #fff !important;
+            fill: black !important;
         }
         .print-renderer.spike-theme.blocklyWidgetDiv .goog-menuitem,
         .print-renderer.spike-theme.blocklyDropDownDiv .goog-menuitem {
