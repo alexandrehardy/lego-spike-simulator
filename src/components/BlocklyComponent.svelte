@@ -502,5 +502,72 @@
         image {
             filter: grayscale(1);
         }
+
+        .print-renderer.spike-theme .blocklyText,
+        .print-renderer.spike-theme .blocklyFlyoutLabelText {
+            font:
+                bold 12pt 'Helvetica Neue',
+                'Segoe UI',
+                Helvetica,
+                sans-serif;
+        }
+        .print-renderer.spike-theme .blocklyTextInputBubble textarea {
+            font-weight: normal;
+        }
+        .print-renderer.spike-theme .blocklyText {
+            fill: #fff;
+        }
+        .print-renderer.spike-theme .blocklyNonEditableText > rect:not(.blocklyDropdownRect),
+        .print-renderer.spike-theme .blocklyEditableText > rect:not(.blocklyDropdownRect) {
+            fill: #fff;
+        }
+        .print-renderer.spike-theme .blocklyNonEditableText > text,
+        .print-renderer.spike-theme .blocklyEditableText > text,
+        .print-renderer.spike-theme .blocklyNonEditableText > g > text,
+        .print-renderer.spike-theme .blocklyEditableText > g > text {
+            fill: #575e75;
+        }
+        .print-renderer.spike-theme .blocklyFlyoutLabelText {
+            fill: #575e75;
+        }
+        .print-renderer.spike-theme .blocklyText.blocklyBubbleText {
+            fill: #575e75;
+        }
+        .print-renderer.spike-theme
+            .blocklyDraggable:not(.blocklyDisabled)
+            .blocklyEditableText:not(.editing):hover
+            > rect,
+        .print-renderer.spike-theme
+            .blocklyDraggable:not(.blocklyDisabled)
+            .blocklyEditableText:not(.editing):hover
+            > .blocklyPath {
+            stroke: #fff;
+            stroke-width: 2;
+        }
+        .print-renderer.spike-theme .blocklyHtmlInput {
+            font-family: 'Helvetica Neue', 'Segoe UI', Helvetica, sans-serif;
+            font-weight: bold;
+            color: #575e75;
+        }
+        .print-renderer.spike-theme .blocklyDropdownText {
+            fill: #fff !important;
+        }
+        .print-renderer.spike-theme.blocklyWidgetDiv .goog-menuitem,
+        .print-renderer.spike-theme.blocklyDropDownDiv .goog-menuitem {
+            font-family: 'Helvetica Neue', 'Segoe UI', Helvetica, sans-serif;
+        }
+        .print-renderer.spike-theme.blocklyDropDownDiv .goog-menuitem-content {
+            color: #fff;
+        }
+        .print-renderer.spike-theme .blocklyHighlightedConnectionPath {
+            stroke: #4eff4e;
+        }
+        .print-renderer.spike-theme .blocklyDisabled > .blocklyOutlinePath {
+            fill: url(#blocklyDisabledPattern2909471669365986);
+        }
+        .print-renderer.spike-theme .blocklyInsertionMarker > .blocklyPath {
+            fill-opacity: 0.2;
+            stroke: none;
+        }
     </style>
 {/if}
