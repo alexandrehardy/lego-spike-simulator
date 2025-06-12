@@ -483,7 +483,8 @@
             fill: white !important;
         }
         rect.blocklyFieldRect {
-            fill: black !important;
+            fill: white !important;
+            stroke: white !important;
         }
         rect.blocklyDropdownRect {
             stroke: white !important;

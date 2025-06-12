@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { Button, Input, Modal } from 'flowbite-svelte';
+    import { Button, Modal } from 'flowbite-svelte';
 
     export let modalOpen = false;
     export let callback: (colour: boolean) => void;
