@@ -44,6 +44,9 @@ export function setupProtototypeBlock(
     prototype.setMovable(false);
     let lastInput: Blockly.Input | undefined;
     prototype.appendDummyInput().appendField(new Blockly.FieldLabel(proc.name), 'NAME');
+    if (proc.prototype == undefined) {
+        proc.prototype = proc.parameters;
+    }
     for (let i = 0; i < proc.prototype.length; i++) {
         if (!proc.prototype[i].id) {
             proc.prototype[i].id = Blockly.utils.idGenerator.genUid();
