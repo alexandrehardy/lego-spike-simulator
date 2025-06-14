@@ -9,7 +9,7 @@ export interface ParameterDefinition {
 export interface ProcedureDefinition {
     id?: string;
     name: string;
-    label?: string;
+    prototype: ParameterDefinition[];
     parameters: ParameterDefinition[];
     returnType?: string[];
 }
@@ -44,24 +44,28 @@ export function setupProtototypeBlock(
     prototype.setMovable(false);
     let lastInput: Blockly.Input | undefined;
     prototype.appendDummyInput().appendField(new Blockly.FieldLabel(proc.name), 'NAME');
-    for (let i = 0; i < proc.parameters.length; i++) {
-        if (!proc.parameters[i].id) {
-            proc.parameters[i].id = Blockly.utils.idGenerator.genUid();
+    for (let i = 0; i < proc.prototype.length; i++) {
+        if (!proc.prototype[i].id) {
+            proc.prototype[i].id = Blockly.utils.idGenerator.genUid();
         }
-        lastInput = prototype.appendValueInput(proc.parameters[i].id!);
-        lastInput.setCheck(proc.parameters[i].type);
-        if (proc.parameters[i].type.length > 0 && proc.parameters[i].type[0] == 'Boolean') {
+        if (proc.prototype[i].type.length > 0 && proc.prototype[i].type[0] == 'Label') {
+            prototype
+                .appendDummyInput()
+                .appendField(new Blockly.FieldLabel(proc.prototype[i].name), 'LABEL');
+        } else if (proc.prototype[i].type.length > 0 && proc.prototype[i].type[0] == 'Boolean') {
+            lastInput = prototype.appendValueInput(proc.prototype[i].id!);
+            lastInput.setCheck(proc.prototype[i].type);
             if (lastInput.connection) {
                 lastInput.connection.setShadowState({
                     type: 'argument_reporter_boolean',
-                    fields: { VALUE: proc.parameters[i].name }
+                    fields: { VALUE: proc.prototype[i].name }
                 });
             }
             if (shadows) {
                 const argBlock = Blockly.serialization.blocks.append(
                     {
                         type: 'argument_reporter_boolean',
-                        fields: { VALUE: proc.parameters[i].name }
+                        fields: { VALUE: proc.prototype[i].name }
                     },
                     prototype.workspace
                 );
@@ -70,17 +74,19 @@ export function setupProtototypeBlock(
                 }
             }
         } else {
+            lastInput = prototype.appendValueInput(proc.prototype[i].id!);
+            lastInput.setCheck(proc.prototype[i].type);
             if (lastInput.connection) {
                 lastInput.connection.setShadowState({
                     type: 'argument_reporter_string_number',
-                    fields: { VALUE: proc.parameters[i].name }
+                    fields: { VALUE: proc.prototype[i].name }
                 });
             }
             if (shadows) {
                 const argBlock = Blockly.serialization.blocks.append(
                     {
                         type: 'argument_reporter_string_number',
-                        fields: { VALUE: proc.parameters[i].name }
+                        fields: { VALUE: proc.prototype[i].name }
                     },
                     prototype.workspace
                 );
@@ -89,9 +95,6 @@ export function setupProtototypeBlock(
                 }
             }
         }
-    }
-    if (proc.label) {
-        prototype.appendDummyInput().appendField(new Blockly.FieldLabel(proc.label), 'LABEL');
     }
 }
 

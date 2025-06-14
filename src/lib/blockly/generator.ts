@@ -78,9 +78,6 @@ spikeGenerator.forBlock['procedures_prototype'] = function (block, generator) {
             continue;
         }
         const statementId = generator.statementToCode(block, input.name);
-        console.log(input);
-        console.log('STAT');
-        console.log(statementId);
         const arg = getNode(statementId) as Variable;
         args.push(arg);
     }

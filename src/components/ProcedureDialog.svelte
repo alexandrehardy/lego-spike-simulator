@@ -8,9 +8,7 @@
     export let modalOpen = false;
     export let callback: ProcedureCreateCallback | undefined = undefined;
     let procedureName = '';
-    let parameters: ParameterDefinition[] = [];
-    let labelVisible = false;
-    let label = '';
+    let prototype: ParameterDefinition[] = [];
     let varChoices = [
         'a',
         'b',
@@ -46,7 +44,8 @@
             return;
         }
         if (procedureName.trim().length > 0) {
-            if (callback({ name: procedureName, parameters: parameters, label: label })) {
+            const parameters = prototype.filter((x) => x.type[0] != 'Label');
+            if (callback({ name: procedureName, prototype: prototype, parameters: parameters })) {
                 reset();
             }
         }
@@ -54,9 +53,7 @@
 
     function reset() {
         procedureName = '';
-        labelVisible = false;
-        label = '';
-        parameters = [];
+        prototype = [];
         modalOpen = false;
     }
 
@@ -65,7 +62,7 @@
     }
 
     function addInputNum() {
-        let i = parameters.length;
+        let i = prototype.length;
         let count = 0;
         while (i >= varChoices.length) {
             count++;
@@ -75,12 +72,12 @@
         if (count) {
             name += count.toString();
         }
-        parameters.push({ name: name, type: ['Number', 'String'] });
-        parameters = parameters;
+        prototype.push({ name: name, type: ['Number', 'String'] });
+        prototype = prototype;
     }
 
     function addInputBool() {
-        let i = parameters.length;
+        let i = prototype.length;
         let count = 0;
         while (i >= varChoices.length) {
             count++;
@@ -90,13 +87,13 @@
         if (count) {
             name += count.toString();
         }
-        parameters.push({ name: name, type: ['Boolean'] });
-        parameters = parameters;
+        prototype.push({ name: name, type: ['Boolean'] });
+        prototype = prototype;
     }
 
     function addLabel() {
-        labelVisible = true;
-        label = '';
+        prototype.push({ name: 'label', type: ['Label'] });
+        prototype = prototype;
     }
 
     function setParameterName(parameter: ParameterDefinition, e: Event) {
@@ -121,13 +118,23 @@
             <div class="h-10 flex flex-row items-center">
                 {procedureName}
             </div>
-            {#each parameters as parameter}
+            {#each prototype as parameter}
+                {#if parameter.type && parameter.type[0] == 'Label'}
+                    <Input
+                        size="md"
+                        placeholder="label"
+                        value={parameter.name}
+                        class="flex-1 min-w-20 py-0.5"
+                        on:change={(e) => {
+                            setParameterName(parameter, e);
+                        }}
+                    />
+                {/if}
                 {#if parameter.type && parameter.type[0] == 'Boolean'}
                     <div class="flex flex-row">
                         <div class="bg-red-400 boolean-left w-5 h-10"></div>
                         <div class="bg-red-400 h-10 flex items-center justify-center">
                             <Input
-                                id="label"
                                 size="md"
                                 placeholder={parameter.name}
                                 value={parameter.name}
@@ -139,12 +146,12 @@
                         </div>
                         <div class="bg-red-400 boolean-right w-5 h-10"></div>
                     </div>
-                {:else}
+                {/if}
+                {#if parameter.type && parameter.type[0] == 'Number'}
                     <div
                         class="bg-red-400 rounded-full px-3 min-w-10 h-10 flex items-center justify-center"
                     >
                         <Input
-                            id="label"
                             size="md"
                             placeholder={parameter.name}
                             value={parameter.name}
@@ -156,15 +163,6 @@
                     </div>
                 {/if}
             {/each}
-            {#if labelVisible}
-                <Input
-                    id="label"
-                    size="lg"
-                    placeholder="label"
-                    bind:value={label}
-                    class="flex-1 min-w-20"
-                />
-            {/if}
         </div>
         <Input id="procedure_name" size="lg" placeholder="block name" bind:value={procedureName} />
         <div class="flex flex-row gap-2 justify-around items-center">
