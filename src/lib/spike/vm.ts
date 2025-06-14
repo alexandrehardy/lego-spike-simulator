@@ -1640,6 +1640,15 @@ export class Value extends Expression {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     override evaluate(thread: Thread): TypedValue {
         // TODO: Make it the correct type based on block context
+        if (typeof this.value == 'number') {
+            return new NumberValue(this.value);
+        } else if (typeof this.value == 'boolean') {
+            return new BooleanValue(this.value);
+        } else if (typeof this.value == 'string') {
+            return new StringValue(this.value);
+        } else if (typeof this.value == 'object') {
+            return new ListValue(this.value);
+        }
         return new StringValue(this.value);
     }
 }
