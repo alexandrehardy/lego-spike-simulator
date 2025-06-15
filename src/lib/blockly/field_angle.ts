@@ -10,6 +10,7 @@
 
 import * as Blockly from 'blockly/core';
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnyDuringMigration = any;
 
 /**
