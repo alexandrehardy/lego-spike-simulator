@@ -32,7 +32,6 @@
     import { toolbox } from '$lib/blockly/toolbox';
     import { type BlocklyState } from '$lib/blockly/state';
     import { Button, CloseButton, Tooltip } from 'flowbite-svelte';
-    import { Dropdown, DropdownItem } from 'flowbite-svelte';
     import { loadScratchSb3 } from '$lib/scratch/sb3';
     import { createManifest } from '$lib/scratch/manifest';
     import { convertToBlockly, convertToScratch, mergeBlockly } from '$lib/scratch/blockly';
@@ -56,6 +55,10 @@
     let print = false;
     let printDialogOpen = false;
     let printColour = false;
+
+    function sleep(ms: number): Promise<void> {
+        return new Promise((resolve) => setTimeout(resolve, ms));
+    }
 
     function createAudioDialog() {
         audioDialogOpen = true;
@@ -152,6 +155,10 @@
                 }
                 selectAudio('Cat Meow 1');
                 if (workspace) {
+                    // Clear the workspace to allow procedures to be destroyed
+                    workspace.clear();
+                    // Wait for workspace events to fire and complete
+                    await sleep(100);
                     Blockly.serialization.workspaces.load(state, workspace);
                     try {
                         const manifestFile = zipFile.file('manifest.json');
