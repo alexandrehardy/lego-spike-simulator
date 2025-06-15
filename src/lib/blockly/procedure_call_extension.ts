@@ -19,13 +19,17 @@ export function registerProcedureCallExtension(blockly: typeof Blockly) {
                 const definition = state;
                 let lastInput = this.appendDummyInput();
                 lastInput.appendField(new Blockly.FieldLabel(definition.name), 'NAME');
-                for (let i = 0; i < definition.parameters.length; i++) {
-                    lastInput = thisBlock.appendValueInput(definition.parameters[i].id);
-                    lastInput.setCheck(definition.parameters[i].type);
-                }
-                if (definition.label) {
-                    lastInput = this.appendDummyInput();
-                    lastInput.appendField(new Blockly.FieldLabel(definition.label), 'LABEL');
+                for (let i = 0; i < definition.prototype.length; i++) {
+                    if (definition.prototype[i].type[0] == 'Label') {
+                        lastInput = this.appendDummyInput();
+                        lastInput.appendField(
+                            new Blockly.FieldLabel(definition.prototype[i].name),
+                            'LABEL'
+                        );
+                    } else {
+                        lastInput = thisBlock.appendValueInput(definition.prototype[i].id);
+                        lastInput.setCheck(definition.prototype[i].type);
+                    }
                 }
                 Blockly.Extensions.apply('shadow_input', this, false);
             },

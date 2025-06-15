@@ -380,7 +380,7 @@ export function convertToBlockly(project: Sb3Project): BlocklyState | undefined 
                 const parts = procCode.split(' ');
                 const name = parts.shift();
                 const params = [];
-                let label = '';
+                const proto = [];
                 while (parts.length > 0) {
                     const nextPart = parts.shift();
                     if (nextPart == '%s') {
@@ -388,24 +388,22 @@ export function convertToBlockly(project: Sb3Project): BlocklyState | undefined 
                         const id = argumentIds.shift();
                         const argName = argumentNames.shift();
                         params.push({ id: id, name: argName, type: ['String', 'Number'] });
+                        proto.push({ id: id, name: argName, type: ['String', 'Number'] });
                     } else if (nextPart == '%b') {
                         //const default = argumentDefaults.shift();
                         const id = argumentIds.shift();
                         const argName = argumentNames.shift();
                         params.push({ id: id, name: argName, type: ['Boolean'] });
+                        proto.push({ id: id, name: argName, type: ['Boolean'] });
                     } else {
-                        if (label.length > 0) {
-                            label = label + ' ' + nextPart;
-                        } else {
-                            label = nextPart ?? '';
-                        }
+                        proto.push({ id: '', name: nextPart, type: ['Label'] });
                     }
                 }
                 block.extraState = {
                     id: id,
                     name: name,
-                    label: label.length > 0 ? label : undefined,
-                    parameters: params
+                    parameters: params,
+                    prototype: proto
                 };
             } else if (scratchBlock.opcode == 'procedures_call') {
                 const argumentIds = JSON.parse(scratchBlock.mutation.argumentids);
@@ -413,7 +411,7 @@ export function convertToBlockly(project: Sb3Project): BlocklyState | undefined 
                 const parts = procCode.split(' ');
                 const name = parts.shift();
                 const params = [];
-                let label = '';
+                const proto = [];
                 let count = 0;
                 while (parts.length > 0) {
                     const nextPart = parts.shift();
@@ -422,24 +420,22 @@ export function convertToBlockly(project: Sb3Project): BlocklyState | undefined 
                         const argName = 'p' + count.toString();
                         count++;
                         params.push({ id: id, name: argName, type: ['String', 'Number'] });
+                        proto.push({ id: id, name: argName, type: ['String', 'Number'] });
                     } else if (nextPart == '%b') {
                         const id = argumentIds.shift();
                         const argName = 'p' + count.toString();
                         count++;
                         params.push({ id: id, name: argName, type: ['Boolean'] });
+                        proto.push({ id: id, name: argName, type: ['Boolean'] });
                     } else {
-                        if (label.length > 0) {
-                            label = label + ' ' + nextPart;
-                        } else {
-                            label = nextPart ?? '';
-                        }
+                        proto.push({ id: '', name: nextPart, type: ['Label'] });
                     }
                 }
                 block.extraState = {
                     id: id,
                     name: name,
-                    label: label.length > 0 ? label : undefined,
-                    parameters: params
+                    parameters: params,
+                    prototype: proto
                 };
             }
         }
@@ -623,19 +619,20 @@ export function convertToScratch(state: BlocklyState): Sb3Project {
             const argumentids: string[] = [];
             const argumentdefaults: string[] = [];
             const argumentnames: string[] = [];
-            for (const param of block.extraState.parameters) {
-                if (param.type[0] == 'Boolean') {
+            for (const param of block.extraState.prototype) {
+                if (param.type[0] == 'Label') {
+                    proccodeParts.push(param.name);
+                } else if (param.type[0] == 'Boolean') {
                     proccodeParts.push('%b');
                     argumentdefaults.push('false');
+                    argumentids.push(param.id);
+                    argumentnames.push(param.name);
                 } else {
                     proccodeParts.push('%s');
                     argumentdefaults.push('');
+                    argumentids.push(param.id);
+                    argumentnames.push(param.name);
                 }
-                argumentids.push(param.id);
-                argumentnames.push(param.name);
-            }
-            if (block.extraState.label) {
-                proccodeParts.push(block.extraState.label);
             }
             sb3Block.mutation = {
                 tagName: 'mutation',
@@ -650,15 +647,15 @@ export function convertToScratch(state: BlocklyState): Sb3Project {
             const proccodeParts = [block.extraState.name];
             const argumentids: string[] = [];
             for (const param of block.extraState.parameters) {
-                if (param.type[0] == 'Boolean') {
+                if (param.type[0] == 'Label') {
+                    proccodeParts.push(param.name);
+                } else if (param.type[0] == 'Boolean') {
                     proccodeParts.push('%b');
+                    argumentids.push(param.id);
                 } else {
                     proccodeParts.push('%s');
+                    argumentids.push(param.id);
                 }
-                argumentids.push(param.id);
-            }
-            if (block.extraState.label) {
-                proccodeParts.push(block.extraState.label);
             }
             sb3Block.mutation = {
                 tagName: 'mutation',
