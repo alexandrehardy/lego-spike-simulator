@@ -646,7 +646,7 @@ export function convertToScratch(state: BlocklyState): Sb3Project {
         } else if (block.type == 'procedures_call') {
             const proccodeParts = [block.extraState.name];
             const argumentids: string[] = [];
-            for (const param of block.extraState.parameters) {
+            for (const param of block.extraState.prototype) {
                 if (param.type[0] == 'Label') {
                     proccodeParts.push(param.name);
                 } else if (param.type[0] == 'Boolean') {
