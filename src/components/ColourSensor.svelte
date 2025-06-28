@@ -5,7 +5,7 @@
     import { type SceneStore, type SceneObject } from '$lib/spike/scene';
     import { Hub, type PortType } from '$lib/spike/vm';
     import * as m4 from '$lib/ldraw/m4';
-    import { type Colour, hexColor } from '$lib/ldraw/components';
+    import { hexColor } from '$lib/ldraw/components';
     import { componentStore, findPartTransform, type Model } from '$lib/ldraw/components';
 
     export let id: string;
