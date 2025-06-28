@@ -5,7 +5,7 @@
     import { type SceneStore, type SceneObject } from '$lib/spike/scene';
     import { Hub, type PortType } from '$lib/spike/vm';
     import * as m4 from '$lib/ldraw/m4';
-    import { hexColor } from '$lib/ldraw/components';
+    import { type Colour, hexColor } from '$lib/ldraw/components';
     import { componentStore, findPartTransform, type Model } from '$lib/ldraw/components';
 
     export let id: string;
@@ -22,19 +22,20 @@
     let mapTexture: MapTexture | null = null;
     let cameraMatrix: m4.Matrix4 = getCameraMatrix(lightSensorId, $componentStore.robotModel);
     let lastColour = '#330033';
+    let reflected = 0;
     let override = 'none';
     let overrideOpen = false;
     let colours = [
-        { value: '#901f76', name: 'Magenta', icon: 'colours/Circle0.svg' },
-        { value: '#1e5aa8', name: 'Blue', icon: 'colours/Circle2.svg' },
-        { value: '#68c3e2', name: 'Medium Azure', icon: 'colours/Circle3.svg' },
-        { value: '#00852b', name: 'Green', icon: 'colours/Circle5.svg' },
-        { value: '#fac80a', name: 'Yellow', icon: 'colours/Circle6.svg' },
-        { value: '#b40000', name: 'Red', icon: 'colours/Circle8.svg' },
-        { value: '#f4f4f4', name: 'White', icon: 'colours/Circle9.svg' },
-        { value: '#000000', name: 'Black', icon: 'colours/Circle10.svg' },
-        { value: '#330033', name: 'Background', icon: 'colours/CircleNone.svg' },
-        { value: 'none', name: 'Sensor', icon: 'icons/SensorLight.svg' }
+        { value: '#901f76', name: 'Magenta', icon: 'colours/Circle0.svg', colour: hexColor('#901f76') },
+        { value: '#1e5aa8', name: 'Blue', icon: 'colours/Circle2.svg', colour: hexColor('#1e5aa8') },
+        { value: '#68c3e2', name: 'Medium Azure', icon: 'colours/Circle3.svg', colour: hexColor('#68c3e2') },
+        { value: '#00852b', name: 'Green', icon: 'colours/Circle5.svg', colour: hexColor('#00852b') },
+        { value: '#fac80a', name: 'Yellow', icon: 'colours/Circle6.svg', colour: hexColor('#fac80a') },
+        { value: '#b40000', name: 'Red', icon: 'colours/Circle8.svg', colour: hexColor('#b40000') },
+        { value: '#f4f4f4', name: 'White', icon: 'colours/Circle9.svg', colour: hexColor('#f4f4f4') },
+        { value: '#000000', name: 'Black', icon: 'colours/Circle10.svg', colour: hexColor('#000000') },
+        { value: '#330033', name: 'Background', icon: 'colours/CircleNone.svg', colour: undefined },
+        { value: 'none', name: 'Sensor', icon: 'icons/SensorLight.svg', colour: undefined }
     ];
 
     let colourGrid = computeGrid(colours, 4);
@@ -78,6 +79,11 @@
         const histogram = new Map<string, number>();
         let avg = 0.0;
         let count = 0;
+        // Add bias to colour measurement.
+        // the 4000K light is actually skewed toward red
+        const rbias = 1;
+        const gbias = 1;
+        const bbias = 1;
         for (let i = 0; i < buffer.length; i += 4) {
             const r = buffer[i + 0];
             const g = buffer[i + 1];
@@ -89,12 +95,35 @@
             const ch = (r << 16) + (g << 8) + b;
             const h = '#' + ch.toString(16);
             const c = hexColor(h);
-            const reflect = Math.sqrt(c.r * c.r + c.g * c.g + c.b * c.b);
+            let dist = 1000.0;
+            let nearest = undefined;
+            for (const colourEntry of colours) {
+                const ref = colourEntry.colour;
+                if (ref) {
+                    // The 4000K light has a slight red bias
+                    // try compensate for that.
+                    const rdist = (c.r * rbias - ref.r) * (c.r * rbias - ref.r);
+                    const gdist = (c.g * gbias - ref.g) * (c.g * gbias - ref.g);
+                    const bdist = (c.b * bbias - ref.b) * (c.b * bbias - ref.b);
+                    const cdist = (rdist + gdist + bdist);
+                    if (cdist < dist) {
+                        nearest = colourEntry.value;
+                        dist = cdist;
+                    }
+                }
+            }
+            const reflect = Math.sqrt((c.r * c.r + c.g * c.g + c.b * c.b)/3.0);
             avg += reflect;
             count++;
-            histogram.set(h, (histogram.get(h) ?? 0) + 1);
+            if ((nearest) && (dist < 0.3)) {
+                histogram.set(nearest, (histogram.get(nearest) ?? 0) + 1);
+            } else {
+                // None
+                histogram.set('#330033', (histogram.get('#330033') ?? 0) + 1);
+            }
         }
         avg = avg / count;
+        reflected = avg;
         hub.measureReflected(port, avg);
 
         const histogramArray: HistogramEntry[] = [];
@@ -355,6 +384,10 @@
 
 <div class="flex flex-row gap-1">
     <canvas {id} class={$$props.class}></canvas>
+    <div class="flex flex-col">
+    <div class="w-12 h-10 text-sm" style="background-color: {lastColour};">&nbsp</div>
+    <div class="text-sm"> R:{ Math.floor(reflected * 100) / 100 } </div>
+    </div>
     <Button class="bg-blue-300 w-12 h-12 m-0 p-0">
         {#each colours as colour}
             {#if override == colour.value}
