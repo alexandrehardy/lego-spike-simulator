@@ -44,10 +44,6 @@ export const codeStore = writable<CompiledCode>({
     procedures: new Map<string, ProcedureBlock>()
 });
 
-function sleep(ms: number): Promise<void> {
-    return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
 class VMTask {
     type: string;
     complete: boolean;
@@ -2004,7 +2000,7 @@ export class Port {
     constructor(type: 'none' | 'force' | 'distance' | 'light' | 'motor') {
         this.type = type;
         this.measure = {
-            colour: '#000000',
+            colour: '#330033',
             distance: 10000.0,
             force: 0.0,
             reflected: 0.0,
@@ -2014,7 +2010,7 @@ export class Port {
 
     reset() {
         this.measure = {
-            colour: '#000000',
+            colour: '#330033',
             distance: 10000.0,
             force: 0.0,
             reflected: 0.0,
