@@ -5,7 +5,7 @@
     import { type SceneStore, type SceneObject } from '$lib/spike/scene';
     import { Hub, type PortType } from '$lib/spike/vm';
     import * as m4 from '$lib/ldraw/m4';
-    import { hexColor } from '$lib/ldraw/components';
+    import { type Colour, hexColor } from '$lib/ldraw/components';
     import { componentStore, findPartTransform, type Model } from '$lib/ldraw/components';
 
     export let id: string;
@@ -14,6 +14,13 @@
     export let lightSensorId: number | 'none' = 'none';
     export let port: PortType;
     export let hub: Hub;
+
+    interface ColourEntry {
+        value: string;
+        name: string;
+        icon: string;
+        colour: Colour | undefined;
+    }
 
     let canRender = false;
     let gl: WebGL | undefined;
@@ -25,7 +32,7 @@
     let reflected = 0;
     let override = 'none';
     let overrideOpen = false;
-    let colours = [
+    let colours: ColourEntry[] = [
         {
             value: '#901f76',
             name: 'Magenta',
@@ -95,7 +102,7 @@
     }
 
     function mapColours() {
-        let result = {};
+        let result: Record<string, ColourEntry> = {};
         for (const colourEntry of colours) {
             result[colourEntry.value] = colourEntry;
         }
