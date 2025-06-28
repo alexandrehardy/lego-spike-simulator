@@ -127,8 +127,8 @@
         // Add bias to colour measurement.
         // the 4000K light is actually skewed toward red
         const rbias = 1;
-        const gbias = 1;
-        const bbias = 1;
+        const gbias = 0.85;
+        const bbias = 0.85;
         for (let i = 0; i < buffer.length; i += 4) {
             const r = buffer[i + 0];
             const g = buffer[i + 1];
