@@ -26,17 +26,54 @@
     let override = 'none';
     let overrideOpen = false;
     let colours = [
-        { value: '#901f76', name: 'Magenta', icon: 'colours/Circle0.svg', colour: hexColor('#901f76') },
-        { value: '#1e5aa8', name: 'Blue', icon: 'colours/Circle2.svg', colour: hexColor('#1e5aa8') },
-        { value: '#68c3e2', name: 'Medium Azure', icon: 'colours/Circle3.svg', colour: hexColor('#68c3e2') },
-        { value: '#00852b', name: 'Green', icon: 'colours/Circle5.svg', colour: hexColor('#00852b') },
-        { value: '#fac80a', name: 'Yellow', icon: 'colours/Circle6.svg', colour: hexColor('#fac80a') },
+        {
+            value: '#901f76',
+            name: 'Magenta',
+            icon: 'colours/Circle0.svg',
+            colour: hexColor('#901f76')
+        },
+        {
+            value: '#1e5aa8',
+            name: 'Blue',
+            icon: 'colours/Circle2.svg',
+            colour: hexColor('#1e5aa8')
+        },
+        {
+            value: '#68c3e2',
+            name: 'Medium Azure',
+            icon: 'colours/Circle3.svg',
+            colour: hexColor('#68c3e2')
+        },
+        {
+            value: '#00852b',
+            name: 'Green',
+            icon: 'colours/Circle5.svg',
+            colour: hexColor('#00852b')
+        },
+        {
+            value: '#fac80a',
+            name: 'Yellow',
+            icon: 'colours/Circle6.svg',
+            colour: hexColor('#fac80a')
+        },
         { value: '#b40000', name: 'Red', icon: 'colours/Circle8.svg', colour: hexColor('#b40000') },
-        { value: '#f4f4f4', name: 'White', icon: 'colours/Circle9.svg', colour: hexColor('#f4f4f4') },
-        { value: '#000000', name: 'Black', icon: 'colours/Circle10.svg', colour: hexColor('#000000') },
+        {
+            value: '#f4f4f4',
+            name: 'White',
+            icon: 'colours/Circle9.svg',
+            colour: hexColor('#f4f4f4')
+        },
+        {
+            value: '#000000',
+            name: 'Black',
+            icon: 'colours/Circle10.svg',
+            colour: hexColor('#000000')
+        },
         { value: '#330033', name: 'Background', icon: 'colours/CircleNone.svg', colour: undefined },
         { value: 'none', name: 'Sensor', icon: 'icons/SensorLight.svg', colour: undefined }
     ];
+
+    let colourMap = mapColours();
 
     let colourGrid = computeGrid(colours, 4);
 
@@ -55,6 +92,14 @@
             rows.push(row);
         }
         return rows;
+    }
+
+    function mapColours() {
+        let result = {};
+        for (const colourEntry of colours) {
+            result[colourEntry.value] = colourEntry;
+        }
+        return result;
     }
 
     interface HistogramEntry {
@@ -105,17 +150,17 @@
                     const rdist = (c.r * rbias - ref.r) * (c.r * rbias - ref.r);
                     const gdist = (c.g * gbias - ref.g) * (c.g * gbias - ref.g);
                     const bdist = (c.b * bbias - ref.b) * (c.b * bbias - ref.b);
-                    const cdist = (rdist + gdist + bdist);
+                    const cdist = rdist + gdist + bdist;
                     if (cdist < dist) {
                         nearest = colourEntry.value;
                         dist = cdist;
                     }
                 }
             }
-            const reflect = Math.sqrt((c.r * c.r + c.g * c.g + c.b * c.b)/3.0);
+            const reflect = Math.sqrt((c.r * c.r + c.g * c.g + c.b * c.b) / 3.0);
             avg += reflect;
             count++;
-            if ((nearest) && (dist < 0.3)) {
+            if (nearest && dist < 0.3) {
                 histogram.set(nearest, (histogram.get(nearest) ?? 0) + 1);
             } else {
                 // None
@@ -385,8 +430,12 @@
 <div class="flex flex-row gap-1">
     <canvas {id} class={$$props.class}></canvas>
     <div class="flex flex-col">
-    <div class="w-12 h-10 text-sm" style="background-color: {lastColour};">&nbsp</div>
-    <div class="text-sm"> R:{ Math.floor(reflected * 100) / 100 } </div>
+        <img
+            class="p-1 w-12 h-10 bg-gray-300"
+            src={colourMap[lastColour].icon}
+            alt={colourMap[lastColour].name}
+        />
+        <div class="text-sm">R:{Math.floor(reflected * 100) / 100}</div>
     </div>
     <Button class="bg-blue-300 w-12 h-12 m-0 p-0">
         {#each colours as colour}
