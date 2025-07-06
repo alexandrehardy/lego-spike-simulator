@@ -470,7 +470,7 @@ export function convertToBlockly(project: Sb3Project): BlocklyState | undefined 
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function encodeConst(value: any, variables: BlocklyStateVariable[]) {
+function encodeConst(value: any, variables: BlocklyStateVariable[], variableValue: boolean) {
     if (typeof value === 'number') {
         return [value, null];
     } else if (typeof value === 'string') {
@@ -485,12 +485,16 @@ function encodeConst(value: any, variables: BlocklyStateVariable[]) {
         // broadcast or normal variable
         const variable = variables.find((x) => value?.id === x?.id);
         if (variable) {
-            if (variable.type === 'broadcast') {
-                return [1, [11, variable.name, variable.id]];
-            } else if (variable.type === 'list') {
-                return [1, [13, variable.name, variable.id]];
+            if (variableValue) {
+                if (variable.type === 'broadcast') {
+                    return [1, [11, variable.name, variable.id]];
+                } else if (variable.type === 'list') {
+                    return [1, [13, variable.name, variable.id]];
+                } else {
+                    return [1, [12, variable.name, variable.id]];
+                }
             } else {
-                return [1, [12, variable.name, variable.id]];
+                return [variable.name, variable.id];
             }
         } else {
             console.log(`Variable not found in encoding: ${value?.id}`);
@@ -572,7 +576,11 @@ export function convertToScratch(state: BlocklyState): Sb3Project {
         if (block.fields) {
             for (const key of Object.keys(block.fields)) {
                 const value = block.fields[key];
-                sb3Block.fields[key] = encodeConst(value, state.variables ?? []);
+                if (block.type == 'data_variable') {
+                    sb3Block.fields[key] = encodeConst(value, state.variables ?? [], true);
+                } else {
+                    sb3Block.fields[key] = encodeConst(value, state.variables ?? [], false);
+                }
             }
         }
         if (block.inputs) {
@@ -595,15 +603,29 @@ export function convertToScratch(state: BlocklyState): Sb3Project {
                     );
                 }
                 if (value.block) {
-                    recurseBlock(value.block, false, block, false);
-                    if (value.shadow) {
-                        sb3Block.inputs[key] = [
-                            3,
-                            value.block.id,
-                            encodeShadow(shadowBlock!, shadowId!)[1]
-                        ];
+                    const inputBlock = recurseBlock(value.block, false, block, false);
+                    if (inputBlock.opcode == 'data_variable') {
+                        // Remove, spike doesn't use this
+                        const variableValue = inputBlock.fields.VARIABLE[1];
+                        if (value.shadow) {
+                            sb3Block.inputs[key] = [
+                                3,
+                                variableValue,
+                                encodeShadow(shadowBlock!, shadowId!)[1]
+                            ];
+                        } else {
+                            sb3Block.inputs[key] = [1, variableValue];
+                        }
                     } else {
-                        sb3Block.inputs[key] = [2, value.block.id];
+                        if (value.shadow) {
+                            sb3Block.inputs[key] = [
+                                3,
+                                value.block.id,
+                                encodeShadow(shadowBlock!, shadowId!)[1]
+                            ];
+                        } else {
+                            sb3Block.inputs[key] = [2, value.block.id];
+                        }
                     }
                 } else if (value.shadow) {
                     sb3Block.inputs[key] = encodeShadow(shadowBlock!, shadowId!);
@@ -665,7 +687,9 @@ export function convertToScratch(state: BlocklyState): Sb3Project {
                 warp: 'false'
             };
         }
-        linearBlocks[block.id!] = sb3Block;
+        if (block.type != 'data_variable') {
+            linearBlocks[block.id!] = sb3Block;
+        }
         return sb3Block;
     }
 
