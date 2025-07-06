@@ -139,6 +139,7 @@ export async function loadScratchSb3(sb3: ArrayBuffer): Promise<Sb3Project | und
         scratchParser(content, false, (err, project) => {
             if (err) {
                 console.log(`Error opening file: ${err} ${typeof content}`);
+                console.log(err);
                 resolve(undefined);
             } else {
                 resolve(project);

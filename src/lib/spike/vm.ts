@@ -1218,6 +1218,10 @@ export class CallStatement extends ActionStatement {
 
     override *_execute(thread: Thread): Generator<VMTask> {
         const procedureBlock = thread.vm.procedures.get(this.name)!;
+        if (!procedureBlock) {
+            console.log(`Missing procedure ${this.name}`);
+            return;
+        }
         if (procedureBlock.arguments.length != this.arguments.length) {
             console.log('Argument mismatch');
             console.log(procedureBlock);
