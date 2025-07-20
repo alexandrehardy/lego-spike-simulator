@@ -68,6 +68,7 @@
 
     const partNames: Record<string, string> = {
         '54696': 'motor',
+        '54696p01': 'motor',
         '68488': 'motor',
         '54675': 'motor',
         '37308': 'light',

@@ -16,9 +16,10 @@
 
     export let modalOpen = false;
     export let hub: Hub;
-    const matchCodes = ['54696', '68488', '54675', '37308', '37316', '37312'];
+    const matchCodes = ['54696', '54696p01', '68488', '54675', '37308', '37316', '37312'];
     const partNames: Record<string, string> = {
         '54696': 'Medium motor',
+        '54696p01': 'Medium motor',
         '68488': 'Small motor',
         '54675': 'Large motor',
         '37308': 'Colour sensor',
@@ -55,6 +56,9 @@
                         }
                     }
                     if (match.part == '54696') {
+                        hub.ports[port] = new Port('motor');
+                        hub.ports[port].motor = new Motor(match.id);
+                    } else if (match.part == '54696p01') {
                         hub.ports[port] = new Port('motor');
                         hub.ports[port].motor = new Motor(match.id);
                     } else if (match.part == '68488') {
