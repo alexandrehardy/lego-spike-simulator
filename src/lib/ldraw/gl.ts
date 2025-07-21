@@ -23,7 +23,10 @@ export interface BBox {
     radius: number; // Radius from center of bbox, squared
 }
 
+let nextCompiledId = 0;
+
 export interface CompiledModel {
+    id: number;
     vertices: Float32Array;
     colours: Float32Array;
     lineOffset: number;
@@ -832,6 +835,9 @@ export class WebGLCompiler {
         }
 
         const compiledModel = {
+            id: nextCompiledId,
+            vertexBuffer: null,
+            colourBuffer: null,
             vertices: new Float32Array(this.compileVertices),
             colours: new Float32Array(this.compileColours),
             lineOffset: 0,
@@ -845,6 +851,7 @@ export class WebGLCompiler {
             },
             recenter: roffset
         };
+        nextCompiledId = nextCompiledId + 1;
         this.compileMatrix = m4.identity();
         this.compileColours = [];
         this.compileVertices = [];
@@ -852,7 +859,13 @@ export class WebGLCompiler {
     }
 }
 
+export interface ModelBuffer {
+    vertexBuffer: WebGLBuffer | null;
+    colourBuffer: WebGLBuffer | null;
+}
+
 export class WebGL extends WebGLCompiler {
+    modelBuffers: Map<number, ModelBuffer>;
     gl: WebGLRenderingContext;
     canvas: HTMLCanvasElement;
     pipeline: PipeLine | undefined;
@@ -895,6 +908,7 @@ export class WebGL extends WebGLCompiler {
         this.maxdist = 1000.0;
         this.setupPipeline();
         this.fragmentDerivative = false;
+        this.modelBuffers = new Map<number, ModelBuffer>();
     }
 
     setPerspective(fieldOfViewDegrees: number, aspect: number, near: number, far: number) {
@@ -1635,22 +1649,37 @@ export class WebGL extends WebGLCompiler {
     }
 
     drawCompiled(model: CompiledModel) {
-        if (!this.vertexBuffer) {
-            return;
-        }
-        if (!this.colourBuffer) {
-            return;
-        }
         if (!this.brickPipeline) {
             return;
         }
         if (model.lines + model.triangles == 0) {
             return;
         }
+
+        let buffers = this.modelBuffers.get(model.id);
+        if (!buffers) {
+            const vertexBuffer = this.gl.createBuffer();
+            if (!vertexBuffer) {
+                return;
+            }
+            const colourBuffer = this.gl.createBuffer();
+            if (!colourBuffer) {
+                return;
+            }
+            this.gl.bindBuffer(this.gl.ARRAY_BUFFER, vertexBuffer);
+            this.gl.bufferData(this.gl.ARRAY_BUFFER, model.vertices, this.gl.STATIC_DRAW);
+            this.gl.bindBuffer(this.gl.ARRAY_BUFFER, colourBuffer);
+            this.gl.bufferData(this.gl.ARRAY_BUFFER, model.colours, this.gl.STATIC_DRAW);
+            buffers = {
+                vertexBuffer: vertexBuffer,
+                colourBuffer: colourBuffer
+            };
+            this.modelBuffers.set(model.id, buffers);
+        }
+
         this.gl.useProgram(this.brickPipeline.program);
         this.gl.uniform1f(this.brickPipeline.brightnessUniform, this.brightness);
-        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.vertexBuffer);
-        this.gl.bufferData(this.gl.ARRAY_BUFFER, model.vertices, this.gl.STATIC_DRAW);
+        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, buffers.vertexBuffer);
         this.gl.vertexAttribPointer(
             this.brickPipeline.vertexAttribute,
             4,
@@ -1659,8 +1688,7 @@ export class WebGL extends WebGLCompiler {
             0,
             0
         );
-        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.colourBuffer);
-        this.gl.bufferData(this.gl.ARRAY_BUFFER, model.colours, this.gl.STATIC_DRAW);
+        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, buffers.colourBuffer);
         this.gl.vertexAttribPointer(
             this.brickPipeline.colourAttribute,
             4,
