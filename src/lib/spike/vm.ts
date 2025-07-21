@@ -11,6 +11,7 @@ export const allPorts: PortType[] = ['A', 'B', 'C', 'D', 'E', 'F'];
 export const fontEmbedsSpace = false;
 let stepSleep = 0;
 let timeFactor = 1.0;
+let startDelay = 1.0;
 
 const colours: Record<string, string> = {
     '1': '#901f76', // Bright reddish violet // Magenta
@@ -141,6 +142,20 @@ export function setTimeFactor(factor: number) {
     } else {
         timeFactor = factor;
     }
+}
+
+export function setStartDelay(delay: number) {
+    if (delay < 0.001) {
+        startDelay = 0.0;
+    } else if (delay > 10) {
+        startDelay = 10;
+    } else {
+        startDelay = delay;
+    }
+}
+
+export function getStartDelay() {
+    return startDelay;
 }
 
 export function getStepSleep() {
@@ -2499,6 +2514,7 @@ export class VM {
     first: boolean;
     timerStart: number;
     deltaTime: number;
+    wait: number;
     sleepTasks: SleepTask[];
 
     constructor(
@@ -2528,6 +2544,7 @@ export class VM {
         this.oscillator = oscillator;
         this.deltaTime = 0.0;
         this.sleepTasks = [];
+        this.wait = 0;
 
         for (const entry of Array.from(events.entries())) {
             const key = entry[0];
@@ -2645,6 +2662,7 @@ export class VM {
         if (this.state == 'stopped') {
             this.state = 'running';
             this.first = true;
+            this.wait = startDelay;
             this.runThreads();
         } else if (this.state == 'paused') {
             this.unpause();
@@ -2682,6 +2700,10 @@ export class VM {
     step(seconds: number, scene: SceneStore) {
         if (this.state == 'running') {
             let duration = seconds * timeFactor + this.deltaTime;
+            if (this.wait >= duration) {
+                this.wait -= duration;
+                return;
+            }
             while (duration > 0.0) {
                 const stepTime = this.stepTime();
                 this.processSleep(stepTime);

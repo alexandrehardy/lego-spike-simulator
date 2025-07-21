@@ -1,15 +1,27 @@
 <script lang="ts">
     import { boundaryStore } from '$lib/spike/scene';
     import { Modal, Label, Range, Toggle } from 'flowbite-svelte';
-    import { getStepSleep, getTimeFactor, setStepSleep, setTimeFactor } from '$lib/spike/vm';
+    import {
+        getStartDelay,
+        getStepSleep,
+        getTimeFactor,
+        setStartDelay,
+        setStepSleep,
+        setTimeFactor
+    } from '$lib/spike/vm';
 
     export let modalOpen = false;
     let stepTime = getStepSleep() / 1000.0;
     let timeScale = getTimeFactor();
     let boundaryScale = $boundaryStore.scale;
+    let startDelay = getStartDelay() / 1000.0;
 
     function updateSleep() {
         setStepSleep(stepTime * 1000);
+    }
+
+    function updateStart() {
+        setStartDelay(startDelay * 1000);
     }
 
     function updateScale() {
@@ -53,6 +65,15 @@
     <div class="flex flex-col gap-2 items-start">
         <Label>Time between program steps: {stepTime} seconds</Label>
         <Range min="0" max="10" step="0.1" bind:value={stepTime} on:change={() => updateSleep()} />
+        <div class="h-2" />
+        <Label>Delay before starting: {startDelay} seconds</Label>
+        <Range
+            min="0"
+            max="10"
+            step="0.1"
+            bind:value={startDelay}
+            on:change={() => updateStart()}
+        />
         <div class="h-2" />
         <Label>Time scaling (slower or faster): {timeScale}</Label>
         <Range
