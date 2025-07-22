@@ -33,6 +33,12 @@
     let brown = brickColour('86');
 
     function reportSensor(gl: WebGL) {
+        if (covered) {
+            distance = 0;
+            hub.measureDistance(port, distance);
+            return;
+        }
+
         const frame = gl.getColourBuffer();
         let closest = 10000;
         if (gl.fragmentDerivative) {
@@ -61,11 +67,7 @@
                 }
             }
         }
-        if (covered) {
-            distance = 0;
-        } else {
-            distance = Math.trunc(closest);
-        }
+        distance = Math.trunc(closest);
         hub.measureDistance(port, distance);
     }
 
