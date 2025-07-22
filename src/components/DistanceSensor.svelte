@@ -1,4 +1,5 @@
 <script lang="ts">
+    import { Checkbox } from 'flowbite-svelte';
     import { boundaryStore } from '$lib/spike/scene';
     import { onDestroy, onMount } from 'svelte';
     import { WebGL, type MapTexture } from '$lib/ldraw/gl';
@@ -28,6 +29,7 @@
     let cameraMatrix: m4.Matrix4 = getCameraMatrix(distanceSensorId, $componentStore.robotModel);
     let distance = 0.0;
     let range = 2000.0;
+    let covered = false;
     let brown = brickColour('86');
 
     function reportSensor(gl: WebGL) {
@@ -59,8 +61,12 @@
                 }
             }
         }
-        hub.measureDistance(port, closest);
-        distance = Math.trunc(closest);
+        if (covered) {
+            distance = 0;
+        } else {
+            distance = Math.trunc(closest);
+        }
+        hub.measureDistance(port, distance);
     }
 
     function doRender(timestamp: number) {
@@ -332,5 +338,8 @@
     <div class="border">
         <canvas {id} class={$$props.class}></canvas>
     </div>
-    {distance}mm
+    <div class="flex flex-col gap-1">
+        <div>{distance}mm</div>
+        <div><Checkbox bind:checked={covered}>covered</Checkbox></div>
+    </div>
 </div>
