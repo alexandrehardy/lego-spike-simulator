@@ -286,8 +286,8 @@
                 gl.mindist = 1; //Only measures from 50mm, but we don't want to clip that, so we set 1mm
                 gl.maxdist = range; // fast sensing is 300mm. But can measure up to 2000mm. Go with 2000
                 gl.renderDepth(true);
-                loadSceneItems(scene.objects, true);
-                loadRobot(scene.robot, true);
+                loadSceneItems(scene.objects, false);
+                loadRobot(scene.robot, false);
                 loadMapTexture(scene.map);
             }
             canRender = true;

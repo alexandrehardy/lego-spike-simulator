@@ -39,7 +39,8 @@ function copyObject(obj: SceneObject): SceneObject {
         bricks: obj.bricks,
         position: obj.position ? { ...obj.position } : { x: 0, y: 0, z: 0 },
         rotation: obj.rotation ?? 0,
-        name: obj.name
+        name: obj.name,
+        compiled: obj.compiled,
     };
 }
 

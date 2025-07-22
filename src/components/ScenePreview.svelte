@@ -358,8 +358,8 @@
         if (canvas) {
             gl = WebGL.create(canvas as HTMLCanvasElement);
             if (gl) {
-                loadSceneItems(scene.objects, true, unresolved);
-                loadRobot(scene.robot, true, unresolved);
+                loadSceneItems(scene.objects, false, unresolved);
+                loadRobot(scene.robot, false, unresolved);
                 loadMapTexture(scene.map);
             }
             canRender = true;

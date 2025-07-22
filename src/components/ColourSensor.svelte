@@ -386,8 +386,8 @@
                 gl.perspectiveAngle = 45;
                 gl.mindist = 0.01;
                 gl.maxdist = 50.0;
-                loadSceneItems(scene.objects, true);
-                loadRobot(scene.robot, true);
+                loadSceneItems(scene.objects, false);
+                loadRobot(scene.robot, false);
                 loadMapTexture(scene.map);
             }
             canRender = true;
