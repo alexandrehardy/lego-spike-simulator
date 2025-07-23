@@ -2663,9 +2663,28 @@ export class VM {
             this.state = 'running';
             this.first = true;
             this.wait = startDelay;
+            this.alignWheelsToModel();
             this.runThreads();
         } else if (this.state == 'paused') {
             this.unpause();
+        }
+    }
+
+    alignWheelsToModel() {
+        for (const wheel of this.hub.wheels) {
+            const xm = Math.abs(wheel.direction.x);
+            const zm = Math.abs(wheel.direction.z);
+            // Make sure wheels point the same direction
+            // To ensure gearing works correctly
+            if (xm > zm) {
+                if (wheel.direction.x > 0) {
+                    wheel.direction = {x: -wheel.direction.x, y: -wheel.direction.y, z: -wheel.direction.z};
+                }
+            } else {
+                if (wheel.direction.z < 0) {
+                    wheel.direction = {x: -wheel.direction.x, y: -wheel.direction.y, z: -wheel.direction.z};
+                }
+            }
         }
     }
 
