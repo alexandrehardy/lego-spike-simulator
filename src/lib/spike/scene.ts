@@ -40,7 +40,7 @@ function copyObject(obj: SceneObject): SceneObject {
         position: obj.position ? { ...obj.position } : { x: 0, y: 0, z: 0 },
         rotation: obj.rotation ?? 0,
         name: obj.name,
-        compiled: obj.compiled,
+        compiled: obj.compiled
     };
 }
 

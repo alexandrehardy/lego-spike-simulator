@@ -2678,11 +2678,19 @@ export class VM {
             // To ensure gearing works correctly
             if (xm > zm) {
                 if (wheel.direction.x > 0) {
-                    wheel.direction = {x: -wheel.direction.x, y: -wheel.direction.y, z: -wheel.direction.z};
+                    wheel.direction = {
+                        x: -wheel.direction.x,
+                        y: -wheel.direction.y,
+                        z: -wheel.direction.z
+                    };
                 }
             } else {
                 if (wheel.direction.z < 0) {
-                    wheel.direction = {x: -wheel.direction.x, y: -wheel.direction.y, z: -wheel.direction.z};
+                    wheel.direction = {
+                        x: -wheel.direction.x,
+                        y: -wheel.direction.y,
+                        z: -wheel.direction.z
+                    };
                 }
             }
         }
