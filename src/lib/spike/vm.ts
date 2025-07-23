@@ -553,17 +553,19 @@ export class ActionStatement extends Statement {
                         }
                     }
                     // This is probably approximate
-                    const revolution_time = 60.0 / rpm;
-                    promises.push(
-                        this.execute_movemotor(
-                            thread,
-                            port,
-                            (degrees * revolution_time) / 360.0,
-                            100.0,
-                            reverse,
-                            false
-                        )
-                    );
+                    if (rpm && rpm > 0) {
+                        const revolution_time = 60.0 / rpm;
+                        promises.push(
+                            this.execute_movemotor(
+                                thread,
+                                port,
+                                (degrees * revolution_time) / 360.0,
+                                100.0,
+                                reverse,
+                                false
+                            )
+                        );
+                    }
                 }
             }
             yield new CompleteAllTask(promises);
@@ -636,35 +638,37 @@ export class ActionStatement extends Statement {
                         percent: 100.0,
                         ignorePresetSpeed: false
                     });
-                    if (unit == 'rotations') {
-                        const revolution_time = 60.0 / rpm;
-                        promises.push(
-                            this.execute_movemotor(
-                                thread,
-                                port,
-                                amount * revolution_time,
-                                100.0,
-                                reverse,
-                                false
-                            )
-                        );
-                    } else if (unit == 'degrees') {
-                        // This is probably approximate
-                        const revolution_time = 60.0 / rpm;
-                        promises.push(
-                            this.execute_movemotor(
-                                thread,
-                                port,
-                                amount * revolution_time,
-                                100.0,
-                                reverse,
-                                false
-                            )
-                        );
-                    } else if (unit == 'seconds') {
-                        promises.push(
-                            this.execute_movemotor(thread, port, amount, 100.0, reverse, false)
-                        );
+                    if (rpm && rpm > 0) {
+                        if (unit == 'rotations') {
+                            const revolution_time = 60.0 / rpm;
+                            promises.push(
+                                this.execute_movemotor(
+                                    thread,
+                                    port,
+                                    amount * revolution_time,
+                                    100.0,
+                                    reverse,
+                                    false
+                                )
+                            );
+                        } else if (unit == 'degrees') {
+                            // This is probably approximate
+                            const revolution_time = 60.0 / rpm;
+                            promises.push(
+                                this.execute_movemotor(
+                                    thread,
+                                    port,
+                                    amount * revolution_time,
+                                    100.0,
+                                    reverse,
+                                    false
+                                )
+                            );
+                        } else if (unit == 'seconds') {
+                            promises.push(
+                                this.execute_movemotor(thread, port, amount, 100.0, reverse, false)
+                            );
+                        }
                     }
                 }
             }
@@ -715,27 +719,29 @@ export class ActionStatement extends Statement {
                     rpm = attachment.motor!.getRpm(options);
                 }
             }
-            if (unit == 'rotations') {
-                const revolution_time = 60.0 / rpm;
-                yield thread.vm.sleep(amount * revolution_time);
-            } else if (unit == 'degrees') {
-                // This is probably approximate
-                const revolution_time = 60.0 / rpm;
-                yield thread.vm.sleep((amount * revolution_time) / 360.0);
-            } else if (unit == 'seconds') {
-                yield thread.vm.sleep(amount);
-            } else if (unit == 'cm') {
-                const revolution_time = 60.0 / rpm;
-                const revs = (amount * 10.0) / thread.vm.hub.moveDistance;
-                yield thread.vm.sleep(revs * revolution_time);
-            } else if (unit == 'in') {
-                const revolution_time = 60.0 / rpm;
-                const revs = (amount * 25.4) / thread.vm.hub.moveDistance;
-                yield thread.vm.sleep(revs * revolution_time);
-            } else if (unit == 'inches') {
-                const revolution_time = 60.0 / rpm;
-                const revs = (amount * 25.4) / thread.vm.hub.moveDistance;
-                yield thread.vm.sleep(revs * revolution_time);
+            if (rpm && rpm > 0) {
+                if (unit == 'rotations') {
+                    const revolution_time = 60.0 / rpm;
+                    yield thread.vm.sleep(amount * revolution_time);
+                } else if (unit == 'degrees') {
+                    // This is probably approximate
+                    const revolution_time = 60.0 / rpm;
+                    yield thread.vm.sleep((amount * revolution_time) / 360.0);
+                } else if (unit == 'seconds') {
+                    yield thread.vm.sleep(amount);
+                } else if (unit == 'cm') {
+                    const revolution_time = 60.0 / rpm;
+                    const revs = (amount * 10.0) / thread.vm.hub.moveDistance;
+                    yield thread.vm.sleep(revs * revolution_time);
+                } else if (unit == 'in') {
+                    const revolution_time = 60.0 / rpm;
+                    const revs = (amount * 25.4) / thread.vm.hub.moveDistance;
+                    yield thread.vm.sleep(revs * revolution_time);
+                } else if (unit == 'inches') {
+                    const revolution_time = 60.0 / rpm;
+                    const revs = (amount * 25.4) / thread.vm.hub.moveDistance;
+                    yield thread.vm.sleep(revs * revolution_time);
+                }
             }
             attachment = thread.vm.hub.ports[thread.vm.hub.movePair1];
             if (attachment && attachment.type == 'motor') {
@@ -935,15 +941,17 @@ export class ActionStatement extends Statement {
                     rpm = attachment.motor!.getRpm(options);
                 }
             }
-            if (unit == 'rotations') {
-                const revolution_time = 60.0 / rpm;
-                yield thread.vm.sleep(amount * revolution_time);
-            } else if (unit == 'degrees') {
-                // This is probably approximate
-                const revolution_time = 60.0 / rpm;
-                yield thread.vm.sleep((amount * revolution_time) / 360.0);
-            } else if (unit == 'seconds') {
-                yield thread.vm.sleep(amount);
+            if (rpm && rpm > 0) {
+                if (unit == 'rotations') {
+                    const revolution_time = 60.0 / rpm;
+                    yield thread.vm.sleep(amount * revolution_time);
+                } else if (unit == 'degrees') {
+                    // This is probably approximate
+                    const revolution_time = 60.0 / rpm;
+                    yield thread.vm.sleep((amount * revolution_time) / 360.0);
+                } else if (unit == 'seconds') {
+                    yield thread.vm.sleep(amount);
+                }
             }
             attachment = thread.vm.hub.ports[thread.vm.hub.movePair1];
             if (attachment && attachment.type == 'motor') {
