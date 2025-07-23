@@ -467,6 +467,13 @@
             height: 100%;
             width: 100%;
         }
+        .print-renderer.spike-theme .blocklyText {
+            fill: #000;
+        }
+        .print-renderer.spike-theme .blocklyFieldRect {
+            fill: white !important;
+            stroke: white !important;
+        }
     </style>
 {:else}
     <style>
