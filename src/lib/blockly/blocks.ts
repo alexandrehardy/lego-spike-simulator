@@ -1033,7 +1033,7 @@ export const blocks = [
             {
                 type: 'field_variable_getter',
                 name: 'VARIABLE',
-                variableTypes: ['Number'],
+                variableTypes: ['Number', 'String'],
                 defaultType: 'Number'
             },
             {
@@ -1298,7 +1298,7 @@ export const blocks = [
             {
                 type: 'field_variable_getter',
                 name: 'VARIABLE',
-                variableTypes: ['Number'],
+                variableTypes: ['Number', 'String'],
                 defaultType: 'Number'
             },
             {
@@ -1327,7 +1327,7 @@ export const blocks = [
                 type: 'field_variable_getter',
                 text: '',
                 name: 'VARIABLE',
-                variableTypes: ['Number'],
+                variableTypes: ['Number', 'String'],
                 defaultType: 'Number',
                 fixed: true
             }
@@ -2171,7 +2171,7 @@ export const blocks = [
             {
                 type: 'input_value',
                 name: 'POWER',
-                check: 'Number',
+                check: ['Number', 'String'],
                 shadow: {
                     type: 'math_number',
                     fields: {
