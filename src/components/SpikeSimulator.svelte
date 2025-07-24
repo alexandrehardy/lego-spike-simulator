@@ -272,7 +272,11 @@
             if (workspace) {
                 let variables = workspace.getVariablesOfType('Number');
                 for (let i = 0; i < variables.length; i++) {
-                    globals[variables[i].name] = new StringValue('');
+                    globals[variables[i].name] = new StringValue('0');
+                }
+                variables = workspace.getVariablesOfType('String');
+                for (let i = 0; i < variables.length; i++) {
+                    globals[variables[i].name] = new StringValue('0');
                 }
                 variables = workspace.getVariablesOfType('list');
                 for (let i = 0; i < variables.length; i++) {
