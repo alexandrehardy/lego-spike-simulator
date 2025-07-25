@@ -324,6 +324,30 @@ export class ActionStatement extends Statement {
     }
 
     *execute_event(thread: Thread, op: string): Generator<VMTask> {
+        if (op == 'broadcast') {
+            const value = this.arguments[0].evaluate(thread);
+            const watcher: BroadcastWatcher = { wait: false, threads: [], started: false };
+            thread.vm.startBroadcast(value.getString(), watcher);
+            while (!watcher.started) {
+                yield thread.vm.sleep(0.0005);
+            }
+            return;
+        } else if (op == 'broadcastandwait') {
+            const value = this.arguments[0].evaluate(thread);
+            const watcher: BroadcastWatcher = { wait: true, threads: [], started: false };
+            thread.vm.startBroadcast(value.getString(), watcher);
+            let done = false;
+            while (!done) {
+                yield thread.vm.sleep(0.0005);
+                done = watcher.started;
+                for (const thread of watcher.threads) {
+                    if (thread.state != 'stopped') {
+                        done = false;
+                    }
+                }
+            }
+            return;
+        }
         yield* super._execute(thread);
     }
 
@@ -1129,7 +1153,12 @@ export class EventStatement extends Statement {
 
     satisfied(thread: Thread): boolean {
         if (this.opcode == 'event_whenbroadcastreceived') {
-            console.log(`Need code ${this.opcode}`);
+            const name = this.arguments[0].evaluate(thread);
+            const broadcasting = thread.vm.isBroadcasting(name.getString());
+            if (broadcasting) {
+                thread.vm.registerBroadcastThread(name.getString(), thread);
+            }
+            return broadcasting;
         } else if (this.opcode == 'flipperevents_whenButton') {
             const buttonArg = this.arguments[0].evaluate(thread);
             const eventArg = this.arguments[1].evaluate(thread);
@@ -2458,6 +2487,17 @@ export class Thread {
         }
     }
 
+    checkCondition() {
+        if (this.state === 'running') {
+            return;
+        } else {
+            if (this.event.satisfied(this)) {
+                this.thread = new TaskProcessor(this.execute());
+                this.thread.processNextTask();
+            }
+        }
+    }
+
     *execute(): Generator<VMTask> {
         if (this.state === 'running') {
             // Already running
@@ -2507,6 +2547,12 @@ function dist(a: Vertex, b: Vertex) {
     return Math.sqrt(dx * dx + dy * dy + dz * dz);
 }
 
+interface BroadcastWatcher {
+    wait: boolean;
+    threads: Thread[];
+    started: boolean;
+}
+
 export class VM {
     id: string;
     hub: Hub;
@@ -2517,6 +2563,7 @@ export class VM {
     events: Map<string, EventStatement>;
     procedures: Map<string, ProcedureBlock>;
     threads: Map<string, Thread>;
+    broadcasts: Map<string, BroadcastWatcher>;
     workspace: Blockly.WorkspaceSvg | undefined;
     state: 'running' | 'stopped' | 'paused';
     first: boolean;
@@ -2540,6 +2587,7 @@ export class VM {
         this.events = events;
         this.procedures = procedures;
         this.threads = new Map<string, Thread>();
+        this.broadcasts = new Map<string, BroadcastWatcher>();
         this.workspace = workspace;
         this.state = 'stopped';
         this.first = true;
@@ -2570,12 +2618,46 @@ export class VM {
         this.timerStart = Date.now() / 1000.0;
     }
 
+    startBroadcast(name: string, watcher: BroadcastWatcher) {
+        if (this.isBroadcasting(name)) {
+            console.log('Already broadcasting');
+        }
+        this.broadcasts.set(name, watcher);
+    }
+
+    isBroadcasting(name: string) {
+        return this.broadcasts.get(name) !== undefined;
+    }
+
+    registerBroadcastThread(name: string, thread: Thread) {
+        const watcher = this.broadcasts.get(name);
+        if (watcher && watcher.wait) {
+            watcher.threads.push(thread);
+        }
+    }
+
+    clearBroadcast() {
+        for (const entry of Array.from(this.broadcasts.entries())) {
+            const watcher = entry[1];
+            watcher.started = true;
+        }
+        this.broadcasts = new Map<string, BroadcastWatcher>();
+    }
+
     runThreads() {
         for (const entry of Array.from(this.threads.entries())) {
             const thread = entry[1];
             thread.checkConditionAndExecute();
         }
+        for (const entry of Array.from(this.threads.entries())) {
+            // Second pass, because a broadcast may have been
+            // triggered by one thread after the previous thread is done.
+            // Process the broadcast before clearing.
+            const thread = entry[1];
+            thread.checkCondition();
+        }
         this.first = false;
+        this.clearBroadcast();
     }
 
     stopAllThreadsExcept(key: string) {
@@ -2671,6 +2753,7 @@ export class VM {
             this.state = 'running';
             this.first = true;
             this.wait = startDelay;
+            this.clearBroadcast();
             this.alignWheelsToModel();
             this.runThreads();
         } else if (this.state == 'paused') {
