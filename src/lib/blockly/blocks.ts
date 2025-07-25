@@ -1346,7 +1346,7 @@ export const blocks = [
             {
                 type: 'input_value',
                 name: 'BROADCAST_INPUT',
-                check: 'broadcast',
+                check: ['broadcast'],
                 shadow: {
                     type: 'event_broadcast_menu',
                     fields: {
@@ -1391,7 +1391,9 @@ export const blocks = [
             {
                 type: 'field_variable_getter',
                 name: 'BROADCAST_OPTION',
-                variable: 'message1'
+                variable: 'message1',
+                variableTypes: ['broadcast'],
+                defaultType: 'broadcast'
             }
         ],
         inputsInline: true,
