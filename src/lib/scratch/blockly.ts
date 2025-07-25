@@ -546,7 +546,10 @@ export function convertToScratch(state: BlocklyState): Sb3Project {
             delete linearBlocks[shadowId];
             return value;
         } else if (shadowBlock.opcode == 'event_broadcast_menu') {
-            const value = [1, shadowBlock.fields.BROADCAST_OPTION[1]];
+            const value = [
+                1,
+                [11, shadowBlock.fields.BROADCAST_OPTION[0], shadowBlock.fields.BROADCAST_OPTION[1]]
+            ];
             delete linearBlocks[shadowId];
             return value;
         } else {
