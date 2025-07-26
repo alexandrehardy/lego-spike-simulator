@@ -906,9 +906,9 @@ spikeGenerator.forBlock['flippermoremotor_motorSetAcceleration'] = function (blo
     const id = newId();
     const portId = generator.statementToCode(block, 'PORT');
     const port = getExpression(portId);
-    const timeId = generator.statementToCode(block, 'TIME');
-    const time = getExpression(timeId);
-    const args: Expression[] = [port, time];
+    const accelId = generator.statementToCode(block, 'ACCELERATION');
+    const accel = getExpression(accelId);
+    const args: Expression[] = [port, accel];
     const newNode = new ActionStatement(block.type, block.id, args);
     nodes.set(id, newNode);
     return id;
@@ -917,8 +917,8 @@ spikeGenerator.forBlock['flippermoremotor_motorSetStopMethod'] = function (block
     const id = newId();
     const portId = generator.statementToCode(block, 'PORT');
     const port = getExpression(portId);
-    const stopId = generator.statementToCode(block, 'STOP');
-    const stop = getExpression(stopId);
+    const stopValue = block.getFieldValue('STOP')!;
+    const stop = new Value('str', block.id, stopValue);
     const args: Expression[] = [port, stop];
     const newNode = new ActionStatement(block.type, block.id, args);
     nodes.set(id, newNode);
@@ -932,6 +932,80 @@ spikeGenerator.forBlock['flippermoremotor_motorStartPower'] = function (block, g
     const power = getExpression(powerId);
     const args: Expression[] = [port, power];
     const newNode = new ActionStatement(block.type, block.id, args);
+    nodes.set(id, newNode);
+    return id;
+};
+spikeGenerator.forBlock['flippermoremove_movementSetStopMethod'] = function (block) {
+    const id = newId();
+    const stopValue = block.getFieldValue('STOP')!;
+    const stop = new Value('str', block.id, stopValue);
+    const args: Expression[] = [stop];
+    const newNode = new ActionStatement(block.type, block.id, args);
+    nodes.set(id, newNode);
+    return id;
+};
+spikeGenerator.forBlock['flippermoremove_startDualSpeed'] = function (block, generator) {
+    const id = newId();
+    const leftId = generator.statementToCode(block, 'LEFT');
+    const left = getExpression(leftId);
+    const rightId = generator.statementToCode(block, 'RIGHT');
+    const right = getExpression(rightId);
+    const args: Expression[] = [left, right];
+    const newNode = new ActionStatement(block.type, block.id, args);
+    nodes.set(id, newNode);
+    return id;
+};
+spikeGenerator.forBlock['flippermoremove_movementSetAcceleration'] = function (block, generator) {
+    const id = newId();
+    const accelerationId = generator.statementToCode(block, 'ACCELERATION');
+    const acceleration = getExpression(accelerationId);
+    const args: Expression[] = [acceleration];
+    const newNode = new ActionStatement(block.type, block.id, args);
+    nodes.set(id, newNode);
+    return id;
+};
+spikeGenerator.forBlock['flippermoremotor_motorSetDegreeCounted'] = function (block, generator) {
+    const id = newId();
+    const portId = generator.statementToCode(block, 'PORT');
+    const port = getExpression(portId);
+    const valueId = generator.statementToCode(block, 'VALUE');
+    const value = getExpression(valueId);
+    const args: Expression[] = [port, value];
+    const newNode = new ActionStatement(block.type, block.id, args);
+    nodes.set(id, newNode);
+    return id;
+};
+spikeGenerator.forBlock['flippermoremotor_power'] = function (block, generator) {
+    const id = newId();
+    const portId = generator.statementToCode(block, 'PORT');
+    const port = getExpression(portId);
+    const args: Expression[] = [port];
+    const newNode = new FunctionExpression(block.type, block.id, args);
+    nodes.set(id, newNode);
+    return id;
+};
+spikeGenerator.forBlock['flippermoremotor_position'] = function (block, generator) {
+    const id = newId();
+    const portId = generator.statementToCode(block, 'PORT');
+    const port = getExpression(portId);
+    const args: Expression[] = [port];
+    const newNode = new FunctionExpression(block.type, block.id, args);
+    nodes.set(id, newNode);
+    return id;
+};
+spikeGenerator.forBlock['flippermoresensors_setOrientation'] = function (block) {
+    const id = newId();
+    const upValue = block.getFieldValue('UP')!;
+    const up = new Value('str', block.id, upValue);
+    const args: Expression[] = [up];
+    const newNode = new ActionStatement(block.type, block.id, args);
+    nodes.set(id, newNode);
+    return id;
+};
+spikeGenerator.forBlock['flippermoresensors_motion'] = function (block) {
+    const id = newId();
+    const args: Expression[] = [];
+    const newNode = new FunctionExpression(block.type, block.id, args);
     nodes.set(id, newNode);
     return id;
 };

@@ -347,11 +347,11 @@ export const blocks = [
         args0: [
             {
                 type: 'field_dropdown',
-                name: 'field_flippermoremotor_menu_acceleration',
+                name: 'acceleration',
                 options: [
-                    ['slow', '1'],
-                    ['medium', '2'],
-                    ['fast', '3']
+                    ['slow', '1000 1000'],
+                    ['medium', '3000 3000'],
+                    ['fast', '10000 10000']
                 ]
             }
         ],
@@ -408,11 +408,11 @@ export const blocks = [
         args0: [
             {
                 type: 'field_dropdown',
-                name: 'field_flippermoremove_menu_acceleration',
+                name: 'acceleration',
                 options: [
-                    ['slow', '1'],
-                    ['medium', '2'],
-                    ['fast', '3']
+                    ['slow', '1000 1000'],
+                    ['medium', '3000 3000'],
+                    ['fast', '10000 10000']
                 ]
             }
         ],
@@ -2061,11 +2061,15 @@ export const blocks = [
                 }
             },
             {
-                type: 'field_angle',
+                type: 'input_value',
                 name: 'POSITION',
-                value: '0',
-                mode: 'compass',
-                precision: 1
+                check: ['String', 'Number'],
+                shadow: {
+                    type: 'math_number',
+                    fields: {
+                        NUM: '0'
+                    }
+                }
             },
             {
                 type: 'input_value',
@@ -2095,7 +2099,7 @@ export const blocks = [
     },
     {
         type: 'flippermoremotor_motorSetAcceleration',
-        message0: '%3 %1 set acceleration to %2 seconds',
+        message0: '%3 %1 set acceleration to %2',
         args0: [
             {
                 type: 'input_value',
@@ -2108,8 +2112,14 @@ export const blocks = [
             },
             {
                 type: 'input_value',
-                name: 'TIME',
-                value: 33
+                name: 'ACCELERATION',
+                check: ['Number', 'String'],
+                shadow: {
+                    type: 'flippermoremotor_menu_acceleration',
+                    fields: {
+                        acceleration: '3000 3000'
+                    }
+                }
             },
             {
                 type: 'field_image',
@@ -2139,9 +2149,13 @@ export const blocks = [
                 }
             },
             {
-                type: 'input_value',
+                type: 'field_dropdown',
                 name: 'STOP',
-                value: 31
+                options: [
+                    ['brake', '1'],
+                    ['hold position', '2'],
+                    ['coast', '0']
+                ]
             },
             {
                 type: 'field_image',
@@ -2196,6 +2210,221 @@ export const blocks = [
         extensions: ['shadow_input']
     },
     {
+        type: 'flippermoremotor_motorSetDegreeCounted',
+        message0: '%3 %1 set relative position to %2',
+        args0: [
+            {
+                type: 'input_value',
+                check: 'String',
+                name: 'PORT',
+                shadow: {
+                    type: 'flippermoremotor_multiple-port-selector',
+                    fields: { 'field_flippermoremotor_multiple-port-selector': 'A' }
+                }
+            },
+            {
+                type: 'input_value',
+                name: 'VALUE',
+                check: ['Number', 'String'],
+                shadow: {
+                    type: 'math_number',
+                    fields: {
+                        NUM: '0'
+                    }
+                }
+            },
+            {
+                type: 'field_image',
+                src: 'icons/Motors.svg',
+                width: 24,
+                height: 24
+            }
+        ],
+        inputsInline: true,
+        colour: '#0090f5',
+        tooltip: 'flippermoremotor_motorSetDegreeCounted',
+        previousStatement: null,
+        nextStatement: null,
+        extensions: ['shadow_input']
+    },
+    {
+        type: 'flippermoremotor_power',
+        message0: '%2 %1 power',
+        args0: [
+            {
+                type: 'input_value',
+                check: 'String',
+                name: 'PORT',
+                shadow: {
+                    type: 'flippermoremotor_single-motor-selector',
+                    fields: { 'field_flippermoremotor_single-motor-selector': 'A' }
+                }
+            },
+            {
+                type: 'field_image',
+                src: 'icons/Motors.svg',
+                width: 24,
+                height: 24
+            }
+        ],
+        inputsInline: true,
+        colour: '#0090f5',
+        tooltip: 'flippermoremotor_power',
+        output: 'Number',
+        extensions: ['shadow_input']
+    },
+    {
+        type: 'flippermoremotor_position',
+        message0: '%2 %1 relative position',
+        args0: [
+            {
+                type: 'input_value',
+                check: 'String',
+                name: 'PORT',
+                shadow: {
+                    type: 'flippermoremotor_single-motor-selector',
+                    fields: { 'field_flippermoremotor_single-motor-selector': 'A' }
+                }
+            },
+            {
+                type: 'field_image',
+                src: 'icons/Motors.svg',
+                width: 24,
+                height: 24
+            }
+        ],
+        inputsInline: true,
+        colour: '#0090f5',
+        tooltip: 'flippermoremotor_position',
+        output: 'Number',
+        extensions: ['shadow_input']
+    },
+    {
+        type: 'flippermoremove_movementSetStopMethod',
+        message0: '%2 set movement motors to %1 at stop',
+        args0: [
+            {
+                type: 'field_dropdown',
+                name: 'STOP',
+                options: [
+                    ['brake', '1'],
+                    ['hold position', '2'],
+                    ['coast', '0']
+                ]
+            },
+            {
+                type: 'field_image',
+                src: 'icons/Movement.svg',
+                width: 24,
+                height: 24
+            }
+        ],
+        inputsInline: true,
+        colour: '#ff4ccd',
+        tooltip: 'flippermoremove_movementSetStopMethod',
+        previousStatement: null,
+        nextStatement: null,
+        extensions: ['shadow_input']
+    },
+    {
+        type: 'flippermoremove_movementSetAcceleration',
+        message0: '%2 set movement acceleration to %1',
+        args0: [
+            {
+                type: 'input_value',
+                name: 'ACCELERATION',
+                check: ['Number', 'String'],
+                shadow: {
+                    type: 'flippermoremove_menu_acceleration',
+                    fields: {
+                        acceleration: '3000 3000'
+                    }
+                }
+            },
+            {
+                type: 'field_image',
+                src: 'icons/Movement.svg',
+                width: 24,
+                height: 24
+            }
+        ],
+        inputsInline: true,
+        colour: '#ff4ccd',
+        tooltip: 'flippermoremotor_motorSetAcceleration',
+        previousStatement: null,
+        nextStatement: null,
+        extensions: ['shadow_input']
+    },
+    {
+        type: 'flippermoremove_startDualSpeed',
+        message0: '%3 start moving at %1 %2 %% speed',
+        args0: [
+            {
+                type: 'input_value',
+                name: 'LEFT',
+                check: ['String', 'Number'],
+                shadow: {
+                    type: 'math_number',
+                    fields: {
+                        NUM: '50'
+                    }
+                }
+            },
+            {
+                type: 'input_value',
+                name: 'RIGHT',
+                check: ['String', 'Number'],
+                shadow: {
+                    type: 'math_number',
+                    fields: {
+                        NUM: '50'
+                    }
+                }
+            },
+            {
+                type: 'field_image',
+                src: 'icons/Movement.svg',
+                width: 24,
+                height: 24
+            }
+        ],
+        inputsInline: true,
+        colour: '#ff4ccd',
+        tooltip: 'flippermoremove_startDualSpeed',
+        previousStatement: null,
+        nextStatement: null,
+        extensions: ['shadow_input']
+    },
+    {
+        type: 'flippermoresensors_setOrientation',
+        message0: '%2 set yaw axis to %1',
+        args0: [
+            {
+                type: 'field_dropdown',
+                name: 'UP',
+                options: [
+                    ['front', 'front'],
+                    ['back', 'back'],
+                    ['top', 'up'],
+                    ['bottom', 'down'],
+                    ['left side', 'leftside'],
+                    ['right side', 'rightside']
+                ]
+            },
+            {
+                type: 'field_image',
+                src: 'icons/SensorHub.svg',
+                width: 24,
+                height: 24
+            }
+        ],
+        colour: '#3fccf1',
+        tooltip: 'flippermoresensors_setOrientation',
+        previousStatement: null,
+        nextStatement: null,
+        extensions: ['shadow_input']
+    },
+    {
         type: 'flippermoresensors_acceleration',
         message0: '%2 acceleration %1',
         args0: [
@@ -2203,9 +2432,9 @@ export const blocks = [
                 type: 'field_dropdown',
                 name: 'AXIS',
                 options: [
-                    ['pitch', 'pitch'],
-                    ['roll', 'roll'],
-                    ['yaw', 'yaw']
+                    ['x', 'x'],
+                    ['y', 'y'],
+                    ['z', 'z']
                 ]
             },
             {
@@ -2229,9 +2458,9 @@ export const blocks = [
                 type: 'field_dropdown',
                 name: 'AXIS',
                 options: [
-                    ['pitch', 'pitch'],
-                    ['roll', 'roll'],
-                    ['yaw', 'yaw']
+                    ['x', 'x'],
+                    ['y', 'y'],
+                    ['z', 'z']
                 ]
             },
             {
@@ -2265,6 +2494,23 @@ export const blocks = [
         extensions: ['shadow_input']
     },
     {
+        type: 'flippermoresensors_motion',
+        message0: '%1 gesture',
+        args0: [
+            {
+                type: 'field_image',
+                src: 'icons/SensorHub.svg',
+                width: 24,
+                height: 24
+            }
+        ],
+        inputsInline: true,
+        colour: '#34ccf1',
+        tooltip: 'flippermoresensors_motion',
+        output: 'Number',
+        extensions: ['shadow_input']
+    },
+    {
         type: 'flippermoresensors_rawColor',
         message0: '%3 %1 raw %2',
         args0: [
@@ -2281,9 +2527,9 @@ export const blocks = [
                 type: 'field_dropdown',
                 name: 'COLOR',
                 options: [
-                    ['red', 'red'],
-                    ['green', 'green'],
-                    ['blue', 'blue']
+                    ['red', '0'],
+                    ['green', '1'],
+                    ['blue', '2']
                 ]
             },
             {

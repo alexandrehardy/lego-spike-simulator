@@ -431,6 +431,25 @@ export const toolbox = {
         },
         {
             kind: 'category',
+            name: 'MORE-MOVEMENT',
+            contents: [
+                {
+                    kind: 'block',
+                    type: 'flippermoremove_movementSetStopMethod'
+                },
+                {
+                    kind: 'block',
+                    type: 'flippermoremove_startDualSpeed'
+                },
+                {
+                    kind: 'block',
+                    type: 'flippermoremove_movementSetAcceleration'
+                }
+            ],
+            colour: '#ff4ccd'
+        },
+        {
+            kind: 'category',
             name: 'MORE-MOTOR',
             contents: [
                 {
@@ -448,6 +467,18 @@ export const toolbox = {
                 {
                     kind: 'block',
                     type: 'flippermoremotor_motorSetAcceleration'
+                },
+                {
+                    kind: 'block',
+                    type: 'flippermoremotor_motorSetDegreeCounted'
+                },
+                {
+                    kind: 'block',
+                    type: 'flippermoremotor_power'
+                },
+                {
+                    kind: 'block',
+                    type: 'flippermoremotor_position'
                 }
             ],
             colour: '#0090f5'
@@ -456,6 +487,10 @@ export const toolbox = {
             kind: 'category',
             name: 'MORE-SENSOR',
             contents: [
+                {
+                    kind: 'block',
+                    type: 'flippermoresensors_setOrientation'
+                },
                 {
                     kind: 'block',
                     type: 'flippermoresensors_rawColor'
@@ -471,6 +506,10 @@ export const toolbox = {
                 {
                     kind: 'block',
                     type: 'flippermoresensors_orientation'
+                },
+                {
+                    kind: 'block',
+                    type: 'flippermoresensors_motion' // gesture
                 }
             ],
             colour: '#3fccf1'
