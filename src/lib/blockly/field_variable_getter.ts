@@ -1,15 +1,18 @@
 import * as Blockly from 'blockly/core';
 // Patch blockly to get access to private members
 import '$lib/blockly/patch';
+import * as variableFlyout from '$lib/blockly/variable_flyout';
 
 /**
  * Class for a variable's dropdown field.
  */
 
 const NONE_AVAILABLE = 'NONE_AVAILABLE';
+const ADD_NEW_VARIABLE = 'ADD_NEW_VARIABLE';
 
 interface FieldVariableGetterConfig extends Blockly.FieldVariableConfig {
     fixed?: boolean;
+    create?: boolean;
 }
 
 interface FieldVariableGetterFromJsonConfig extends FieldVariableGetterConfig {
@@ -21,6 +24,7 @@ type AnyDuringMigration = any;
 
 export class FieldVariableGetter extends Blockly.FieldVariable {
     protected fixed: boolean = false;
+    protected create: boolean = false;
     constructor(
         varName: string | null | typeof Blockly.Field.SKIP_SETUP,
         validator?: Blockly.FieldVariableValidator,
@@ -32,6 +36,9 @@ export class FieldVariableGetter extends Blockly.FieldVariable {
         this.menuGenerator_ = FieldVariableGetter.dropdownCreate as Blockly.MenuGenerator;
         if (config && config.fixed !== undefined) {
             this.fixed = config.fixed;
+        }
+        if (config && config.create !== undefined) {
+            this.create = config.create;
         }
     }
 
@@ -119,6 +126,9 @@ export class FieldVariableGetter extends Blockly.FieldVariable {
         }
         copy.variableMenuGenerator = Blockly.FieldVariable.dropdownCreate;
         const options = copy.variableMenuGenerator(copy);
+        if (this.create) {
+            options.push([`Create ${this.getDefaultType()} variable...`, ADD_NEW_VARIABLE]);
+        }
         if (options.length == 2) {
             return [['No variables available', NONE_AVAILABLE]];
         }
@@ -126,9 +136,40 @@ export class FieldVariableGetter extends Blockly.FieldVariable {
     }
 
     protected override onItemSelected_(menu: Blockly.Menu, menuItem: Blockly.MenuItem) {
+        const block = this.getSourceBlock();
+        if (!block) {
+            throw new Blockly.UnattachedFieldError();
+        }
+        const workspace = block.workspace;
+
+        function onCreateVariable(v: variableFlyout.VariableDefinition) {
+            const existing = Blockly.Variables.nameUsedWithAnyType(v.name, workspace);
+            if (!existing) {
+                // No conflict
+                workspace.createVariable(v.name, v.type);
+                return true;
+            }
+
+            let msg;
+            if (existing.type === v.type) {
+                msg = Blockly.Msg['VARIABLE_ALREADY_EXISTS'].replace('%1', existing.name);
+            } else {
+                msg = Blockly.Msg['VARIABLE_ALREADY_EXISTS_FOR_ANOTHER_TYPE'];
+                msg = msg.replace('%1', existing.name).replace('%2', existing.type);
+            }
+            Blockly.dialog.alert(msg);
+            return false;
+        }
+
         const id = menuItem.getValue();
         // Handle special cases.
         if (id === NONE_AVAILABLE) {
+            return;
+        }
+        if (id === ADD_NEW_VARIABLE) {
+            if (variableFlyout.variableCreateDialog) {
+                variableFlyout.variableCreateDialog(this.getDefaultType(), onCreateVariable);
+            }
             return;
         }
         return super.onItemSelected_(menu, menuItem);

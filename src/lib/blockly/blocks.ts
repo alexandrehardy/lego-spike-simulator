@@ -20,6 +20,7 @@ export const blocks = [
             {
                 type: 'field_variable_getter',
                 name: 'BROADCAST_OPTION',
+                create: true,
                 variable: 'message1',
                 variableTypes: ['broadcast'],
                 defaultType: 'broadcast'

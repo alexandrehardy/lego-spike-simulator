@@ -14,11 +14,13 @@
             return;
         }
         if (variableName.trim().length > 0) {
-            let variableType = 'Number';
+            let variableType = 'String';
             if (type == 'list') {
                 variableType = 'list';
+            } else if (type == 'broadcast') {
+                variableType = 'broadcast';
             } else {
-                variableType = 'Number';
+                variableType = 'String';
             }
             if (callback({ name: variableName, type: variableType })) {
                 variableName = '';
@@ -32,7 +34,7 @@
         modalOpen = false;
     }
 
-    $: title = type == 'list' ? 'New List' : 'New Variable';
+    $: title = type == 'list' ? 'New List' : type == 'broadcast' ? 'New Broadcast' : 'New Variable';
 </script>
 
 <Modal

@@ -500,7 +500,7 @@ export class ActionStatement extends Statement {
                     // for when they need to be stopped
                     // Copy motorGoDirectionToPosition
                     let degrees = 0;
-                    let position = attachment.motor!.relativePosition;
+                    const position = attachment.motor!.relativePosition;
                     const rpm = attachment.motor!.getRpm({
                         percent: speed,
                         ignorePresetSpeed: true

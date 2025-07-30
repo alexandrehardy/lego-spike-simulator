@@ -9,7 +9,7 @@ export interface VariableDefinition {
 export type VariableCreateCallback = (v: VariableDefinition) => boolean;
 export type VariableDialog = (type: string, callback: VariableCreateCallback) => void;
 
-let variableCreateDialog: VariableDialog | undefined;
+export let variableCreateDialog: VariableDialog | undefined;
 
 function numberButtonClickHandler(button: Blockly.FlyoutButton) {
     const workspace = button.getTargetWorkspace();
@@ -32,7 +32,7 @@ function numberButtonClickHandler(button: Blockly.FlyoutButton) {
         return false;
     }
     if (variableCreateDialog) {
-        variableCreateDialog('Number', onCreateVariable);
+        variableCreateDialog('String', onCreateVariable);
     }
 }
 
@@ -71,7 +71,9 @@ function variablesFlyoutCallback(workspace: Blockly.Workspace) {
         callbackkey: 'CREATE_SPIKE_NUMBER_VARIABLE'
     });
 
-    let variables = workspace.getVariablesOfType('Number');
+    let variables = workspace.getVariablesOfType('String');
+    const numberVariables = workspace.getVariablesOfType('Number');
+    variables = variables.concat(numberVariables);
     variables = variables.sort(Blockly.VariableModel.compareByName);
     if (variables.length > 0) {
         for (let i = 0; i < variables.length; i++) {
