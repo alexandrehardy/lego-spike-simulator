@@ -117,6 +117,7 @@
         const zoomToFit = new ZoomToFitControl(workspace);
         zoomToFit.init();
         observer.observe(element);
+        workspace.createVariable('message1', 'broadcast');
     });
 
     onDestroy(() => {
@@ -160,6 +161,11 @@
                     // Wait for workspace events to fire and complete
                     await sleep(100);
                     Blockly.serialization.workspaces.load(state, workspace);
+                    const existing = Blockly.Variables.nameUsedWithAnyType('message1', workspace);
+                    if (!existing) {
+                        // No conflict
+                        workspace.createVariable('message1', 'broadcast');
+                    }
                     try {
                         const manifestFile = zipFile.file('manifest.json');
                         if (manifestFile) {
