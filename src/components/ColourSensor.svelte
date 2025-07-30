@@ -130,6 +130,9 @@
         const buffer = gl.getColourBuffer().buffer;
         const histogram = new Map<string, number>();
         let avg = 0.0;
+        let avg_red = 0.0;
+        let avg_green = 0.0;
+        let avg_blue = 0.0;
         let count = 0;
         // Add bias to colour measurement.
         // the 4000K light is actually skewed toward red
@@ -166,6 +169,9 @@
             }
             const reflect = Math.sqrt((c.r * c.r + c.g * c.g + c.b * c.b) / 3.0);
             avg += reflect;
+            avg_red += c.r;
+            avg_green += c.g;
+            avg_blue += c.b;
             count++;
             if (nearest && dist < 0.3) {
                 histogram.set(nearest, (histogram.get(nearest) ?? 0) + 1);
@@ -175,8 +181,12 @@
             }
         }
         avg = avg / count;
+        avg_red = avg_red / count;
+        avg_green = avg_green / count;
+        avg_blue = avg_blue / count;
         reflected = avg;
         hub.measureReflected(port, avg);
+        hub.measureRawColour(port, avg_red, avg_green, avg_blue);
 
         const histogramArray: HistogramEntry[] = [];
         for (const [key, value] of histogram) {

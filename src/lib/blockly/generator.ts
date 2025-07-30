@@ -212,7 +212,7 @@ spikeGenerator.forBlock['flipperlight_menu_orientation'] = function (block) {
     return id;
 };
 spikeGenerator.forBlock['flippermoremotor_menu_acceleration'] = function (block) {
-    const selected = block.getFieldValue('field_flippermoremotor_menu_acceleration')!;
+    const selected = block.getFieldValue('acceleration')!;
     const id = newId();
     nodes.set(id, new Value('accel', block.id, selected));
     return id;
@@ -230,13 +230,13 @@ spikeGenerator.forBlock['flippermoremotor_single-motor-selector'] = function (bl
     return id;
 };
 spikeGenerator.forBlock['flippermoremove_menu_acceleration'] = function (block) {
-    const selected = block.getFieldValue('field_flippermoremove_menu_acceleration')!;
+    const selected = block.getFieldValue('acceleration')!;
     const id = newId();
     nodes.set(id, new Value('port', block.id, selected));
     return id;
 };
 spikeGenerator.forBlock['flippermoresensors_color-sensor-selector'] = function (block) {
-    const selected = block.getFieldValue('field_flipperevents_color-sensor-selector')!;
+    const selected = block.getFieldValue('field_flippermoresensors_color-sensor-selector')!;
     const id = newId();
     nodes.set(id, new Value('port', block.id, selected));
     return id;

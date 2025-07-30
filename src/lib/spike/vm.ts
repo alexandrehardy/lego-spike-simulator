@@ -2,7 +2,7 @@ import * as Blockly from 'blockly/core';
 import { writable } from 'svelte/store';
 import { mbitfont } from '$lib/spike/font';
 import { SoundLibrary } from '$lib/blockly/audio';
-import { hexColor, type Vertex } from '$lib/ldraw/components';
+import { type Vertex } from '$lib/ldraw/components';
 import { type SceneStore } from '$lib/spike/scene';
 import * as m4 from '$lib/ldraw/m4';
 
@@ -532,8 +532,12 @@ export class ActionStatement extends Statement {
             yield new CompleteAllTask(promises);
         } else if (op == 'motorSetAcceleration') {
             // ignore this
+            const ports = this.arguments[0].evaluate(thread).getString();
+            const acceleration = this.arguments[1].evaluate(thread).getString();
         } else if (op == 'motorSetStopMethod') {
             // ignore this, we can't coast without physics
+            const ports = this.arguments[0].evaluate(thread).getString();
+            const method = this.arguments[1].evaluate(thread).getString();
         } else if (op == 'motorSetDegreeCounted') {
             const ports = this.arguments[0].evaluate(thread).getString();
             const degree = this.arguments[1].evaluate(thread).getNumber();
@@ -570,6 +574,7 @@ export class ActionStatement extends Statement {
     *execute_flippermoremove(thread: Thread, op: string): Generator<VMTask> {
         if (op == 'movementSetStopMethod') {
             // ignore this, we stop abruptly
+            const method = this.arguments[0].evaluate(thread).getString();
         } else if (op == 'startDualSpeed') {
             let left = this.arguments[0].evaluate(thread).getNumber();
             let right = this.arguments[1].evaluate(thread).getNumber();
@@ -623,13 +628,19 @@ export class ActionStatement extends Statement {
             }
         } else if (op == 'movementSetAcceleration') {
             // ignore this, we start abruptly
+            const acceleration = this.arguments[0].evaluate(thread).getString();
         } else {
             yield* super._execute(thread);
         }
     }
 
     *execute_flippermoresensors(thread: Thread, op: string): Generator<VMTask> {
-        yield* super._execute(thread);
+        if (op == 'setOrientation') {
+            const up = this.arguments[0].evaluate(thread).getString();
+            yield* super._execute(thread);
+        } else {
+            yield* super._execute(thread);
+        }
     }
 
     *execute_movemotor(
@@ -1761,10 +1772,15 @@ export class FunctionExpression extends Expression {
             const attachment = thread.vm.hub.ports[port];
             return new NumberValue(attachment.measure.reflected * 100);
         } else if (this.opcode == 'flippermoresensors_acceleration') {
+            const axis = this.arguments[0].evaluate(thread).getString();
             return super.evaluate(thread);
         } else if (this.opcode == 'flippermoresensors_angularVelocity') {
+            const axis = this.arguments[0].evaluate(thread).getString();
             return super.evaluate(thread);
         } else if (this.opcode == 'flippermoresensors_orientation') {
+            return super.evaluate(thread);
+        } else if (this.opcode == 'flippermoresensors_motion') {
+            // gesture
             return super.evaluate(thread);
         } else if (this.opcode == 'flippermoresensors_rawColor') {
             const portString = this.arguments[0].evaluate(thread).getString();
@@ -1772,13 +1788,13 @@ export class FunctionExpression extends Expression {
             const port = portString as PortType;
             const attachment = thread.vm.hub.ports[port];
             if (attachment && attachment.type == 'light') {
-                const colour = hexColor(attachment.measure.colour);
+                // Don't use the hexcolour, use the raw red green blue values
                 if (channel == 'red') {
-                    return new NumberValue(Math.round(colour.r * 255.0));
+                    return new NumberValue(Math.round(attachment.measure.rawRed * 255.0));
                 } else if (channel == 'blue') {
-                    return new NumberValue(Math.round(colour.b * 255.0));
+                    return new NumberValue(Math.round(attachment.measure.rawBlue * 255.0));
                 } else if (channel == 'green') {
-                    return new NumberValue(Math.round(colour.g * 255.0));
+                    return new NumberValue(Math.round(attachment.measure.rawGreen * 255.0));
                 }
             }
             return new NumberValue(0);
@@ -2201,6 +2217,9 @@ export interface Measure {
     colour: string;
     reflected: number;
     force_changed: boolean;
+    rawRed: number;
+    rawGreen: number;
+    rawBlue: number;
 }
 
 export class Port {
@@ -2218,7 +2237,10 @@ export class Port {
             distance: 10000.0,
             force: 0.0,
             reflected: 0.0,
-            force_changed: false
+            force_changed: false,
+            rawRed: 0.0,
+            rawGreen: 0.0,
+            rawBlue: 0.0
         };
     }
 
@@ -2228,7 +2250,10 @@ export class Port {
             distance: 10000.0,
             force: 0.0,
             reflected: 0.0,
-            force_changed: false
+            force_changed: false,
+            rawRed: 0.0,
+            rawGreen: 0.0,
+            rawBlue: 0.0
         };
         if (this.motor) {
             this.motor.reset();
@@ -2447,6 +2472,12 @@ export class Hub {
 
     measureReflected(port: PortType, reflected: number) {
         this.ports[port].measure.reflected = reflected;
+    }
+
+    measureRawColour(port: PortType, r: number, g: number, b: number) {
+        this.ports[port].measure.rawRed = r;
+        this.ports[port].measure.rawGreen = g;
+        this.ports[port].measure.rawBlue = b;
     }
 
     measureDistance(port: PortType, distance: number) {
