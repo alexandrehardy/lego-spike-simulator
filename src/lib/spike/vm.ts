@@ -487,13 +487,81 @@ export class ActionStatement extends Statement {
 
     *execute_flippermoremotor(thread: Thread, op: string): Generator<VMTask> {
         if (op == 'motorGoToRelativePosition') {
-            yield* super._execute(thread);
+            const ports = this.arguments[0].evaluate(thread).getString();
+            const target = this.arguments[1].evaluate(thread).getNumber();
+            const speed = this.arguments[2].evaluate(thread).getNumber();
+            const promises: Generator<VMTask>[] = [];
+            for (let i = 0; i < ports.length; i++) {
+                const portChar = ports.charAt(i);
+                const port = portChar as PortType;
+                const attachment = thread.vm.hub.ports[port];
+                if (attachment && attachment.type == 'motor') {
+                    // Start the motors at the same time, and monitor position
+                    // for when they need to be stopped
+                    // Copy motorGoDirectionToPosition
+                    let degrees = 0;
+                    let position = attachment.motor!.relativePosition;
+                    const rpm = attachment.motor!.getRpm({
+                        percent: speed,
+                        ignorePresetSpeed: true
+                    });
+                    let reverse = false;
+                    if (target < position) {
+                        reverse = true;
+                        degrees = position - target;
+                    } else {
+                        reverse = false;
+                        degrees = target - position;
+                    }
+                    // This is probably approximate
+                    if (rpm && rpm > 0) {
+                        const revolution_time = 60.0 / rpm;
+                        promises.push(
+                            this.execute_movemotor(
+                                thread,
+                                port,
+                                (degrees * revolution_time) / 360.0,
+                                speed,
+                                reverse,
+                                true
+                            )
+                        );
+                    }
+                }
+            }
+            yield new CompleteAllTask(promises);
         } else if (op == 'motorSetAcceleration') {
-            yield* super._execute(thread);
+            // ignore this
         } else if (op == 'motorSetStopMethod') {
-            yield* super._execute(thread);
+            // ignore this, we can't coast without physics
+        } else if (op == 'motorSetDegreeCounted') {
+            const ports = this.arguments[0].evaluate(thread).getString();
+            const degree = this.arguments[1].evaluate(thread).getNumber();
+            for (let i = 0; i < ports.length; i++) {
+                const portChar = ports.charAt(i);
+                const port = portChar as PortType;
+                const attachment = thread.vm.hub.ports[port];
+                if (attachment && attachment.type == 'motor') {
+                    attachment.motor!.setRelativePosition(degree);
+                }
+            }
         } else if (op == 'motorStartPower') {
-            yield* super._execute(thread);
+            const ports = this.arguments[0].evaluate(thread).getString();
+            const speed = this.arguments[1].evaluate(thread).getNumber();
+            for (let i = 0; i < ports.length; i++) {
+                const portChar = ports.charAt(i);
+                const port = portChar as PortType;
+                const attachment = thread.vm.hub.ports[port];
+                if (attachment && attachment.type == 'motor') {
+                    if (speed < 0) {
+                        const options = { reverse: true, percent: -speed, ignorePresetSpeed: true };
+                        attachment.motor!.startMotor(options);
+                    } else {
+                        const options = { reverse: false, percent: speed, ignorePresetSpeed: true };
+                        attachment.motor!.startMotor(options);
+                    }
+                }
+            }
         } else {
             yield* super._execute(thread);
         }
@@ -1673,6 +1741,23 @@ export class FunctionExpression extends Expression {
                 return new NumberValue(attachment.motor!.motorSpeed * 100);
             }
             return new NumberValue(0);
+        } else if (this.opcode == 'flippermoremotor_position') {
+            const portString = this.arguments[0].evaluate(thread).getString();
+            const port = portString as PortType;
+            const attachment = thread.vm.hub.ports[port];
+            if (attachment && attachment.type == 'motor') {
+                return new NumberValue(attachment.motor!.relativePosition);
+            }
+            return new NumberValue(0);
+        } else if (this.opcode == 'flippermoremotor_power') {
+            const portString = this.arguments[0].evaluate(thread).getString();
+            const port = portString as PortType;
+            const attachment = thread.vm.hub.ports[port];
+            if (attachment && attachment.type == 'motor') {
+                // We spin up to full speed immediately.
+                return new NumberValue(attachment.motor!.motorSpeed * 100);
+            }
+            return new NumberValue(0);
         } else if (this.opcode == 'sound_volume') {
             return super.evaluate(thread);
         } else {
@@ -1931,6 +2016,7 @@ export class Motor {
     //54675 large (135rpm)
     id: number;
     position: number;
+    relativePosition: number;
     motorSpeed: number;
     rpm: number;
     on: boolean;
@@ -1939,6 +2025,7 @@ export class Motor {
     constructor(id: number) {
         this.id = id;
         this.position = 0;
+        this.relativePosition = 0;
         this.motorSpeed = 0.75;
         this.rpm = 135 * this.motorSpeed;
         this.on = false;
@@ -1947,6 +2034,7 @@ export class Motor {
 
     reset() {
         this.position = 0;
+        this.relativePosition = 0;
         this.motorSpeed = 0.75;
         this.rpm = 135 * this.motorSpeed;
         this.on = false;
@@ -1965,11 +2053,22 @@ export class Motor {
         this.rpm = percent * 135;
     }
 
+    setRelativePosition(degree: number) {
+        this.relativePosition = degree;
+    }
+
     getRpm(options: MotorOptions) {
+        let percent = options.percent;
+        if (percent > 100) {
+            percent = 100;
+        }
+        if (percent < -100) {
+            percent = -100;
+        }
         if (options.ignorePresetSpeed) {
-            return (135 * options.percent) / 100.0;
+            return (135 * percent) / 100.0;
         } else {
-            return (this.motorSpeed * 135 * options.percent) / 100.0;
+            return (this.motorSpeed * 135 * percent) / 100.0;
         }
     }
 
@@ -1996,8 +2095,10 @@ export class Motor {
         const delta = (time * this.rpm) / 60.0;
         if (this.reverse) {
             this.position -= delta * 360;
+            this.relativePosition -= delta * 360;
         } else {
             this.position += delta * 360;
+            this.relativePosition += delta * 360;
         }
         while (this.position >= 360) {
             this.position -= 360;
