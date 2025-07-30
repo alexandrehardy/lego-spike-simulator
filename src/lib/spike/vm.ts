@@ -568,7 +568,64 @@ export class ActionStatement extends Statement {
     }
 
     *execute_flippermoremove(thread: Thread, op: string): Generator<VMTask> {
-        yield* super._execute(thread);
+        if (op == 'movementSetStopMethod') {
+            // ignore this, we stop abruptly
+        } else if (op == 'startDualSpeed') {
+            let left = this.arguments[0].evaluate(thread).getNumber();
+            let right = this.arguments[1].evaluate(thread).getNumber();
+            left = left / 100.0;
+            right = right / 100.0;
+            if (left > 1.0) {
+                left = 1.0;
+            }
+            if (left < -1.0) {
+                left = -1.0;
+            }
+            if (right > 1.0) {
+                right = 1.0;
+            }
+            if (right < -1.0) {
+                right = -1.0;
+            }
+            let attachment = thread.vm.hub.ports[thread.vm.hub.movePair1];
+            let speed = 0;
+            let reverse = false;
+            if (attachment && attachment.type == 'motor') {
+                if (left < 0) {
+                    speed = -left * 100;
+                    reverse = false;
+                } else {
+                    speed = left * 100;
+                    reverse = true;
+                }
+                attachment.motor!.startMotor({
+                    reverse: reverse,
+                    percent: speed,
+                    ignorePresetSpeed: true
+                });
+            }
+            attachment = thread.vm.hub.ports[thread.vm.hub.movePair2];
+            speed = 0;
+            reverse = false;
+            if (attachment && attachment.type == 'motor') {
+                if (right < 0) {
+                    speed = -right * 100;
+                    reverse = true;
+                } else {
+                    speed = right * 100;
+                    reverse = false;
+                }
+                attachment.motor!.startMotor({
+                    reverse: reverse,
+                    percent: speed,
+                    ignorePresetSpeed: true
+                });
+            }
+        } else if (op == 'movementSetAcceleration') {
+            // ignore this, we start abruptly
+        } else {
+            yield* super._execute(thread);
+        }
     }
 
     *execute_flippermoresensors(thread: Thread, op: string): Generator<VMTask> {
