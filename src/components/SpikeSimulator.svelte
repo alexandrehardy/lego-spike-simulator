@@ -226,7 +226,13 @@
         const frameTime = timestamp - lastFrame;
         if (vm.state == 'running') {
             if (lastFrame > 0) {
-                vm.step(frameTime / 1000.0, scene);
+                let seconds = frameTime / 1000.0;
+                if (seconds > 2.0) {
+                    // Browser must have paused us
+                    // don't do more than 2 seconds
+                    seconds = 2.0;
+                }
+                vm.step(seconds, scene);
             } else {
                 vm.step(0.0, scene);
             }
